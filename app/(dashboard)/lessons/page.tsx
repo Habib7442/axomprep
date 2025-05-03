@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server-client'
-import Header from '@/components/Header'
 import LessonCard from '@/components/LessonCard'
 
 export default async function Lessons() {
@@ -16,7 +15,6 @@ export default async function Lessons() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
 
       {/* Main content */}
       <main>
