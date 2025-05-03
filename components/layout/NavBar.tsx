@@ -1,12 +1,11 @@
 'use client'
 
-import { ReactNode } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
-export default function HomeLayout({ children }: { children: ReactNode }) {
+export default function NavBar() {
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <>
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -66,18 +65,6 @@ export default function HomeLayout({ children }: { children: ReactNode }) {
           </Link>
         </nav>
       </div>
-
-      {/* Main Content */}
-      <main>
-        {children}
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 py-6">
-        <div className="container mx-auto px-4 text-center text-gray-400 text-sm">
-          <p>© {new Date().getFullYear()} MathQuest. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+    </>
   )
 }

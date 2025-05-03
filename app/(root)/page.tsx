@@ -2,10 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import NavBar from '@/components/layout/NavBar';
+import Footer from '@/components/layout/Footer';
 
 export default function HomePage() {
   return (
-    <div>
+    <div className="min-h-screen bg-gray-900 text-white">
+      <NavBar />
       {/* Hero Section */}
       <section className="py-20 px-4 text-center bg-gray-900">
         <div className="max-w-5xl mx-auto">
@@ -144,9 +147,9 @@ export default function HomePage() {
                 </div>
               </div>
               <p className="text-gray-300">
-                &quot;MathQuest has made learning algebra fun! I used to struggle
-                with equations, but the interactive lessons helped me understand
-                the concepts better.&quot;
+                &quot;MathQuest has made learning algebra fun! I used to
+                struggle with equations, but the interactive lessons helped me
+                understand the concepts better.&quot;
               </p>
             </div>
 
@@ -162,7 +165,8 @@ export default function HomePage() {
               </div>
               <p className="text-gray-300">
                 &quot;I love how I can track my progress and earn rewards. It
-                motivates me to keep practicing and improving my math skills.&quot;
+                motivates me to keep practicing and improving my math
+                skills.&quot;
               </p>
             </div>
 
@@ -206,6 +210,7 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

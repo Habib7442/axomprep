@@ -2,11 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import HomeLayout from './home-layout';
+import NavBar from '@/components/layout/NavBar';
+import Footer from '@/components/layout/Footer';
 
 export default function HomePage() {
   return (
-    <HomeLayout>
+    <div className="min-h-screen bg-gray-900 text-white">
+      <NavBar />
       <div>
       {/* Hero Section */}
       <section className="py-20 px-4 text-center bg-gray-900">
@@ -148,6 +150,7 @@ export default function HomePage() {
         </div>
       </section>
     </div>
-    </HomeLayout>
+      <Footer />
+    </div>
   );
 }
