@@ -20,9 +20,13 @@ export async function createUserProfile(
   username: string,
   firstName: string | null,
   lastName: string | null,
-  grade: number | null
+  exam: string | null
 ) {
   try {
+    // Randomly assign a Hogwarts house
+    const houses = ['gryffindor', 'slytherin', 'ravenclaw', 'hufflepuff']
+    const randomHouse = houses[Math.floor(Math.random() * houses.length)]
+
     const { error } = await supabaseAdmin
       .from('users')
       .insert([
@@ -32,7 +36,8 @@ export async function createUserProfile(
           username,
           first_name: firstName,
           last_name: lastName,
-          grade,
+          exam,
+          house: randomHouse,
           xp: 0,
           level: 1
         }

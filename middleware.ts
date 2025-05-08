@@ -37,16 +37,42 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Check if the user is not logged in
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/signup') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
-    // If no user, redirect to the login page
+  // Get the current path
+  const path = request.nextUrl.pathname
+
+  // Public routes that don't require authentication
+  const isPublicRoute =
+    path === '/' ||
+    path.startsWith('/login') ||
+    path.startsWith('/signup') ||
+    path.startsWith('/auth') ||
+    path.startsWith('/verify') ||
+    path.startsWith('/_next') ||
+    path.match(/\.(ico|png|jpg|jpeg|svg|css|js)$/)
+
+  // Protected routes that require authentication
+  const isProtectedRoute = path.startsWith('/dashboard') || path.startsWith('/profile')
+
+  // Redirect logic
+  if (!user && isProtectedRoute) {
+    // If no user and trying to access protected route, redirect to login
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
+
+  if (user && (path.startsWith('/login') || path.startsWith('/signup'))) {
+    // If user is logged in and trying to access login/signup pages, redirect to dashboard
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+
+  // Check if user has verified email
+  if (user && !user.email_confirmed_at && isProtectedRoute) {
+    // If user is not verified and trying to access protected routes, redirect to verify page
+    const url = request.nextUrl.clone()
+    url.pathname = '/verify'
     return NextResponse.redirect(url)
   }
 

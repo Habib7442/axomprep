@@ -15,10 +15,11 @@ export default function SignupForm() {
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [grade, setGrade] = useState<number | ''>('')
+  const [exam, setExam] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [assignedHouse, setAssignedHouse] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -28,7 +29,7 @@ export default function SignupForm() {
     setError(null)
     setSuccess(null)
 
-    if (!firstName || !lastName || !email || !password || grade === '') {
+    if (!firstName || !lastName || !email || !password || exam === '') {
       setError('All fields are required')
       setLoading(false)
       return
@@ -41,8 +42,8 @@ export default function SignupForm() {
     }
 
     try {
-      // Convert grade to number for the database
-      const gradeValue = typeof grade === 'number' ? grade.toString() : ''
+      // Use the exam value for the database
+      const examValue = exam || ''
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -52,7 +53,7 @@ export default function SignupForm() {
           data: {
             first_name: firstName,
             last_name: lastName,
-            grade: gradeValue
+            exam: exam
           }
         }
       })
@@ -78,6 +79,11 @@ export default function SignupForm() {
         // Generate a random username
         const username = generateRandomUsername(firstName, lastName)
 
+        // Randomly assign a Hogwarts house
+        const houses = ['gryffindor', 'slytherin', 'ravenclaw', 'hufflepuff']
+        const randomHouse = houses[Math.floor(Math.random() * houses.length)]
+        setAssignedHouse(randomHouse)
+
         // Use the server action to create the user profile
         const { success, error: profileError } = await createUserProfile(
           data.user.id,
@@ -85,7 +91,7 @@ export default function SignupForm() {
           username,
           firstName,
           lastName,
-          typeof grade === 'number' ? grade : null
+          exam
         )
 
         if (!success) {
@@ -94,14 +100,36 @@ export default function SignupForm() {
           return
         }
 
-        setSuccess('Account created successfully! You can now log in with your email and password.')
+        // Format house name for display
+        const formattedHouse = randomHouse.charAt(0).toUpperCase() + randomHouse.slice(1)
 
-        // Clear form fields after successful signup
-        setFirstName('')
-        setLastName('')
-        setEmail('')
-        setPassword('')
-        setGrade('')
+        // Check if the user needs to verify their email
+        if (data.user.identities && data.user.identities.length > 0 && !data.user.email_confirmed_at) {
+          // Show success message and redirect to verification page
+          setSuccess(`Account created successfully! The Sorting Hat has placed you in ${formattedHouse}! Please verify your email to continue.`)
+
+          // Clear form fields
+          setFirstName('')
+          setLastName('')
+          setEmail('')
+          setPassword('')
+          setExam('')
+
+          // Redirect to verification page after a short delay
+          setTimeout(() => {
+            router.push('/verify')
+          }, 2000)
+        } else {
+          // If email verification is not required (unlikely with Supabase defaults)
+          setSuccess(`Account created successfully! The Sorting Hat has placed you in ${formattedHouse}!`)
+
+          // Clear form fields
+          setFirstName('')
+          setLastName('')
+          setEmail('')
+          setPassword('')
+          setExam('')
+        }
       } else {
         console.error('No user data returned:', data)
         setError('Something went wrong. Please try again.')
@@ -124,50 +152,64 @@ export default function SignupForm() {
   return (
     <div className="w-full">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold text-white">Create your account</h2>
-        <p className="text-gray-400 mt-2">Start your learning journey</p>
+        <h2 className="text-3xl font-bold text-amber-100 font-serif">Your Hogwarts Acceptance Letter</h2>
+        <p className="text-amber-200/80 mt-2 italic">Begin your magical journey at MockWizard</p>
       </div>
 
-      <div className="flex gap-4 mb-6">
-        <Button variant="outline" className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600">
-          <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-          </svg>
-          Google
-        </Button>
-        <Button variant="outline" className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600">
-          <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-          </svg>
-          GitHub
-        </Button>
-      </div>
-
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-600"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-gray-800 text-gray-400">Or</span>
+      <div className="relative mb-8">
+        <div className="absolute inset-0 bg-[url('/images/parchment-texture.jpg')] bg-cover opacity-10 rounded-lg"></div>
+        <div className="relative p-4 text-center">
+          <p className="text-amber-200 font-serif">
+            Dear Future Wizard,
+          </p>
+          <p className="text-amber-200/80 text-sm mt-2 italic">
+            We are pleased to inform you that you have been accepted to MockWizard School of Competitive Exam Preparation.
+            Please complete the enrollment form below to secure your place among our distinguished houses.
+          </p>
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-900/50 border border-red-500 text-red-200 rounded-md text-sm">
-          {error}
+        <div className="mb-6 p-4 bg-[#740001]/30 border-2 border-[#740001] text-amber-200 rounded-lg text-sm shadow-lg">
+          <div className="flex items-center">
+            <svg className="h-5 w-5 mr-2 text-[#D3A625]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span className="font-serif font-medium">{error}</span>
+          </div>
         </div>
       )}
 
       {success && (
-        <div className="mb-4 p-3 bg-green-900/50 border border-green-500 text-green-200 rounded-md text-sm">
-          {success}
+        <div className="mb-6 p-5 bg-[url('/images/parchment-texture.jpg')] bg-cover border-2 border-amber-800 text-amber-900 rounded-lg shadow-lg">
+          <div className="flex items-center mb-3">
+            {assignedHouse && (
+              <div className={`w-12 h-12 rounded-full mr-4 flex items-center justify-center border-2 shadow-md ${
+                assignedHouse === 'gryffindor' ? 'bg-[#740001] text-[#D3A625] border-[#D3A625]' :
+                assignedHouse === 'slytherin' ? 'bg-[#1A472A] text-[#AAAAAA] border-[#AAAAAA]' :
+                assignedHouse === 'ravenclaw' ? 'bg-[#0E1A40] text-[#946B2D] border-[#946B2D]' :
+                'bg-[#ECB939] text-[#372E29] border-[#372E29]'
+              }`}>
+                <span className="font-bold text-lg font-serif">
+                  {assignedHouse?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <div>
+              <h3 className="font-serif font-bold text-lg">The Sorting Hat has decided!</h3>
+              <p className="font-medium">{success}</p>
+            </div>
+          </div>
+          <p className="text-sm text-amber-800 italic border-t border-amber-800/30 pt-2 mt-2">
+            You&apos;ll be able to see your house and participate in the house cup competition after verifying your email.
+          </p>
         </div>
       )}
 
-      <form onSubmit={handleSignUp} className="space-y-4">
+      <form onSubmit={handleSignUp} className="space-y-6 bg-[#0E1A2D]/80 p-6 rounded-lg border border-amber-900/30 shadow-lg">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName" className="text-sm font-medium text-gray-300">
+            <Label htmlFor="firstName" className="text-sm font-medium text-amber-200 font-serif">
               First Name
             </Label>
             <Input
@@ -175,12 +217,12 @@ export default function SignupForm() {
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="bg-gray-700 border-gray-600 text-white focus:ring-yellow-400"
-              placeholder="John"
+              className="bg-[#1A1A2E] border-amber-900/50 text-amber-100 focus:ring-amber-500 focus:border-amber-500"
+              placeholder="Harry"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName" className="text-sm font-medium text-gray-300">
+            <Label htmlFor="lastName" className="text-sm font-medium text-amber-200 font-serif">
               Last Name
             </Label>
             <Input
@@ -188,81 +230,81 @@ export default function SignupForm() {
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="bg-gray-700 border-gray-600 text-white focus:ring-yellow-400"
-              placeholder="Doe"
+              className="bg-[#1A1A2E] border-amber-900/50 text-amber-100 focus:ring-amber-500 focus:border-amber-500"
+              placeholder="Potter"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="grade" className="text-sm font-medium text-gray-300">
-            Grade
+          <Label htmlFor="exam" className="text-sm font-medium text-amber-200 font-serif">
+            Choose Your Magical Subject
           </Label>
           <Select
-            value={grade.toString()}
-            onValueChange={(value) => setGrade(value ? parseInt(value) : '')}
+            value={exam}
+            onValueChange={(value) => setExam(value)}
           >
-            <SelectTrigger className="bg-gray-700 border-gray-600 text-white focus:ring-yellow-400">
-              <SelectValue placeholder="Select your grade" />
+            <SelectTrigger className="bg-[#1A1A2E] border-amber-900/50 text-amber-100 focus:ring-amber-500 focus:border-amber-500">
+              <SelectValue placeholder="Select your exam" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-700 border-gray-600 text-white">
-              <SelectItem value="8">Grade 8</SelectItem>
-              <SelectItem value="9">Grade 9</SelectItem>
-              <SelectItem value="10">Grade 10</SelectItem>
-              <SelectItem value="11">Grade 11</SelectItem>
-              <SelectItem value="12">Grade 12</SelectItem>
+            <SelectContent className="bg-[#1A1A2E] border-amber-900/50 text-amber-100">
+              <SelectItem value="ssc" className="focus:bg-amber-900/30 focus:text-amber-100">SSC</SelectItem>
+              <SelectItem value="railways" className="focus:bg-amber-900/30 focus:text-amber-100">RAILWAYS</SelectItem>
+              <SelectItem value="banking" className="focus:bg-amber-900/30 focus:text-amber-100">BANKING</SelectItem>
+              <SelectItem value="adre" className="focus:bg-amber-900/30 focus:text-amber-100">ADRE</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium text-gray-300">
-            Email
+          <Label htmlFor="email" className="text-sm font-medium text-amber-200 font-serif">
+            Owl Post Address (Email)
           </Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-gray-700 border-gray-600 text-white focus:ring-yellow-400"
-            placeholder="john.doe@example.com"
+            className="bg-[#1A1A2E] border-amber-900/50 text-amber-100 focus:ring-amber-500 focus:border-amber-500"
+            placeholder="wizard@hogwarts.edu"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-medium text-gray-300">
-            Password
+          <Label htmlFor="password" className="text-sm font-medium text-amber-200 font-serif">
+            Secret Spell (Password)
           </Label>
           <Input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-gray-700 border-gray-600 text-white focus:ring-yellow-400"
+            className="bg-[#1A1A2E] border-amber-900/50 text-amber-100 focus:ring-amber-500 focus:border-amber-500"
             placeholder="••••••••"
           />
-          <p className="text-gray-400 text-xs mt-1">Minimum length is 8 characters</p>
+          <p className="text-amber-200/60 text-xs mt-1 italic">Your spell must be at least 8 characters long</p>
         </div>
 
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold"
+          className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold font-serif py-6 rounded-md shadow-lg shadow-amber-900/30 transition-transform hover:scale-105"
         >
-          {loading ? 'Creating account...' : 'Sign Up'}
+          {loading ? 'Casting Enrollment Spell...' : 'Join MockWizard Academy'}
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-400">
-        By creating an account, you agree to the{' '}
-        <a href="#" className="text-yellow-400 hover:underline">Terms of Service</a>
-      </p>
+      <div className="mt-8 text-center bg-[#0E1A2D]/60 p-4 rounded-lg border border-amber-900/20">
+        <p className="text-amber-200/80 text-sm font-serif">
+          By enrolling, you agree to follow the rules of MockWizard Academy and promise not to reveal magical secrets to muggles.
+        </p>
+      </div>
 
       <div className="mt-6 text-center">
-        <p className="text-gray-400">
-          Already have an account?{' '}
-          <Link href="/login" className="text-yellow-400 hover:underline">
-            Log in
+        <p className="text-amber-200/80 font-serif">
+          Already a student at MockWizard?{' '}
+          <Link href="/login" className="text-amber-400 hover:underline hover:text-amber-300 transition-colors">
+            Return to your studies
           </Link>
         </p>
       </div>

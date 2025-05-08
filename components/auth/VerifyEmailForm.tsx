@@ -18,32 +18,51 @@ export default function VerifyEmailForm() {
   useEffect(() => {
     async function getUserEmail() {
       const { data: { user }, error } = await supabase.auth.getUser()
-      
+
       if (error || !user) {
         router.push('/login')
         return
       }
-      
+
+      // If the user's email is already confirmed, redirect to dashboard
+      if (user.email_confirmed_at) {
+        router.push('/dashboard')
+        return
+      }
+
       setEmail(user.email)
       setLoading(false)
+
+      // Check session status periodically to detect when email is verified
+      const checkInterval = setInterval(async () => {
+        const { data: { user: updatedUser } } = await supabase.auth.getUser()
+
+        if (updatedUser?.email_confirmed_at) {
+          clearInterval(checkInterval)
+          router.push('/dashboard')
+        }
+      }, 5000) // Check every 5 seconds
+
+      // Clean up interval on component unmount
+      return () => clearInterval(checkInterval)
     }
-    
+
     getUserEmail()
   }, [router, supabase])
 
   const handleResendVerification = async () => {
     if (!email) return
-    
+
     setResendLoading(true)
     setError(null)
     setResendSuccess(false)
-    
+
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email
       })
-      
+
       if (error) {
         setError(error.message)
       } else {
@@ -91,13 +110,13 @@ export default function VerifyEmailForm() {
           <p className="text-gray-400 text-sm">
             Please check your inbox and click the verification link to activate your account.
           </p>
-          
+
           {error && (
             <div className="p-3 bg-red-900/50 border border-red-500 text-red-200 rounded-md text-sm">
               {error}
             </div>
           )}
-          
+
           {resendSuccess && (
             <div className="p-3 bg-green-900/50 border border-green-500 text-green-200 rounded-md text-sm">
               Verification email resent successfully!
@@ -112,9 +131,9 @@ export default function VerifyEmailForm() {
           >
             {resendLoading ? 'Sending...' : 'Resend Verification Email'}
           </Button>
-          
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             onClick={handleSignOut}
             className="w-full border-gray-600 text-gray-300 hover:text-white"
           >
@@ -122,7 +141,7 @@ export default function VerifyEmailForm() {
           </Button>
         </CardFooter>
       </Card>
-      
+
       <div className="mt-6 text-center">
         <p className="text-gray-400 text-sm">
           Need help? <a href="mailto:support@mathsquest.com" className="text-yellow-400 hover:underline">Contact Support</a>

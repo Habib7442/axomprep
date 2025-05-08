@@ -5,9 +5,42 @@ import { createClient } from '@/lib/supabase/browser-client'
 import { useRouter } from 'next/navigation'
 import DashboardOverview from '@/components/dashboard/DashboardOverview'
 
+interface UserProgress {
+  xp: number
+  level: number
+  completedLessons: number
+  totalLessons: number
+  completedProblems: number
+  totalProblems: number
+  badges: any[]
+  testStats: {
+    totalTests: number
+    passedTests: number
+    bestScore: number
+    averageScore: number
+    recentTests: any[]
+  }
+}
+
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
   const [userProfile, setUserProfile] = useState<any>(null)
+  const [userProgress, setUserProgress] = useState<UserProgress>({
+    xp: 0,
+    level: 1,
+    completedLessons: 0,
+    totalLessons: 5,
+    completedProblems: 0,
+    totalProblems: 25,
+    badges: [],
+    testStats: {
+      totalTests: 0,
+      passedTests: 0,
+      bestScore: 0,
+      averageScore: 0,
+      recentTests: []
+    }
+  })
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
@@ -15,37 +48,29 @@ export default function DashboardPage() {
   // Hogwarts houses
   const houses = ['gryffindor', 'slytherin', 'ravenclaw', 'hufflepuff']
 
-  // This is a placeholder for actual user progress data that would come from Supabase
-  const mockProgress = {
-    xp: 120,
-    level: 1,
-    completedLessons: 0,
-    totalLessons: 5,
-    completedProblems: 0,
-    totalProblems: 25,
-    badges: [
-      {
-        id: 1,
-        name: 'First Spell Cast',
-        description: 'You cast your first mathematical spell!',
-        icon: 'wand'
-      }
-    ]
-  }
-
   useEffect(() => {
-    async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser()
+    async function fetchData() {
+      try {
+        // Get authenticated user
+        const { data: { user } } = await supabase.auth.getUser()
 
-      if (user) {
+        if (!user) {
+          router.push('/login')
+          return
+        }
+
         setUser(user)
 
-        // Get user profile data if available
-        const { data: profile } = await supabase
+        // Get user profile data
+        const { data: profile, error: profileError } = await supabase
           .from('users')
           .select('*')
           .eq('id', user.id)
           .single()
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError)
+        }
 
         if (profile) {
           setUserProfile(profile)
@@ -53,21 +78,61 @@ export default function DashboardPage() {
           // If no profile exists, randomly assign a house
           const randomHouse = houses[Math.floor(Math.random() * houses.length)]
           setUserProfile({ house: randomHouse })
-
-          // In a real app, you would create a profile here
-          // await supabase.from('users').insert({
-          //   id: user.id,
-          //   house: randomHouse
-          // })
         }
-      } else {
-        router.push('/login')
-      }
 
-      setLoading(false)
+        // Fetch user's test results
+        const { data: testResults, error: testError } = await supabase
+          .from('mock_test_results')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (testError) {
+          console.error('Error fetching test results:', testError)
+        }
+
+        // Fetch user's badges
+        const { data: userBadges, error: badgesError } = await supabase
+          .from('user_badges')
+          .select(`
+            *,
+            badges (*)
+          `)
+          .eq('user_id', user.id)
+
+        if (badgesError) {
+          console.error('Error fetching badges:', badgesError)
+        }
+
+        // Calculate user progress
+        const progress: UserProgress = {
+          xp: profile?.xp || 0,
+          level: profile?.level || 1,
+          completedLessons: 0, // Will be updated when lessons are implemented
+          totalLessons: 5,
+          completedProblems: 0, // Will be updated when problems are implemented
+          totalProblems: 25,
+          badges: userBadges?.map(badge => badge.badges) || [],
+          testStats: {
+            totalTests: testResults?.length || 0,
+            passedTests: testResults?.filter(test => test.passed).length || 0,
+            bestScore: testResults?.length ? Math.max(...testResults.map(test => test.score)) : 0,
+            averageScore: testResults?.length
+              ? Math.round(testResults.reduce((sum, test) => sum + test.score, 0) / testResults.length)
+              : 0,
+            recentTests: testResults?.slice(0, 3) || []
+          }
+        }
+
+        setUserProgress(progress)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    getUser()
+    fetchData()
   }, [router, supabase])
 
   if (loading) {
@@ -91,11 +156,14 @@ export default function DashboardPage() {
     ...user,
     user_metadata: {
       ...user?.user_metadata,
-      house: userProfile?.house || 'slytherin'
+      house: userProfile?.house || 'slytherin',
+      first_name: userProfile?.first_name || user?.user_metadata?.first_name,
+      last_name: userProfile?.last_name || user?.user_metadata?.last_name,
+      username: userProfile?.username
     }
   }
 
   return (
-    <DashboardOverview user={magicalUser} userProgress={mockProgress} />
+    <DashboardOverview user={magicalUser} userProgress={userProgress} />
   )
 }

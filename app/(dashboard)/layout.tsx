@@ -54,6 +54,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   // Get current house colors
   const colors = houseColors[userHouse as keyof typeof houseColors]
 
+  // Function to truncate email
+  const truncateEmail = (email: string) => {
+    if (!email) return ''
+    const [username, domain] = email.split('@')
+    if (username.length <= 6) return email
+    return `${username.substring(0, 6)}...@${domain}`
+  }
+
   useEffect(() => {
     async function getUser() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -112,61 +120,151 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       style={{ backgroundBlendMode: 'overlay' }}
     >
       {/* Header - Hogwarts Great Hall style */}
-      <header className={`${colors.primary} border-b-2 ${colors.border} shadow-lg`}>
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className={`bg-gradient-to-r ${colors.accent} border-b-2 ${colors.border} shadow-lg sticky top-0 z-50`}>
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center">
-            <div className="h-10 w-10 mr-3 relative">
-              <svg className={`h-full w-full ${colors.text}`} viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.5 1.5c-1.7 0-3 1.3-3 3v1.9L7 8.9v1.6c0 .5.4.9.9.9h.6v7.2c0 .5.4.9.9.9h6.1c.5 0 .9-.4.9-.9v-7.2h.6c.5 0 .9-.4.9-.9V8.9l-2.5-2.5V4.5c0-1.7-1.3-3-3-3zm0 1.5c.8 0 1.5.7 1.5 1.5v1.5h-3V4.5c0-.8.7-1.5 1.5-1.5zm-3 5.4l1.5-1.5h3l1.5 1.5v.6h-6v-.6zm1.5 1.5h3v6h-3v-6z"/>
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold italic">MockWizards</h1>
+            <Link href="/dashboard" className="flex items-center group">
+              <div className="relative h-12 w-12 mr-3 overflow-hidden rounded-md border-2 border-amber-600 shadow-md transition-transform group-hover:scale-105">
+                <Image
+                  src="/images/logo.jpg"
+                  alt="MockWizard Logo"
+                  width={48}
+                  height={48}
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-amber-100 font-serif tracking-wide">MockWizard</h1>
+                <p className={`text-xs ${colors.text} italic`}>Magical Test Preparation</p>
+              </div>
+            </Link>
           </div>
 
           <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/dashboard" className={`${colors.text} hover:text-white transition border-b border-transparent hover:border-current`}>
+            <Link href="/dashboard" className={`${colors.text} hover:text-white transition border-b-2 border-transparent hover:border-current flex items-center`}>
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
               Great Hall
             </Link>
-            <Link href="/dashboard/lessons" className={`${colors.text} hover:text-white transition border-b border-transparent hover:border-current`}>
+            {/* <Link href="/dashboard/spellbooks" className={`${colors.text} hover:text-white transition border-b-2 border-transparent hover:border-current flex items-center`}>
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
               Spellbooks
+            </Link> */}
+            <Link href="/dashboard/mock-tests" className={`${colors.text} hover:text-white transition border-b-2 border-transparent hover:border-current flex items-center`}>
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Mock Tests
             </Link>
-            <Link href="/profile" className={`${colors.text} hover:text-white transition border-b border-transparent hover:border-current`}>
-              Wizard Profile
+            <Link href="/dashboard/leaderboard" className={`${colors.text} hover:text-white transition border-b-2 border-transparent hover:border-current flex items-center`}>
+              <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Leaderboard
             </Link>
           </nav>
 
           <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center">
-              <div className={`h-8 w-8 rounded-full ${colors.secondary} flex items-center justify-center mr-2`}>
+            <div className="hidden md:flex items-center bg-black/20 px-3 py-1.5 rounded-full">
+              <div className={`h-8 w-8 rounded-full ${colors.secondary} flex items-center justify-center mr-2 text-sm font-bold shadow-inner border border-white/20`}>
                 {userHouse === 'gryffindor' && 'G'}
                 {userHouse === 'slytherin' && 'S'}
                 {userHouse === 'ravenclaw' && 'R'}
                 {userHouse === 'hufflepuff' && 'H'}
               </div>
-              <span className="text-sm">{user?.email}</span>
+              <div className="flex flex-col">
+                <span className="text-xs text-amber-200 font-medium">
+                  {user?.user_metadata?.first_name || 'Wizard'}
+                </span>
+                <span className="text-xs opacity-80">
+                  {truncateEmail(user?.email || '')}
+                </span>
+              </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSignOut}
-              className={`border ${colors.border} ${colors.text} hover:text-white`}
-            >
-              Leave Castle
-            </Button>
+
+            <div className="flex space-x-2">
+              <Link href="/profile">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`border ${colors.border} ${colors.text} hover:text-black hidden md:flex`}
+                >
+                  <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Profile
+                </Button>
+              </Link>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                className={`border ${colors.border} ${colors.text} hover:text-black`}
+              >
+                <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Leave
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Mobile Navigation - Marauder's Map style */}
-      <div className={`md:hidden ${colors.primary} border-b ${colors.border} px-4 py-2`}>
-        <nav className="flex justify-between">
-          <Link href="/dashboard" className={`${colors.text} hover:text-white transition py-2`}>
+      <div className={`md:hidden bg-gradient-to-r ${colors.accent} border-b ${colors.border} px-4 py-3 shadow-md`}>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            <div className={`h-7 w-7 rounded-full ${colors.secondary} flex items-center justify-center mr-2 text-xs font-bold shadow-inner border border-white/20`}>
+              {userHouse === 'gryffindor' && 'G'}
+              {userHouse === 'slytherin' && 'S'}
+              {userHouse === 'ravenclaw' && 'R'}
+              {userHouse === 'hufflepuff' && 'H'}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs text-amber-200 font-medium">
+                {user?.user_metadata?.first_name || 'Wizard'}
+              </span>
+              <span className="text-xs opacity-80">
+                {truncateEmail(user?.email || '')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <nav className="grid grid-cols-2 gap-2">
+          <Link href="/dashboard" className={`${colors.text} hover:text-white transition py-2 px-3 bg-black/20 rounded-md flex items-center`}>
+            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
             Great Hall
           </Link>
-          <Link href="/dashboard/lessons" className={`${colors.text} hover:text-white transition py-2`}>
+          {/* <Link href="/dashboard/spellbooks" className={`${colors.text} hover:text-white transition py-2 px-3 bg-black/20 rounded-md flex items-center`}>
+            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
             Spellbooks
+          </Link> */}
+          <Link href="/dashboard/mock-tests" className={`${colors.text} hover:text-white transition py-2 px-3 bg-black/20 rounded-md flex items-center`}>
+            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Mock Tests
           </Link>
-          <Link href="/profile" className={`${colors.text} hover:text-white transition py-2`}>
+          <Link href="/dashboard/leaderboard" className={`${colors.text} hover:text-white transition py-2 px-3 bg-black/20 rounded-md flex items-center`}>
+            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Leaderboard
+          </Link>
+          <Link href="/profile" className={`${colors.text} hover:text-white transition py-2 px-3 bg-black/20 rounded-md flex items-center col-span-2`}>
+            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
             Wizard Profile
           </Link>
         </nav>
@@ -197,8 +295,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Footer - Hogwarts motto style */}
       <footer className={`${colors.primary} border-t-2 ${colors.border} py-6`}>
         <div className="container mx-auto px-4 text-center text-amber-200 text-sm">
-          <p className="font-medium italic">"Draco dormiens nunquam titillandus"</p>
-          <p className="mt-1">© {new Date().getFullYear()} MathWizards Academy. All magical rights reserved.</p>
+          <p className="font-medium italic">&ldquo;Draco dormiens nunquam titillandus&rdquo;</p>
+          <p className="mt-1">© {new Date().getFullYear()} MockWizard Academy. All magical rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -21,22 +21,22 @@ export default function LoginForm() {
 
   const handleResendVerification = async () => {
     const unverifiedEmail = sessionStorage.getItem('unverifiedEmail') || email
-    
+
     if (!unverifiedEmail) {
       setError('No email address to send verification to')
       return
     }
-    
+
     setResendLoading(true)
     setError(null)
     setResendSuccess(false)
-    
+
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: unverifiedEmail
       })
-      
+
       if (error) {
         setError(`Error sending verification email: ${error.message}`)
       } else {
@@ -64,18 +64,19 @@ export default function LoginForm() {
     }
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // First, check if the user exists and if their email is verified
+      const { data: { user: existingUser }, error: userError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) {
-        console.error('Login error details:', error)
+      if (userError) {
+        console.error('Login error details:', userError)
 
         // Provide more user-friendly error messages
-        if (error.message.includes('Invalid login credentials')) {
+        if (userError.message.includes('Invalid login credentials')) {
           setError('Invalid email or password. Please try again.')
-        } else if (error.message.includes('Email not confirmed')) {
+        } else if (userError.message.includes('Email not confirmed')) {
           setError(
             'Your email address has not been verified. Please check your inbox for the verification link or click "Resend verification email" below.'
           )
@@ -84,7 +85,19 @@ export default function LoginForm() {
             sessionStorage.setItem('unverifiedEmail', email)
           }
         } else {
-          setError(`Error: ${error.message}`)
+          setError(`Error: ${userError.message}`)
+        }
+        return
+      }
+
+      // Check if email is verified
+      if (existingUser && !existingUser.email_confirmed_at) {
+        setError(
+          'Your email address has not been verified. Please check your inbox for the verification link or click "Resend verification email" below.'
+        )
+        // Store the email in session storage for resend functionality
+        if (email) {
+          sessionStorage.setItem('unverifiedEmail', email)
         }
         return
       }
@@ -103,79 +116,77 @@ export default function LoginForm() {
   return (
     <div className="w-full">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold text-white">Log in to your account</h2>
-        <p className="text-gray-400 mt-2">Welcome back to MathQuest</p>
+        <h2 className="text-3xl font-bold text-amber-100 font-serif">Return to MockWizard Academy</h2>
+        <p className="text-amber-200/80 mt-2 italic">Welcome back, esteemed wizard</p>
       </div>
 
-      <div className="flex gap-4 mb-6">
-        <Button variant="outline" className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600">
-          <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
-          </svg>
-          Google
-        </Button>
-        <Button variant="outline" className="flex-1 bg-gray-700 hover:bg-gray-600 text-white border-gray-600">
-          <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-          </svg>
-          GitHub
-        </Button>
-      </div>
-
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-600"></div>
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-gray-800 text-gray-400">Or</span>
+      <div className="relative mb-8">
+        <div className="absolute inset-0 bg-[url('/images/parchment-texture.jpg')] bg-cover opacity-10 rounded-lg"></div>
+        <div className="relative p-4 text-center">
+          <p className="text-amber-200 font-serif">
+            "It matters not what someone is born, but what they grow to be."
+          </p>
+          <p className="text-amber-200/60 text-sm mt-2 italic">
+            — Albus Dumbledore
+          </p>
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-900/50 border border-red-500 text-red-200 rounded-md text-sm">
-          {error}
+        <div className="mb-6 p-4 bg-[#740001]/30 border-2 border-[#740001] text-amber-200 rounded-lg text-sm shadow-lg">
+          <div className="flex items-center">
+            <svg className="h-5 w-5 mr-2 text-[#D3A625]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span className="font-serif font-medium">{error}</span>
+          </div>
           {error.includes('not been verified') && (
             <Button
               variant="destructive"
               size="sm"
               onClick={handleResendVerification}
               disabled={resendLoading}
-              className="mt-2 w-full bg-red-800 hover:bg-red-700"
+              className="mt-3 w-full bg-amber-600 hover:bg-amber-700 text-white font-serif"
             >
-              {resendLoading ? 'Sending...' : 'Resend verification email'}
+              {resendLoading ? 'Sending owl post...' : 'Resend verification owl'}
             </Button>
           )}
         </div>
       )}
 
       {resendSuccess && (
-        <div className="mb-4 p-3 bg-green-900/50 border border-green-500 text-green-200 rounded-md text-sm">
-          Verification email sent successfully! Please check your inbox.
+        <div className="mb-6 p-4 bg-[#1A472A]/30 border-2 border-[#AAAAAA] text-amber-200 rounded-lg text-sm shadow-lg">
+          <div className="flex items-center">
+            <svg className="h-5 w-5 mr-2 text-[#AAAAAA]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-serif font-medium">Owl dispatched successfully! Please check your inbox for the verification letter.</span>
+          </div>
         </div>
       )}
 
-      <form onSubmit={handleSignIn} className="space-y-4">
+      <form onSubmit={handleSignIn} className="space-y-6 bg-[#0E1A2D]/80 p-6 rounded-lg border border-amber-900/30 shadow-lg">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium text-gray-300">
-            Email
+          <Label htmlFor="email" className="text-sm font-medium text-amber-200 font-serif">
+            Owl Post Address (Email)
           </Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-gray-700 border-gray-600 text-white focus:ring-yellow-400"
-            placeholder="john.doe@example.com"
+            className="bg-[#1A1A2E] border-amber-900/50 text-amber-100 focus:ring-amber-500 focus:border-amber-500"
+            placeholder="wizard@hogwarts.edu"
           />
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password" className="text-sm font-medium text-gray-300">
-              Password
+            <Label htmlFor="password" className="text-sm font-medium text-amber-200 font-serif">
+              Secret Spell (Password)
             </Label>
-            <Link href="/forgot-password" className="text-sm text-yellow-400 hover:underline">
-              Forgot password?
+            <Link href="/forgot-password" className="text-sm text-amber-400 hover:text-amber-300 hover:underline italic font-serif">
+              Forgot your spell?
             </Link>
           </div>
           <Input
@@ -183,32 +194,32 @@ export default function LoginForm() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-gray-700 border-gray-600 text-white focus:ring-yellow-400"
+            className="bg-[#1A1A2E] border-amber-900/50 text-amber-100 focus:ring-amber-500 focus:border-amber-500"
             placeholder="••••••••"
           />
         </div>
 
         <div className="flex items-center space-x-2">
-          <Checkbox id="remember-me" className="data-[state=checked]:bg-yellow-400 border-gray-600" />
-          <Label htmlFor="remember-me" className="text-sm text-gray-300">
-            Remember me
+          <Checkbox id="remember-me" className="data-[state=checked]:bg-amber-600 border-amber-900/50" />
+          <Label htmlFor="remember-me" className="text-sm text-amber-200 font-serif">
+            Remember my wand
           </Label>
         </div>
 
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold"
+          className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold font-serif py-6 rounded-md shadow-lg shadow-amber-900/30 transition-transform hover:scale-105"
         >
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? 'Casting Alohomora...' : 'Enter the Great Hall'}
         </Button>
       </form>
 
-      <div className="mt-6 text-center">
-        <p className="text-gray-400">
-          Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-yellow-400 hover:underline">
-            Sign up
+      <div className="mt-8 text-center bg-[#0E1A2D]/60 p-4 rounded-lg border border-amber-900/20">
+        <p className="text-amber-200/80 font-serif">
+          Not yet enrolled at MockWizard?{' '}
+          <Link href="/signup" className="text-amber-400 hover:text-amber-300 hover:underline transition-colors">
+            Receive your acceptance letter
           </Link>
         </p>
       </div>
