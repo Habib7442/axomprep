@@ -30,19 +30,29 @@ interface TestResultsListProps {
   results: TestResult[]
   tests: Test[]
   onDownloadCertificate: (testId: string) => void
+  itemsPerPage?: number
 }
 
 export default function TestResultsList({
   results,
   tests,
-  onDownloadCertificate
+  onDownloadCertificate,
+  itemsPerPage = 5
 }: TestResultsListProps) {
+  const [currentPage, setCurrentPage] = React.useState(1);
+
   // Format time in minutes and seconds
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
     return `${minutes}m ${remainingSeconds}s`
   }
+
+  // Calculate pagination
+  const totalPages = Math.ceil(results.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, results.length);
+  const currentResults = results.slice(startIndex, endIndex);
 
   if (results.length === 0) {
     return (
@@ -59,7 +69,7 @@ export default function TestResultsList({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      {results.map((result, index) => {
+      {currentResults.map((result, index) => {
         const test = tests.find(t => t.id === result.test_id) || {
           name: result.test_id,
           passingMarks: 0,
@@ -138,6 +148,35 @@ export default function TestResultsList({
           </div>
         )
       })}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-6 space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="h-8 w-8 p-0 text-amber-800 border-amber-300"
+          >
+            &lt;
+          </Button>
+
+          <div className="text-sm text-amber-800">
+            Page {currentPage} of {totalPages}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="h-8 w-8 p-0 text-amber-800 border-amber-300"
+          >
+            &gt;
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

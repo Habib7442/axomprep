@@ -104,7 +104,18 @@ export default function ProfilePage() {
           .order('created_at', { ascending: false })
 
         if (!error && results) {
-          setTestResults(results)
+          // Process results to keep only the best score for each test_id
+          const bestResults = new Map<string, any>();
+
+          results.forEach(result => {
+            if (!bestResults.has(result.test_id) ||
+                bestResults.get(result.test_id).score < result.score) {
+              bestResults.set(result.test_id, result);
+            }
+          });
+
+          // Convert Map back to array
+          setTestResults(Array.from(bestResults.values()));
         }
 
         setMockTests(mockTestsData)
@@ -526,6 +537,7 @@ export default function ProfilePage() {
                     results={testResults}
                     tests={mockTests}
                     onDownloadCertificate={downloadCertificate}
+                    itemsPerPage={5}
                   />
                 </CardContent>
               </Card>

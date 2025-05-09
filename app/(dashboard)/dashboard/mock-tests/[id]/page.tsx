@@ -4,12 +4,14 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/browser-client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Loader2, Clock, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 import sscCGLMockTest from '@/public/maths-mock/ssc/mock-1'
+import sscCGLMockTestImages from '@/public/reasoning-mock/ssc/mock-1'
 import { use } from 'react'
 
 export default function MockTestPage({ params }: { params: Promise<{ id: string }> }) {
@@ -32,8 +34,17 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
   const [testResults, setTestResults] = useState<any>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  // Get the test data
-  const mockTest = sscCGLMockTest
+  // Get the test data based on the test ID
+  const getTestData = () => {
+    // For demonstration purposes, we're using the image-based test for reasoning
+    // In a real implementation, you would dynamically import the correct test based on testId
+    if (testId === 'reasoning/ssc') {
+      return sscCGLMockTestImages
+    }
+    return sscCGLMockTest
+  }
+
+  const mockTest = getTestData()
 
   // Initialize timer
   useEffect(() => {
@@ -352,6 +363,36 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
                     <div>
                       <p className="font-medium">{question.question}</p>
 
+                      {/* Display question image if available */}
+                      {'questionImage' in question && question.questionImage && (
+                        <div className="mt-4 flex justify-center">
+                          <div className="relative w-full max-w-md h-48 border-2 border-amber-300 rounded-md overflow-hidden">
+                            <Image
+                              src={question.questionImage as string}
+                              alt="Question figure"
+                              fill
+                              style={{ objectFit: 'contain' }}
+                              className="p-2"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Display option image if available */}
+                      {'hasImageOptions' in question && question.hasImageOptions && 'optionImage' in question && question.optionImage && (
+                        <div className="mt-4 flex justify-center">
+                          <div className="relative w-full max-w-md h-48 border-2 border-amber-300 rounded-md overflow-hidden">
+                            <Image
+                              src={question.optionImage as string}
+                              alt="Options figure"
+                              fill
+                              style={{ objectFit: 'contain' }}
+                              className="p-2"
+                            />
+                          </div>
+                        </div>
+                      )}
+
                       <div className="mt-2 space-y-1">
                         {question.options.map((option, optIndex) => (
                           <div
@@ -513,31 +554,86 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
 
             <div className="mb-4 md:mb-6">
               <p className="text-amber-900 font-medium text-sm md:text-base">{currentQuestion.question}</p>
+
+              {/* Display question image if available */}
+              {'questionImage' in currentQuestion && currentQuestion.questionImage && (
+                <div className="mt-4 flex justify-center">
+                  <div className="relative w-full max-w-md h-48 md:h-64 border-2 border-amber-300 rounded-md overflow-hidden">
+                    <Image
+                      src={currentQuestion.questionImage as string}
+                      alt="Question figure"
+                      fill
+                      style={{ objectFit: 'contain' }}
+                      className="p-2"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
-              {currentQuestion.options.map((option, index) => (
-                <div
-                  key={index}
-                  className={`flex items-center p-2 md:p-3 rounded-md border cursor-pointer ${
-                    selectedAnswers[currentQuestion.id] === option
-                      ? 'bg-amber-100 border-amber-400'
-                      : 'bg-white border-gray-300 hover:bg-amber-50'
-                  }`}
-                  onClick={() => handleAnswerSelect(currentQuestion.id, option)}
-                >
-                  <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full border flex items-center justify-center mr-2 md:mr-3 ${
-                    selectedAnswers[currentQuestion.id] === option
-                      ? 'border-amber-600 bg-amber-600 text-white'
-                      : 'border-gray-400'
-                  }`}>
-                    {selectedAnswers[currentQuestion.id] === option && (
-                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full"></div>
-                    )}
+              {/* Check if this question has a single option image */}
+              {('hasImageOptions' in currentQuestion && currentQuestion.hasImageOptions && 'optionImage' in currentQuestion && currentQuestion.optionImage) ? (
+                <div className="mb-4">
+                  <div className="relative w-full h-64 border-2 border-amber-300 rounded-md overflow-hidden mb-4">
+                    <Image
+                      src={currentQuestion.optionImage as string}
+                      alt="Options figure"
+                      fill
+                      style={{ objectFit: 'contain' }}
+                      className="p-2"
+                    />
                   </div>
-                  <span className="text-sm md:text-base">{String.fromCharCode(65 + index)}. {option}</span>
+
+                  {/* Display text options with the image above */}
+                  {currentQuestion.options.map((option, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-center p-2 md:p-3 rounded-md border cursor-pointer ${
+                        selectedAnswers[currentQuestion.id] === option
+                          ? 'bg-amber-100 border-amber-400'
+                          : 'bg-white border-gray-300 hover:bg-amber-50'
+                      }`}
+                      onClick={() => handleAnswerSelect(currentQuestion.id, option)}
+                    >
+                      <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full border flex items-center justify-center mr-2 md:mr-3 ${
+                        selectedAnswers[currentQuestion.id] === option
+                          ? 'border-amber-600 bg-amber-600 text-white'
+                          : 'border-gray-400'
+                      }`}>
+                        {selectedAnswers[currentQuestion.id] === option && (
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full"></div>
+                        )}
+                      </div>
+                      <span className="text-sm md:text-base">{String.fromCharCode(65 + index)}. {option}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                // Regular text options without image
+                currentQuestion.options.map((option, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center p-2 md:p-3 rounded-md border cursor-pointer ${
+                      selectedAnswers[currentQuestion.id] === option
+                        ? 'bg-amber-100 border-amber-400'
+                        : 'bg-white border-gray-300 hover:bg-amber-50'
+                    }`}
+                    onClick={() => handleAnswerSelect(currentQuestion.id, option)}
+                  >
+                    <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full border flex items-center justify-center mr-2 md:mr-3 ${
+                      selectedAnswers[currentQuestion.id] === option
+                        ? 'border-amber-600 bg-amber-600 text-white'
+                        : 'border-gray-400'
+                    }`}>
+                      {selectedAnswers[currentQuestion.id] === option && (
+                        <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <span className="text-sm md:text-base">{String.fromCharCode(65 + index)}. {option}</span>
+                  </div>
+                ))
+              )}
             </div>
 
             <div className="flex justify-between mt-4 md:mt-6">

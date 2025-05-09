@@ -86,13 +86,13 @@ export default function TestDetailsPage({ params }: { params: Promise<{ id: stri
           return
         }
 
-        // Fetch test result
+        // Fetch all test results for this test to find the best one
         const { data: resultData, error: resultError } = await supabase
           .from('mock_test_results')
           .select('*')
           .eq('user_id', user.id)
           .eq('test_id', testId)
-          .order('created_at', { ascending: false })
+          .order('score', { ascending: false }) // Order by score to get the best result first
           .limit(1)
           .single()
 
