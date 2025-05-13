@@ -113,11 +113,6 @@ export default function EnrollmentPage() {
     } catch (error) {
       console.error("Error submitting enrollment:", error);
 
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "There was an error submitting your enrollment. Please try again.";
-
       toast("Enrollment Failed");
     } finally {
       setIsSubmitting(false);

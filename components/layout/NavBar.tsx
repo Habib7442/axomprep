@@ -110,19 +110,19 @@ export default function NavBar() {
                 <h1 className="text-xl font-bold text-amber-100 font-serif">
                   MockWizard
                 </h1>
-                <p className={`text-xs  italic`}>Powered by AxomPrep</p>
+                <p className={`text-xs  italic text-amber-200`}>Powered by AxomPrep</p>
               </div>
             </Link>
           </div>
 
           <nav className="hidden md:flex items-center space-x-6">
-            <Link
+            {/* <Link
               href="/dashboard"
               className="text-amber-200 hover:text-white transition flex items-center"
             >
               <Home className="h-4 w-4 mr-1" />
               <span>Dashboard</span>
-            </Link>
+            </Link> */}
             <Link
               href="/dashboard/mock-tests"
               className="text-amber-200 hover:text-white transition flex items-center"
@@ -130,19 +130,26 @@ export default function NavBar() {
               <BookOpen className="h-4 w-4 mr-1" />
               <span>Mock Tests</span>
             </Link>
-            <Link
+            {/* <Link
               href="/dashboard/leaderboard"
               className="text-amber-200 hover:text-white transition flex items-center"
             >
               <Award className="h-4 w-4 mr-1" />
               <span>Leaderboard</span>
-            </Link>
+            </Link> */}
             <Link
               href="/about-axomprep"
               className="text-teal-200 hover:text-white transition flex items-center underline"
             >
               <Award className="h-4 w-4 mr-1" />
               <span>About AxomPrep</span>
+            </Link>
+            <Link
+              href="/axomprep-notes"
+              className="text-teal-200 hover:text-white transition flex items-center underline"
+            >
+              <Award className="h-4 w-4 mr-1" />
+              <span>Notes</span>
             </Link>
           </nav>
 
@@ -232,14 +239,14 @@ export default function NavBar() {
       {isMenuOpen && (
         <div className="md:hidden bg-amber-900 border-b border-amber-700 px-4 py-2 shadow-lg">
           <nav className="flex flex-col space-y-3 py-3">
-            <Link
+            {/* <Link
               href="/dashboard"
               className="text-amber-200 hover:text-white transition py-2 flex items-center"
               onClick={() => setIsMenuOpen(false)}
             >
               <Home className="h-4 w-4 mr-2" />
               <span>Dashboard</span>
-            </Link>
+            </Link> */}
             <Link
               href="/dashboard/mock-tests"
               className="text-amber-200 hover:text-white transition py-2 flex items-center"
@@ -248,14 +255,29 @@ export default function NavBar() {
               <BookOpen className="h-4 w-4 mr-2" />
               <span>Mock Tests</span>
             </Link>
+
             <Link
+              href="/about-axomprep"
+              className="text-teal-200 hover:text-white transition flex items-center underline"
+            >
+              <Award className="h-4 w-4 mr-1" />
+              <span>About AxomPrep</span>
+            </Link>
+            <Link
+              href="/axomprep-notes"
+              className="text-teal-200 hover:text-white transition flex items-center underline"
+            >
+              <Award className="h-4 w-4 mr-1" />
+              <span>Notes</span>
+            </Link>
+            {/* <Link
               href="/dashboard/leaderboard"
               className="text-amber-200 hover:text-white transition py-2 flex items-center"
               onClick={() => setIsMenuOpen(false)}
             >
               <Award className="h-4 w-4 mr-2" />
               <span>Leaderboard</span>
-            </Link>
+            </Link> */}
             {user && (
               <Link
                 href="/profile"
