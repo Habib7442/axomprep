@@ -135,7 +135,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-amber-100 font-serif tracking-wide">MockWizard</h1>
-                <p className={`text-xs ${colors.text} italic`}>Magical Test Preparation</p>
+                <p className={`text-xs ${colors.text} italic`}>Powered by AxomPrep</p>
               </div>
             </Link>
           </div>

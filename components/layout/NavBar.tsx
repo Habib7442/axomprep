@@ -1,85 +1,94 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/browser-client'
-import { Menu, X, User, LogOut, BookOpen, Award, Home } from 'lucide-react'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/browser-client";
+import { Menu, X, User, LogOut, BookOpen, Award, Home } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function NavBar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [userProfile, setUserProfile] = useState<any>(null)
-  const supabase = createClient()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (user) {
-        setUser(user)
+        setUser(user);
 
         // Get user profile data if available
         const { data: profile } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
-          .single()
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
 
         if (profile) {
-          setUserProfile(profile)
+          setUserProfile(profile);
         }
       }
     }
 
-    getUser()
-  }, [supabase])
+    getUser();
+  }, [supabase]);
 
   // Function to truncate email
   const truncateEmail = (email: string) => {
-    if (!email) return ''
-    const [username, domain] = email.split('@')
-    if (username.length <= 6) return email
-    return `${username.substring(0, 6)}...@${domain}`
-  }
+    if (!email) return "";
+    const [username, domain] = email.split("@");
+    if (username.length <= 6) return email;
+    return `${username.substring(0, 6)}...@${domain}`;
+  };
 
   // Function to get user initials for avatar
   const getUserInitials = () => {
     if (userProfile?.first_name) {
-      return `${userProfile.first_name[0]}${userProfile.last_name ? userProfile.last_name[0] : ''}`
+      return `${userProfile.first_name[0]}${
+        userProfile.last_name ? userProfile.last_name[0] : ""
+      }`;
     }
     if (user?.email) {
-      return user.email[0].toUpperCase()
+      return user.email[0].toUpperCase();
     }
-    return 'MW'
-  }
+    return "MW";
+  };
 
   // Function to get house color for avatar
   const getHouseColor = () => {
-    const house = userProfile?.house || 'gryffindor'
+    const house = userProfile?.house || "gryffindor";
     switch (house) {
-      case 'gryffindor': return 'bg-[#740001] text-[#D3A625]'
-      case 'slytherin': return 'bg-[#1A472A] text-[#AAAAAA]'
-      case 'ravenclaw': return 'bg-[#0E1A40] text-[#946B2D]'
-      case 'hufflepuff': return 'bg-[#ECB939] text-[#372E29]'
-      default: return 'bg-amber-700 text-white'
+      case "gryffindor":
+        return "bg-[#740001] text-[#D3A625]";
+      case "slytherin":
+        return "bg-[#1A472A] text-[#AAAAAA]";
+      case "ravenclaw":
+        return "bg-[#0E1A40] text-[#946B2D]";
+      case "hufflepuff":
+        return "bg-[#ECB939] text-[#372E29]";
+      default:
+        return "bg-amber-700 text-white";
     }
-  }
+  };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    window.location.href = '/login'
-  }
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
 
   return (
     <>
@@ -97,22 +106,43 @@ export default function NavBar() {
                   className="object-cover"
                 />
               </div>
-              <h1 className="text-xl font-bold text-amber-100 font-serif">MockWizard</h1>
+              <div>
+                <h1 className="text-xl font-bold text-amber-100 font-serif">
+                  MockWizard
+                </h1>
+                <p className={`text-xs  italic`}>Powered by AxomPrep</p>
+              </div>
             </Link>
           </div>
 
           <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/dashboard" className="text-amber-200 hover:text-white transition flex items-center">
+            <Link
+              href="/dashboard"
+              className="text-amber-200 hover:text-white transition flex items-center"
+            >
               <Home className="h-4 w-4 mr-1" />
               <span>Dashboard</span>
             </Link>
-            <Link href="/dashboard/mock-tests" className="text-amber-200 hover:text-white transition flex items-center">
+            <Link
+              href="/dashboard/mock-tests"
+              className="text-amber-200 hover:text-white transition flex items-center"
+            >
               <BookOpen className="h-4 w-4 mr-1" />
               <span>Mock Tests</span>
             </Link>
-            <Link href="/dashboard/leaderboard" className="text-amber-200 hover:text-white transition flex items-center">
+            <Link
+              href="/dashboard/leaderboard"
+              className="text-amber-200 hover:text-white transition flex items-center"
+            >
               <Award className="h-4 w-4 mr-1" />
               <span>Leaderboard</span>
+            </Link>
+            <Link
+              href="/about-axomprep"
+              className="text-teal-200 hover:text-white transition flex items-center underline"
+            >
+              <Award className="h-4 w-4 mr-1" />
+              <span>About AxomPrep</span>
             </Link>
           </nav>
 
@@ -120,17 +150,27 @@ export default function NavBar() {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
                     <Avatar className={`h-8 w-8 ${getHouseColor()}`}>
-                      <AvatarImage src={userProfile?.avatar_url} alt={userProfile?.username || user.email} />
-                      <AvatarFallback className={getHouseColor()}>{getUserInitials()}</AvatarFallback>
+                      <AvatarImage
+                        src={userProfile?.avatar_url}
+                        alt={userProfile?.username || user.email}
+                      />
+                      <AvatarFallback className={getHouseColor()}>
+                        {getUserInitials()}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{userProfile?.username || 'Wizard'}</p>
+                      <p className="text-sm font-medium leading-none">
+                        {userProfile?.username || "Wizard"}
+                      </p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {truncateEmail(user.email)}
                       </p>
@@ -229,8 +269,8 @@ export default function NavBar() {
             {user && (
               <button
                 onClick={() => {
-                  handleSignOut()
-                  setIsMenuOpen(false)
+                  handleSignOut();
+                  setIsMenuOpen(false);
                 }}
                 className="text-amber-200 hover:text-white transition py-2 flex items-center"
               >
@@ -242,5 +282,5 @@ export default function NavBar() {
         </div>
       )}
     </>
-  )
+  );
 }
