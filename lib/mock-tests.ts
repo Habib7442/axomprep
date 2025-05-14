@@ -1,8 +1,8 @@
 import sscMock1 from "@/public/maths-mock/ssc/mock-1";
 // import sscMock2 from '@/public/maths-mock/ssc/mock-2'
-import railwaysMock1 from "@/public/maths-mock/railways/mock-1";
-import bankingMock1 from "@/public/maths-mock/banking/mock-1";
-import adreMock1 from "@/public/maths-mock/adre/mock-1";
+import railwaysMathsMock1 from "@/public/maths-mock/railways/mock-1";
+import railwaysReasoningMock1 from "@/public/reasoning-mock/railways/mock-1";
+import railwaysGKMock1 from "@/public/gk/railways/mock-1";
 import sscReasoningMock1 from "@/public/reasoning-mock/ssc/mock-1";
 
 export interface MockTest {
@@ -87,46 +87,43 @@ export function getAllMockTests(): MockTest[] {
     //   shift: sscMock2.shift
     // },
     {
-      id: "railways/mock-1",
-      name: "Railways RRB Mock Test 1",
-      description:
-        "Practice test for Railways RRB exam with 10 questions on Mathematics",
+      id: "railways/maths",
+      name: "Railways RRB NTPC Mock Test 1",
+      description: "Practice test for Railways RRB exam",
       category: "Railways",
       subject: "Mathematics",
       difficulty: "intermediate",
-      timeLimit: railwaysMock1.timeLimit,
-      totalMarks: railwaysMock1.totalMarks,
-      passingMarks: railwaysMock1.passingMarks,
-      date: railwaysMock1.date,
-      shift: railwaysMock1.shift,
+      timeLimit: railwaysMathsMock1.timeLimit,
+      totalMarks: railwaysMathsMock1.totalMarks,
+      passingMarks: railwaysMathsMock1.passingMarks,
+      date: railwaysMathsMock1.date,
+      shift: railwaysMathsMock1.shift,
     },
     {
-      id: "banking/mock-1",
-      name: "Banking SBI PO Mock Test 1",
-      description:
-        "Practice test for Banking SBI PO exam with 10 questions on Mathematics",
-      category: "Banking",
-      subject: "Mathematics",
-      difficulty: "advanced",
-      timeLimit: bankingMock1.timeLimit,
-      totalMarks: bankingMock1.totalMarks,
-      passingMarks: bankingMock1.passingMarks,
-      date: bankingMock1.date,
-      shift: bankingMock1.shift,
+      id: "railways/reasoning",
+      name: "Railways RRB NTPC Mock Test 1",
+      description: "Practice test for Railways RRB exam",
+      category: "Railways",
+      subject: "Reasoning",
+      difficulty: "intermediate",
+      timeLimit: railwaysReasoningMock1.timeLimit,
+      totalMarks: railwaysReasoningMock1.totalMarks,
+      passingMarks: railwaysReasoningMock1.passingMarks,
+      date: railwaysReasoningMock1.date,
+      shift: railwaysReasoningMock1.shift,
     },
     {
-      id: "adre/mock-1",
-      name: "ADRE Mock Test 1",
-      description:
-        "Practice test for ADRE exam with 10 questions on Mathematics",
-      category: "ADRE",
-      subject: "Mathematics",
-      difficulty: "advanced",
-      timeLimit: adreMock1.timeLimit,
-      totalMarks: adreMock1.totalMarks,
-      passingMarks: adreMock1.passingMarks,
-      date: adreMock1.date,
-      shift: adreMock1.shift,
+      id: "railways/gk",
+      name: "Railways RRB NTPC Mock Test 1",
+      description: "Practice test for Railways RRB exam",
+      category: "Railways",
+      subject: "General Knowledge",
+      difficulty: "intermediate",
+      timeLimit: railwaysGKMock1.timeLimit,
+      totalMarks: railwaysGKMock1.totalMarks,
+      passingMarks: railwaysGKMock1.passingMarks,
+      date: railwaysGKMock1.date,
+      shift: railwaysGKMock1.shift,
     },
   ];
 }

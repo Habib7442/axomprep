@@ -229,14 +229,14 @@ export const notes: Note[] = [
 
 // Helper function to filter notes by class, subject, and language
 export function filterNotes(
-  classFilter?: string,
-  subjectFilter?: string,
-  languageFilter?: string
+  classFilter: string,
+  subjectFilter: string,
+  languageFilter: string
 ): Note[] {
   return notes.filter(
     (note) =>
-      (!classFilter || note.class === classFilter) &&
-      (!subjectFilter || note.subject === subjectFilter) &&
-      (!languageFilter || note.language === languageFilter)
+      (classFilter === "" || note.class === classFilter) &&
+      (subjectFilter === "" || note.subject === subjectFilter) &&
+      (languageFilter === "" || note.language === languageFilter)
   );
 }

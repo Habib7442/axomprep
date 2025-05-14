@@ -12,7 +12,33 @@ import { Progress } from '@/components/ui/progress'
 import { Loader2, Clock, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 import sscCGLMockTest from '@/public/maths-mock/ssc/mock-1'
 import sscCGLMockTestImages from '@/public/reasoning-mock/ssc/mock-1'
+import railwaysMathsMock1 from '@/public/maths-mock/railways/mock-1'
+import railwaysReasoningMock1 from '@/public/reasoning-mock/railways/mock-1'
+import railwaysGKMock1 from '@/public/gk/railways/mock-1'
 import { use } from 'react'
+
+// Define types for mock test data
+interface MockTestQuestion {
+  id: number;
+  question: string;
+  options: string[];
+  answer: string;
+  questionImage?: string;
+  optionImage?: string;
+  hasImageOptions?: boolean;
+}
+
+interface MockTest {
+  name: string;
+  subject: string;
+  date: string;
+  shift: string;
+  totalMarks: number;
+  passingMarks: number;
+  negativeMarking: number;
+  timeLimit: number;
+  questions: MockTestQuestion[];
+}
 
 export default function MockTestPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
@@ -35,16 +61,23 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
   const [submitting, setSubmitting] = useState(false)
 
   // Get the test data based on the test ID
-  const getTestData = () => {
-    // For demonstration purposes, we're using the image-based test for reasoning
-    // In a real implementation, you would dynamically import the correct test based on testId
-    if (testId === 'reasoning/ssc') {
-      return sscCGLMockTestImages
+  const getTestData = (): MockTest => {
+    // Use the appropriate mock test data based on the test ID
+    switch (testId) {
+      case 'reasoning/ssc':
+        return sscCGLMockTestImages as MockTest
+      case 'railways/maths':
+        return railwaysMathsMock1 as MockTest
+      case 'railways/reasoning/mock-1':
+        return railwaysReasoningMock1 as MockTest
+      case 'railways/gk/mock-1':
+        return railwaysGKMock1 as MockTest
+      default:
+        return sscCGLMockTest as MockTest
     }
-    return sscCGLMockTest
   }
 
-  const mockTest = getTestData()
+  const mockTest: MockTest = getTestData()
 
   // Initialize timer
   useEffect(() => {
