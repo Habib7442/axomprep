@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MockWizard - Magical Competitive Exam Preparation",
-  description: "A magical platform for SSC, Railways, Banking and ADRE exam preparation with interactive lessons and mock tests",
+  title: "AxomPrep",
+  description:
+    "A magical platform for SSC, Railways, Banking and ADRE exam preparation with interactive lessons and mock tests",
 };
 
 export default function RootLayout({
