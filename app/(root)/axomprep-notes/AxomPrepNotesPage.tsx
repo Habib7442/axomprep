@@ -34,18 +34,18 @@ import {
 import Link from "next/link";
 
 export default function AxomPrepNotesPage() {
-  const [selectedClass, setSelectedClass] = useState<string>("");
-  const [selectedSubject, setSelectedSubject] = useState<string>("");
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
+  const [selectedClass, setSelectedClass] = useState<string>("all");
+  const [selectedSubject, setSelectedSubject] = useState<string>("all");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
 
   // Filter notes based on selected filters
   const filteredNotes = filterNotes(selectedClass, selectedSubject, selectedLanguage);
 
   // Reset all filters
   const resetFilters = () => {
-    setSelectedClass("");
-    setSelectedSubject("");
-    setSelectedLanguage("");
+    setSelectedClass("all");
+    setSelectedSubject("all");
+    setSelectedLanguage("all");
   };
 
   return (
@@ -80,7 +80,7 @@ export default function AxomPrepNotesPage() {
                     <SelectValue placeholder="All Classes" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#0E1A2D] border-teal-700">
-                    <SelectItem value="" className="text-amber-100">
+                    <SelectItem value="all" className="text-amber-100">
                       All Classes
                     </SelectItem>
                     {classes.map((cls) => (
@@ -104,7 +104,7 @@ export default function AxomPrepNotesPage() {
                     <SelectValue placeholder="All Subjects" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#0E1A2D] border-teal-700">
-                    <SelectItem value="" className="text-amber-100">
+                    <SelectItem value="all" className="text-amber-100">
                       All Subjects
                     </SelectItem>
                     {subjects.map((subject) => (
@@ -128,7 +128,7 @@ export default function AxomPrepNotesPage() {
                     <SelectValue placeholder="All Languages" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#0E1A2D] border-teal-700">
-                    <SelectItem value="" className="text-amber-100">
+                    <SelectItem value="all" className="text-amber-100">
                       All Languages
                     </SelectItem>
                     {languages.map((language) => (

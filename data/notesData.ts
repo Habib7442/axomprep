@@ -235,8 +235,8 @@ export function filterNotes(
 ): Note[] {
   return notes.filter(
     (note) =>
-      (classFilter === "" || note.class === classFilter) &&
-      (subjectFilter === "" || note.subject === subjectFilter) &&
-      (languageFilter === "" || note.language === languageFilter)
+      (classFilter === "all" || note.class === classFilter) &&
+      (subjectFilter === "all" || note.subject === subjectFilter) &&
+      (languageFilter === "all" || note.language === languageFilter)
   );
 }
