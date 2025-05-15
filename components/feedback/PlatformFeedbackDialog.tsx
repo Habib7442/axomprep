@@ -158,7 +158,7 @@ export default function PlatformFeedbackDialog({
                     <Input
                       placeholder="Enter your name"
                       {...field}
-                      className="bg-amber-900/10 border-amber-600/30 text-amber-900 placeholder:text-amber-400/50"
+                      className="bg-amber-900/10 border-amber-600/30 text-amber-900 placeholder:text-amber-900"
                     />
                   </FormControl>
                   <FormMessage />
@@ -193,7 +193,7 @@ export default function PlatformFeedbackDialog({
                   <FormControl>
                     <Textarea
                       placeholder="Share your thoughts, suggestions, or experiences with MockWizard..."
-                      className="bg-amber-900/10 border-amber-600/30 text-amber-900 placeholder:text-amber-400/50 min-h-[100px]"
+                      className="bg-amber-900/10 border-amber-600/30 text-amber-900 placeholder:text-amber-900 min-h-[100px]"
                       {...field}
                     />
                   </FormControl>
