@@ -119,7 +119,11 @@ export default function DashboardOverview({ user, userProgress }: DashboardOverv
                         <div key={index} className="bg-[#0c1220] rounded-lg p-3 border border-amber-800/30">
                           <div className="flex justify-between items-center">
                             <div>
-                              <h4 className="font-medium text-amber-50">{test.test_id.replace('/', ' ')}</h4>
+                              <h4 className="font-medium text-amber-50">
+                                {test.test_id === 'railways/je/paper1'
+                                  ? 'RRB JE Paper 1'
+                                  : test.test_id.replace(/\//g, ' ')}
+                              </h4>
                               <div className="flex items-center mt-1">
                                 <Badge className={`mr-2 ${test.passed ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}`}>
                                   {test.passed ? 'Passed' : 'Failed'}
@@ -129,7 +133,7 @@ export default function DashboardOverview({ user, userProgress }: DashboardOverv
                                 </span>
                               </div>
                             </div>
-                            <Link href={`/dashboard/test-details/${test.test_id.replace('/', '-')}`}>
+                            <Link href={`/dashboard/test-details/${test.test_id.replace(/\//g, '-')}`}>
                               <Button className="bg-amber-600 hover:bg-amber-700 text-white border border-amber-800 text-xs px-3 py-1 h-auto">
                                 View Details
                               </Button>

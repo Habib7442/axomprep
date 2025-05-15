@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/browser-client";
-import { Menu, X, User, LogOut, BookOpen, Award, Home } from "lucide-react";
+import { Menu, X, User, LogOut, BookOpen, School } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,24 +93,27 @@ export default function NavBar() {
   return (
     <>
       {/* Header */}
-      <header className="bg-gradient-to-r from-amber-900 to-amber-800 border-b border-amber-700 shadow-md sticky top-0 z-50">
+      <header className="bg-gradient-to-r from-teal-900 to-amber-900 border-b border-teal-700 shadow-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-2 flex items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <div className="relative h-10 w-10 mr-2 overflow-hidden rounded-md">
+              <div className="relative h-12 w-12 mr-2 overflow-hidden rounded-md bg-teal-700 flex items-center justify-center">
+                {/* Replace with actual AxomPrep logo when available */}
                 <Image
-                  src="/images/logo.jpg"
+                  src="/logo.jpg"
                   alt="MockWizard Logo"
-                  width={40}
-                  height={40}
+                  width={48}
+                  height={48}
                   className="object-cover"
                 />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-amber-100 font-serif">
-                  MockWizard
-                </h1>
-                <p className={`text-xs  italic text-amber-200`}>Powered by AxomPrep</p>
+                <div className="flex items-center">
+                  <h1 className="text-lg font-bold text-teal-300">AxomPrep</h1>
+                </div>
+                <p className={`text-sm text-amber-300 font-medium`}>
+                  <span className="italic">MockWizard Platform</span>
+                </p>
               </div>
             </Link>
           </div>
@@ -139,17 +142,17 @@ export default function NavBar() {
             </Link> */}
             <Link
               href="/about-axomprep"
-              className="text-teal-200 hover:text-white transition flex items-center underline"
+              className="text-teal-200 hover:text-white transition flex items-center font-medium"
             >
-              <Award className="h-4 w-4 mr-1" />
-              <span>About AxomPrep</span>
+              <School className="h-4 w-4 mr-1" />
+              <span>AxomPrep Coaching</span>
             </Link>
             <Link
               href="/axomprep-notes"
-              className="text-teal-200 hover:text-white transition flex items-center underline"
+              className="text-teal-200 hover:text-white transition flex items-center font-medium"
             >
-              <Award className="h-4 w-4 mr-1" />
-              <span>Notes</span>
+              <BookOpen className="h-4 w-4 mr-1" />
+              <span>AxomPrep Notes</span>
             </Link>
           </nav>
 
@@ -237,7 +240,7 @@ export default function NavBar() {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-amber-900 border-b border-amber-700 px-4 py-2 shadow-lg">
+        <div className="md:hidden bg-gradient-to-r from-teal-900 to-amber-900 border-b border-amber-700 px-4 py-2 shadow-lg">
           <nav className="flex flex-col space-y-3 py-3">
             {/* <Link
               href="/dashboard"
@@ -258,17 +261,17 @@ export default function NavBar() {
 
             <Link
               href="/about-axomprep"
-              className="text-teal-200 hover:text-white transition flex items-center underline"
+              className="text-teal-200 hover:text-white transition flex items-center font-medium"
             >
-              <Award className="h-4 w-4 mr-1" />
-              <span>About AxomPrep</span>
+              <School className="h-4 w-4 mr-1" />
+              <span>AxomPrep Coaching</span>
             </Link>
             <Link
               href="/axomprep-notes"
-              className="text-teal-200 hover:text-white transition flex items-center underline"
+              className="text-teal-200 hover:text-white transition flex items-center font-medium"
             >
-              <Award className="h-4 w-4 mr-1" />
-              <span>Notes</span>
+              <BookOpen className="h-4 w-4 mr-1" />
+              <span>AxomPrep Notes</span>
             </Link>
             {/* <Link
               href="/dashboard/leaderboard"

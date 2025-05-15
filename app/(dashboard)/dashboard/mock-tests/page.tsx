@@ -34,8 +34,8 @@ export default function MockTestsPage() {
 
   const [loading, setLoading] = useState(true)
   const [userResults, setUserResults] = useState<any[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || 'ssc')
-  const [selectedSubject, setSelectedSubject] = useState<string>(subjectParam || 'all')
+  const [selectedCategory, setSelectedCategory] = useState<string>(categoryParam || 'railways')
+  const [selectedSubject, setSelectedSubject] = useState<string>(subjectParam || 'full-length')
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>(difficultyParam || 'all')
   const router = useRouter()
   const supabase = createClient()
@@ -149,7 +149,7 @@ export default function MockTestsPage() {
             <Filter className="h-5 w-5 mr-2" /> Filter Mock Tests
           </CardTitle>
           <CardDescription className="text-amber-700">
-            Select your exam, subject, and difficulty level to find the perfect mock test
+            Select your exam category, subject, and difficulty level to find the perfect mock test
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -200,15 +200,13 @@ export default function MockTestsPage() {
                 }}
               >
                 <SelectTrigger className="border-amber-300 bg-white">
-                  <SelectValue placeholder="All Subjects" />
+                  <SelectValue placeholder="Select Subject" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Subjects</SelectItem>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject.id} value={subject.id}>
-                      {subject.name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="full-length">Full Length</SelectItem>
+                  <SelectItem value="mathematics">Mathematics</SelectItem>
+                  <SelectItem value="reasoning">Reasoning</SelectItem>
+                  <SelectItem value="general-knowledge">General Knowledge</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -245,17 +243,17 @@ export default function MockTestsPage() {
           </div>
 
           {/* Active filters display */}
-          {(selectedCategory !== 'all' || selectedSubject !== 'all' || selectedDifficulty !== 'all') && (
+          {(selectedCategory !== 'railways' || selectedSubject !== 'full-length' || selectedDifficulty !== 'all') && (
             <div className="mt-4 flex flex-wrap gap-2">
-              {selectedCategory !== 'all' && (
+              {selectedCategory !== 'railways' && (
                 <Badge className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1">
                   Exam: {examCategories.find(c => c.id === selectedCategory)?.name}
                   <button
                     className="ml-2 text-amber-600 hover:text-amber-900"
                     onClick={() => {
-                      setSelectedCategory('ssc')
+                      setSelectedCategory('railways')
                       const params = new URLSearchParams(searchParams.toString())
-                      params.set('category', 'ssc')
+                      params.set('category', 'railways')
                       router.push(`/dashboard/mock-tests?${params.toString()}`)
                     }}
                   >
@@ -263,15 +261,15 @@ export default function MockTestsPage() {
                   </button>
                 </Badge>
               )}
-              {selectedSubject !== 'all' && (
+              {selectedSubject !== 'full-length' && (
                 <Badge className="bg-amber-100 text-amber-800 border border-amber-300 px-3 py-1">
                   Subject: {subjects.find(s => s.id === selectedSubject)?.name}
                   <button
                     className="ml-2 text-amber-600 hover:text-amber-900"
                     onClick={() => {
-                      setSelectedSubject('all')
+                      setSelectedSubject('full-length')
                       const params = new URLSearchParams(searchParams.toString())
-                      params.delete('subject')
+                      params.set('subject', 'full-length')
                       router.push(`/dashboard/mock-tests?${params.toString()}`)
                     }}
                   >
@@ -299,10 +297,10 @@ export default function MockTestsPage() {
                 variant="ghost"
                 className="text-amber-600 hover:text-amber-900 hover:bg-amber-100 h-7 px-2 py-0 text-xs"
                 onClick={() => {
-                  setSelectedCategory('ssc')
-                  setSelectedSubject('all')
+                  setSelectedCategory('railways')
+                  setSelectedSubject('full-length')
                   setSelectedDifficulty('all')
-                  router.push('/dashboard/mock-tests?category=ssc')
+                  router.push('/dashboard/mock-tests?category=railways&subject=full-length')
                 }}
               >
                 Clear All Filters
@@ -404,7 +402,7 @@ export default function MockTestsPage() {
 
                   <CardFooter className="border-t border-amber-800/30 pt-4">
                     {canAttempt ? (
-                      <Link href={`/dashboard/mock-tests/${test.id.replace('/', '-')}`} className="w-full">
+                      <Link href={`/dashboard/mock-tests/${test.id.replace(/\//g, '-')}`} className="w-full">
                         <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-800 font-medium">
                           {hasPassed ? 'Retake Test' : 'Start Test'}
                         </Button>

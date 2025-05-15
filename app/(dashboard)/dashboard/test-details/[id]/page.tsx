@@ -17,8 +17,10 @@ export default function TestDetailsPage({ params }: { params: Promise<{ id: stri
 
   // Unwrap params using React.use()
   const unwrappedParams = use(params)
-  // Replace hyphens with slashes to match the original test ID format
-  const testId = unwrappedParams.id.replace('-', '/')
+  // Replace ALL hyphens with slashes to match the original test ID format
+  const testId = unwrappedParams.id.replace(/-/g, '/')
+
+  console.log('Test details page - parsed testId:', testId)
 
   // Define types for better type safety
   interface TestResult {
@@ -94,21 +96,29 @@ export default function TestDetailsPage({ params }: { params: Promise<{ id: stri
           .eq('test_id', testId)
           .order('score', { ascending: false }) // Order by score to get the best result first
           .limit(1)
-          .single()
 
+        // Check if we have any results
         if (resultError) {
           console.error('Error fetching test result:', resultError)
           setLoading(false)
           return
         }
 
-        setTestResult(resultData)
+        // If no results found, set testResult to null
+        if (!resultData || resultData.length === 0) {
+          console.log('No test results found for this test')
+          setLoading(false)
+          return
+        }
+
+        // Use the first result (which should be the best score)
+        setTestResult(resultData[0])
 
         // Fetch user answers if available
         const { data: answersData, error: answersError } = await supabase
           .from('mock_test_answers')
           .select('*')
-          .eq('result_id', resultData.id)
+          .eq('result_id', resultData[0].id)
 
         if (!answersError && answersData) {
           setUserAnswers(answersData)
@@ -123,22 +133,32 @@ export default function TestDetailsPage({ params }: { params: Promise<{ id: stri
 
         // Dynamically import the test questions
         try {
-          // The correct path format is @/public/maths-mock/category/mock-number
-          // For example: @/public/maths-mock/ssc/mock-1
-          const [category, mockNumber] = testId.split('/')
-          console.log(`Attempting to import questions from: @/public/maths-mock/${category}/mock-${mockNumber.replace('mock-', '')}`)
+          // Handle different test ID formats
+          let importPath = '';
 
-          const testModule = await import(`@/public/maths-mock/${category}/mock-${mockNumber.replace('mock-', '')}`)
-          console.log('Test module loaded:', testModule)
+          if (testId.startsWith('railways/je/')) {
+            // Special case for RRB JE tests
+            importPath = '@/data/rrb/je/paper1';
+            console.log(`Attempting to import RRB JE questions from: ${importPath}`);
+          } else {
+            // Standard path format for other tests
+            const [category, mockNumber] = testId.split('/');
+            importPath = `@/public/maths-mock/${category}/mock-${mockNumber.replace('mock-', '')}`;
+            console.log(`Attempting to import questions from: ${importPath}`);
+          }
+
+          const testModule = await import(importPath);
+          console.log('Test module loaded:', testModule);
 
           if (testModule.default && testModule.default.questions) {
-            console.log('Questions found:', testModule.default.questions.length)
-            setQuestions(testModule.default.questions)
+            console.log('Questions found:', testModule.default.questions.length);
+            setQuestions(testModule.default.questions);
           } else {
-            console.error('No questions found in the imported module')
+            console.error('No questions found in the imported module');
           }
         } catch (importError) {
-          console.error('Error importing test questions:', importError)
+          console.error('Error importing test questions:', importError);
+          console.error('Import error details:', importError instanceof Error ? importError.message : 'Unknown error');
         }
 
         setLoading(false)
@@ -167,20 +187,50 @@ export default function TestDetailsPage({ params }: { params: Promise<{ id: stri
   }
 
   if (!testResult || !test) {
+    // Get test details from mock tests to show the name
+    const allTests = getAllMockTests()
+    const testInfo = allTests.find(t => t.id === testId)
+
     return (
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center py-8">
-          <AlertCircle className="h-12 w-12 text-amber-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-amber-800 mb-2">Test Result Not Found</h2>
-          <p className="text-amber-700 mb-6">
-            We couldn&apos;t find the test result you&apos;re looking for. It may have been deleted or you may not have permission to view it.
-          </p>
-          <Link href="/dashboard/mock-tests">
-            <Button className="bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-800 font-medium">
-              Back to Mock Tests
-            </Button>
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="mb-6">
+          <Link href="/dashboard" className="inline-flex items-center text-amber-700 hover:text-amber-900 mb-4">
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Dashboard
           </Link>
         </div>
+
+        <Card className="border-2 border-amber-800/30 bg-amber-50/80 p-6">
+          <div className="text-center py-8">
+            <AlertCircle className="h-12 w-12 text-amber-600 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-amber-800 mb-2">Test Result Not Found</h2>
+            <p className="text-amber-700 mb-2">
+              {testInfo ?
+                `You haven't taken the "${testInfo.name}" test yet.` :
+                "We couldn't find the test result you're looking for."}
+            </p>
+            <p className="text-amber-600 text-sm mb-6">
+              {testInfo ?
+                "Take the test to see your results here." :
+                "It may have been deleted or you may not have permission to view it."}
+            </p>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-3">
+              {testInfo && (
+                <Link href={`/dashboard/mock-tests/${testId.replace(/\//g, '-')}`}>
+                  <Button className="bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-800 font-medium w-full sm:w-auto">
+                    Take This Test
+                  </Button>
+                </Link>
+              )}
+              <Link href="/dashboard/mock-tests">
+                <Button className="bg-amber-700 hover:bg-amber-800 text-white border-2 border-amber-800 font-medium w-full sm:w-auto">
+                  Browse All Tests
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </Card>
       </div>
     )
   }

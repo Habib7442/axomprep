@@ -216,3 +216,43 @@ VALUES
   (5, 'mcq', 'Which of the following is the factored form of 2x² + 7x + 3?', '(2x + 1)(x + 3)', '["(2x + 1)(x + 3)", "(2x + 3)(x + 1)", "(x + 1)(2x + 3)", "(x - 1)(2x - 3)"]', 3, ARRAY['Try different combinations of factors']),
   (5, 'input', 'Factor completely: x² + 6x + 9', '(x+3)²', NULL, 1, ARRAY['This is a perfect square trinomial', 'a² + 2ab + b² = (a+b)²']),
   (5, 'mcq', 'Which of the following cannot be factored using real numbers?', 'x² + 1', '["x² - 1", "x² + 2x + 1", "x² + 1", "x² - 2x + 1"]', 2, ARRAY['Check if each expression has real roots']);
+
+
+
+-- Create platform feedback table to store general user feedback about the platform
+CREATE TABLE IF NOT EXISTS public.platform_feedback (
+  id SERIAL PRIMARY KEY,
+  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL, -- Name of the person giving feedback (could be anonymous)
+  rating INTEGER NOT NULL, -- Rating from 1-5
+  feedback_text TEXT NOT NULL, -- Feedback text
+  is_approved BOOLEAN DEFAULT false, -- Whether the feedback is approved for public display
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Add RLS policies for platform feedback
+ALTER TABLE public.platform_feedback ENABLE ROW LEVEL SECURITY;
+
+-- Users can insert their own feedback
+CREATE POLICY "Users can insert platform feedback"
+  ON public.platform_feedback
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
+
+-- Users can view their own feedback
+CREATE POLICY "Users can view their own platform feedback"
+  ON public.platform_feedback
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Admins can view and update all feedback
+CREATE POLICY "Admins can view all platform feedback"
+  ON public.platform_feedback
+  FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+-- Allow public access to view approved feedback (for home page)
+CREATE POLICY "Public can view approved platform feedback"
+  ON public.platform_feedback
+  FOR SELECT
+  USING (is_approved = true);

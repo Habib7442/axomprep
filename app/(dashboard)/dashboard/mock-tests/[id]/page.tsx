@@ -9,13 +9,21 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Loader2, Clock, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
-import sscCGLMockTest from '@/public/maths-mock/ssc/mock-1'
-import sscCGLMockTestImages from '@/public/reasoning-mock/ssc/mock-1'
-import railwaysMathsMock1 from '@/public/maths-mock/railways/mock-1'
-import railwaysReasoningMock1 from '@/public/reasoning-mock/railways/mock-1'
-import railwaysGKMock1 from '@/public/gk/railways/mock-1'
+import { Loader2, Clock, AlertCircle, CheckCircle, XCircle, ShieldAlert } from 'lucide-react'
+import rrbJePaper1 from '@/data/rrb/je/paper1'
 import { use } from 'react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { SecureQuestionText } from '@/components/secure-question-text'
+import PlatformFeedbackDialog from '@/components/feedback/PlatformFeedbackDialog'
 
 // Define types for mock test data
 interface MockTestQuestion {
@@ -47,7 +55,7 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
   // Unwrap params using React.use()
   const unwrappedParams = use(params)
   // Replace hyphens with slashes to match the original test ID format
-  const testId = unwrappedParams.id.replace('-', '/')
+  const testId = unwrappedParams.id.replace(/-/g, '/')
 
   // State variables
   const [loading, setLoading] = useState(true)
@@ -59,103 +67,24 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
   const [testCompleted, setTestCompleted] = useState(false)
   const [testResults, setTestResults] = useState<any>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false)
 
   // Get the test data based on the test ID
   const getTestData = (): MockTest => {
     // Use the appropriate mock test data based on the test ID
     switch (testId) {
-      case 'reasoning/ssc':
-        return sscCGLMockTestImages as MockTest
-      case 'railways/maths':
-        return railwaysMathsMock1 as MockTest
-      case 'railways/reasoning/mock-1':
-        return railwaysReasoningMock1 as MockTest
-      case 'railways/gk/mock-1':
-        return railwaysGKMock1 as MockTest
+      case 'railways/je/paper1':
+        return rrbJePaper1 as MockTest
+      case 'rrb/je/paper1': // Keep for backward compatibility
+        return rrbJePaper1 as MockTest
       default:
-        return sscCGLMockTest as MockTest
+        console.log('Unknown test ID:', testId)
+        return rrbJePaper1 as MockTest
     }
   }
 
   const mockTest: MockTest = getTestData()
-
-  // Initialize timer
-  useEffect(() => {
-    async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
-      setUser(user)
-      setLoading(false)
-    }
-
-    checkAuth()
-  }, [router, supabase])
-
-  // Timer effect
-  useEffect(() => {
-    let timer: NodeJS.Timeout
-
-    if (testStarted && !testCompleted && timeRemaining > 0) {
-      timer = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            clearInterval(timer)
-            submitTest()
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
-    }
-
-    return () => {
-      if (timer) clearInterval(timer)
-    }
-  }, [testStarted, testCompleted, timeRemaining])
-
-  // Start the test
-  const startTest = () => {
-    setTimeRemaining(mockTest.timeLimit * 60) // Convert minutes to seconds
-    setTestStarted(true)
-  }
-
-  // Handle answer selection
-  const handleAnswerSelect = (questionId: number, answer: string) => {
-    setSelectedAnswers(prev => ({
-      ...prev,
-      [questionId]: answer
-    }))
-  }
-
-  // Navigate to next question
-  const goToNextQuestion = () => {
-    if (currentQuestionIndex < mockTest.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1)
-    }
-  }
-
-  // Navigate to previous question
-  const goToPrevQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(prev => prev - 1)
-    }
-  }
-
-  // Navigate to a specific question
-  const goToQuestion = (index: number) => {
-    setCurrentQuestionIndex(index)
-  }
-
-  // Format time remaining
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60)
-    const remainingSeconds = seconds % 60
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`
-  }
 
   // Calculate test results
   const calculateResults = useCallback(() => {
@@ -236,6 +165,35 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
           alert(`Failed to save test results: ${error.message}. Please take a screenshot of your results.`)
         } else {
           console.log('Test results saved successfully:', data)
+
+          // Save user answers to the mock_test_answers table
+          if (data && data.length > 0) {
+            const savedResultId = data[0].id
+
+            // Create an array of answer objects to insert
+            const answersToInsert = Object.entries(selectedAnswers).map(([questionId, answer]) => ({
+              result_id: savedResultId,
+              question_id: parseInt(questionId),
+              answer: answer
+            }))
+
+            if (answersToInsert.length > 0) {
+              const { error: answersError } = await supabase
+                .from('mock_test_answers')
+                .insert(answersToInsert)
+
+              if (answersError) {
+                console.error('Error saving user answers:', answersError)
+              } else {
+                console.log('User answers saved successfully')
+              }
+            }
+
+            // Show feedback form after a short delay
+            setTimeout(() => {
+              setShowFeedbackForm(true)
+            }, 1000)
+          }
         }
       } catch (error) {
         console.error('Exception saving test results:', error)
@@ -246,13 +204,127 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
     }
 
     setSubmitting(false)
-  }, [testCompleted, submitting, calculateResults, user, supabase, testId])
+  }, [testCompleted, submitting, calculateResults, user, supabase, testId, selectedAnswers])
 
-  // Confirm before submitting
-  const confirmSubmit = () => {
-    if (window.confirm('Are you sure you want to submit your test? You cannot change your answers after submission.')) {
-      submitTest()
+  // Initialize timer and add anti-cheating measures
+  useEffect(() => {
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      setUser(user)
+      setLoading(false)
     }
+
+    checkAuth()
+
+    // Add anti-screenshot and anti-copy protection
+    const preventCopy = (e: ClipboardEvent) => {
+      e.preventDefault()
+      return false
+    }
+
+    const preventScreenCapture = (e: KeyboardEvent) => {
+      // Prevent PrintScreen, Ctrl+P, Ctrl+Shift+S, etc.
+      if (
+        e.key === 'PrintScreen' ||
+        (e.ctrlKey && e.key === 'p') ||
+        (e.ctrlKey && e.shiftKey && e.key === 's') ||
+        (e.metaKey && e.key === 'p')
+      ) {
+        e.preventDefault()
+        return false
+      }
+    }
+
+    const preventContextMenu = (e: MouseEvent) => {
+      e.preventDefault()
+      return false
+    }
+
+    // Add event listeners
+    document.addEventListener('copy', preventCopy)
+    document.addEventListener('cut', preventCopy)
+    document.addEventListener('keydown', preventScreenCapture)
+    document.addEventListener('contextmenu', preventContextMenu)
+
+    // Remove event listeners on cleanup
+    return () => {
+      document.removeEventListener('copy', preventCopy)
+      document.removeEventListener('cut', preventCopy)
+      document.removeEventListener('keydown', preventScreenCapture)
+      document.removeEventListener('contextmenu', preventContextMenu)
+    }
+  }, [router, supabase])
+
+  // Timer effect
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+
+    if (testStarted && !testCompleted && timeRemaining > 0) {
+      timer = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            clearInterval(timer)
+            submitTest()
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+
+    return () => {
+      if (timer) clearInterval(timer)
+    }
+  }, [testStarted, testCompleted, timeRemaining, submitTest])
+
+  // Start the test
+  const startTest = () => {
+    setTimeRemaining(mockTest.timeLimit * 60) // Convert minutes to seconds
+    setTestStarted(true)
+  }
+
+  // Handle answer selection
+  const handleAnswerSelect = (questionId: number, answer: string) => {
+    setSelectedAnswers(prev => ({
+      ...prev,
+      [questionId]: answer
+    }))
+  }
+
+  // Navigate to next question
+  const goToNextQuestion = () => {
+    if (currentQuestionIndex < mockTest.questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1)
+    }
+  }
+
+  // Navigate to previous question
+  const goToPrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1)
+    }
+  }
+
+  // Navigate to a specific question
+  const goToQuestion = (index: number) => {
+    setCurrentQuestionIndex(index)
+  }
+
+  // Format time remaining
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`
+  }
+
+  // Open submit confirmation dialog
+  const confirmSubmit = () => {
+    setShowSubmitDialog(true)
   }
 
   if (loading) {
@@ -337,6 +409,14 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
             Your test results have been saved. You can view your performance in your profile.
           </div>
         </div>
+
+        {/* Platform Feedback Dialog */}
+        <PlatformFeedbackDialog
+          isOpen={showFeedbackForm}
+          onOpenChange={setShowFeedbackForm}
+          userId={user.id}
+          userName={user.user_metadata?.first_name ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ''}` : undefined}
+        />
 
         <Card className="border-2 border-amber-800/30 bg-amber-50/80 p-6">
           <div className="text-center mb-6">
@@ -503,7 +583,39 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
   const currentQuestion = mockTest.questions[currentQuestionIndex]
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto select-none">
+      {/* Anti-cheating warning */}
+      <div className="mb-4 p-2 bg-amber-100 border border-amber-300 rounded-md">
+        <div className="flex items-center">
+          <ShieldAlert className="h-5 w-5 text-amber-700 mr-2" />
+          <p className="text-amber-800 text-sm">
+            <strong>Anti-cheating protection active:</strong> Screenshots, copying, and printing are disabled.
+            All activity is logged with your user ID.
+          </p>
+        </div>
+      </div>
+
+      {/* Submit Confirmation Dialog */}
+      <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <AlertDialogContent className="bg-amber-50 border-2 border-amber-800/30">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-amber-800 font-serif text-xl">Submit Test</AlertDialogTitle>
+            <AlertDialogDescription className="text-amber-700">
+              Are you sure you want to submit your test? You cannot change your answers after submission.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel className="border-2 border-amber-800 text-amber-800 hover:bg-amber-100">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={submitTest}
+              className="bg-amber-600 hover:bg-amber-700 text-white border-2 border-amber-800 font-medium"
+            >
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Test header with timer and progress */}
       <div className="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <h1 className="text-xl font-bold text-amber-800 font-serif">{mockTest.name}</h1>
@@ -586,7 +698,19 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
             </div>
 
             <div className="mb-4 md:mb-6">
-              <p className="text-amber-900 font-medium text-sm md:text-base">{currentQuestion.question}</p>
+              {/* Anti-copy question display */}
+              <div className="mb-2">
+                <div className="flex items-center mb-2">
+                  <ShieldAlert className="h-4 w-4 text-amber-600 mr-1" />
+                  <span className="text-xs text-amber-600">Anti-cheating protection enabled</span>
+                </div>
+                <SecureQuestionText
+                  text={currentQuestion.question}
+                  userId={user?.id || 'MockWizard User'}
+                  questionNumber={currentQuestionIndex + 1}
+                  totalQuestions={mockTest.questions.length}
+                />
+              </div>
 
               {/* Display question image if available */}
               {'questionImage' in currentQuestion && currentQuestion.questionImage && (
@@ -598,7 +722,16 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
                       fill
                       style={{ objectFit: 'contain' }}
                       className="p-2"
+                      unoptimized={true} // Prevent image optimization to maintain watermarks
+                      onContextMenu={(e) => e.preventDefault()} // Prevent right-click on images
+                      draggable={false} // Prevent dragging images
                     />
+                    {/* Overlay to prevent screenshots */}
+                    <div className="absolute inset-0 select-none pointer-events-none opacity-10 flex items-center justify-center">
+                      <div className="transform -rotate-30 text-amber-900 text-opacity-30 whitespace-nowrap">
+                        {user?.id || 'MockWizard User'} • {new Date().toISOString().split('T')[0]}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -615,7 +748,16 @@ export default function MockTestPage({ params }: { params: Promise<{ id: string 
                       fill
                       style={{ objectFit: 'contain' }}
                       className="p-2"
+                      unoptimized={true} // Prevent image optimization to maintain watermarks
+                      onContextMenu={(e) => e.preventDefault()} // Prevent right-click on images
+                      draggable={false} // Prevent dragging images
                     />
+                    {/* Overlay to prevent screenshots */}
+                    <div className="absolute inset-0 select-none pointer-events-none opacity-10 flex items-center justify-center">
+                      <div className="transform -rotate-30 text-amber-900 text-opacity-30 whitespace-nowrap">
+                        {user?.id || 'MockWizard User'} • {new Date().toISOString().split('T')[0]}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Display text options with the image above */}

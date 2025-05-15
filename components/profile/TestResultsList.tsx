@@ -127,7 +127,7 @@ export default function TestResultsList({
             </div>
 
             <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
-              <Link href={`/dashboard/test-details/${result.test_id.replace('/', '-')}`}>
+              <Link href={`/dashboard/test-details/${result.test_id.replace(/\//g, '-')}`}>
                 <Button
                   className="bg-amber-700 hover:bg-amber-800 text-white text-xs sm:text-sm py-1 sm:py-2 h-auto"
                 >

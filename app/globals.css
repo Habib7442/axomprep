@@ -120,3 +120,32 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom rotation class for watermarks */
+.transform.-rotate-30 {
+  transform: rotate(-30deg);
+}
+
+/* Anti-cheating styles */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.no-copy {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Prevent printing */
+@media print {
+  body {
+    display: none;
+  }
+}
