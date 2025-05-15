@@ -199,13 +199,13 @@ export default function HomePage() {
               </div>
             </div>
             <div className="md:w-2/3">
-              <h2 className="text-3xl font-bold text-teal-100 mb-4">
+              <h2 className="text-3xl font-bold text-teal-100 mb-4 text-center">
                 About AxomPrep Coaching Center
               </h2>
-              <p className="text-teal-200 mb-4 text-lg">
+              <p className="text-teal-200 mb-4 text-lg text-center">
                 AxomPrep is a premier coaching center offering comprehensive preparation for Mathematics, General Science, and English for classes 8-10 in both English and Assamese medium.
               </p>
-              <p className="text-teal-200 mb-6">
+              <p className="text-teal-200 mb-6 text-center">
                 With experienced faculty, personalized attention, and proven teaching methodologies, AxomPrep has helped thousands of students achieve academic excellence and succeed in competitive exams.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -226,7 +226,7 @@ export default function HomePage() {
                 </div>
               </div>
               <Link href="/about-axomprep">
-                <Button className="bg-teal-600 hover:bg-teal-700 text-white border-2 border-teal-500">
+                <Button className="bg-teal-600 hover:bg-teal-700 text-white border-2 border-teal-500 font-medium text-lg shadow-md mx-auto w-full">
                   Learn More About AxomPrep
                 </Button>
               </Link>

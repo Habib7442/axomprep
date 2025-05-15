@@ -97,7 +97,7 @@ export default function NavBar() {
         <div className="container mx-auto px-4 py-2 flex items-center justify-between">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <div className="relative h-12 w-12 mr-2 overflow-hidden rounded-md bg-teal-700 flex items-center justify-center">
+              <div className="relative h-12 w-12 mr-2 overflow-hidden rounded-full bg-teal-700 flex items-center justify-center">
                 {/* Replace with actual AxomPrep logo when available */}
                 <Image
                   src="/logo.jpg"
@@ -111,9 +111,9 @@ export default function NavBar() {
                 <div className="flex items-center">
                   <h1 className="text-lg font-bold text-teal-300">AxomPrep</h1>
                 </div>
-                <p className={`text-sm text-amber-300 font-medium`}>
+                {/* <p className={`text-sm text-amber-300 font-medium`}>
                   <span className="italic">MockWizard Platform</span>
-                </p>
+                </p> */}
               </div>
             </Link>
           </div>
