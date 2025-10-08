@@ -58,7 +58,13 @@ const CompanionForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const companion = await createCompanion(values)
+    // Convert duration to number to ensure type consistency
+    const formData = {
+      ...values,
+      duration: Number(values.duration)
+    };
+    
+    const companion = await createCompanion(formData)
     if(companion){
       redirect(`/companions/${companion.id}`)
     } else {
@@ -200,6 +206,8 @@ const CompanionForm = () => {
                   type="number"
                   placeholder="15"
                   {...field}
+                  value={field.value || ""}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                   className="input"
                 />
               </FormControl>
