@@ -1,5 +1,10 @@
+"use client";
+
+import { addBookmark, isCompanionBookmarked, removeBookmark } from "@/lib/actions/companion.actions";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface CompanionCardProps {
   id: string;
@@ -18,14 +23,47 @@ const CompanionCard = ({
   duration,
   color,
 }: CompanionCardProps) => {
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const pathname = usePathname();
+
+  // Check if the companion is bookmarked when the component mounts
+  useEffect(() => {
+    const checkBookmarkStatus = async () => {
+      try {
+        const bookmarked = await isCompanionBookmarked(id);
+        setIsBookmarked(bookmarked);
+      } catch (error) {
+        console.error("Error checking bookmark status:", error);
+      }
+    };
+
+    checkBookmarkStatus();
+  }, [id]);
+
+  const handleBookmark = async () => {
+    try {
+      if (isBookmarked) {
+        // Remove bookmark
+        await removeBookmark(id, pathname);
+        setIsBookmarked(false);
+      } else {
+        // Add bookmark
+        await addBookmark(id, pathname);
+        setIsBookmarked(true);
+      }
+    } catch (error) {
+      console.error("Error updating bookmark:", error);
+    }
+  };
+
   return (
     <article className="companion-card" style={{ backgroundColor: color }}>
       <div className="flex justify-between items-center">
         <div className="subject-badge">{subject}</div>
-        <button className="companion-bookmark">
+        <button className="companion-bookmark" onClick={handleBookmark}>
           <Image
-            src="icons/bookmark.svg"
-            alt="bookmark"
+            src={isBookmarked ? "/icons/bookmark-filled.svg" : "/icons/bookmark.svg"}
+            alt={isBookmarked ? "bookmarked" : "bookmark"}
             width={12.5}
             height={15}
           />
@@ -38,7 +76,7 @@ const CompanionCard = ({
         <p className="text-sm">{duration} minutes</p>
       </div>
       <Link href={`/companions/${id}`} className="w-full">
-      <button className="btn-primary w-full justify-center">Launch Lesson</button>
+        <button className="btn-primary w-full justify-center">Launch Lesson</button>
       </Link>
     </article>
   );
