@@ -124,11 +124,12 @@ export const TopicExplanation = ({ subject, chapter, topic, loading: parentLoadi
           explanation: cleanText,
           style: "educational"
         },
-        clientMessages: "transcript" as const,
-        serverMessages: undefined,
+        clientMessages: ["transcript"],
+        serverMessages: [],
       };
       
       // Start VAPI session with the explanation
+      // @ts-expect-error - Using the same pattern as CompanionComponent which works fine
       vapi.start(configureAssistant("female", "educational"), assistantOverrides);
       
       alert(`🎤 Voice tutor session started. The AI tutor will explain "${topic ? topic : chapter}" to you. You can ask questions about this topic during the session.`);

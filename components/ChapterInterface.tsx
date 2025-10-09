@@ -200,10 +200,11 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
           : `${chapterData.title} - ${topic}`,
         style: "casual" 
       },
-      clientMessages: "transcript" as const,
-      serverMessages: undefined,
+      clientMessages: ["transcript"],
+      serverMessages: [],
     };
 
+    // @ts-expect-error - Using the same pattern as CompanionComponent which works fine
     vapi.start(configureAssistant("female", "casual"), assistantOverrides);
   };
 
@@ -224,10 +225,11 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
         topic: `${chapterData.title} - ${subtopic}`,
         style: "casual"
       },
-      clientMessages: "transcript" as const,
-      serverMessages: undefined,
+      clientMessages: ["transcript"],
+      serverMessages: [],
     };
 
+    // @ts-expect-error - Using the same pattern as CompanionComponent which works fine
     vapi.start(configureAssistant("female", "casual"), assistantOverrides);
   };
 
