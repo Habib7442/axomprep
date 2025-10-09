@@ -200,8 +200,8 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
           : `${chapterData.title} - ${topic}`,
         style: "casual" 
       },
-      clientMessages: ["transcript"],
-      serverMessages: [],
+      clientMessages: "transcript" as const,
+      serverMessages: undefined,
     };
 
     vapi.start(configureAssistant("female", "casual"), assistantOverrides);
@@ -224,8 +224,8 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
         topic: `${chapterData.title} - ${subtopic}`,
         style: "casual"
       },
-      clientMessages: ["transcript"],
-      serverMessages: [],
+      clientMessages: "transcript" as const,
+      serverMessages: undefined,
     };
 
     vapi.start(configureAssistant("female", "casual"), assistantOverrides);
@@ -510,21 +510,6 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
                   <p className="text-sm text-gray-600">{topic.description}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  {/* Smart Actions */}
-                  <div className="flex gap-2">
-                    <button 
-                      className="text-gray-500 hover:text-blue-600 transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Handle voice tutor for this subtopic
-                        handleSubtopicVoiceTutor(topic.title);
-                      }}
-                      title="Practice with voice tutor for this subtopic"
-                    >
-                      🎓
-                    </button>
-                  </div>
-                  
                   {/* Mastery and expansion controls only */}
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div 
@@ -558,6 +543,7 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
                           subject={chapterData.subject} 
                           chapter={chapterData.title} 
                           topic={topic.title} 
+                          loading={loadingTopics[topic.id]} // Pass loading state
                         />
                       </div>
                       <div className="mb-4">

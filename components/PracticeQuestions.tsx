@@ -32,6 +32,7 @@ export const PracticeQuestions = ({ subject, chapter, userId, subtopic }: Practi
     correctCount: number;
     timeTaken: number;
   } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add submitting state
 
   const handleGenerateQuestions = async () => {
     setLoading(true);
@@ -83,72 +84,80 @@ export const PracticeQuestions = ({ subject, chapter, userId, subtopic }: Practi
   };
 
   const handleSubmit = async () => {
-    // Calculate score
-    let correctCount = 0;
-    questions.forEach((question, index) => {
-      // Convert the selected answer (full text) to the corresponding letter (A, B, C, D)
-      const selectedAnswerText = selectedAnswers[index];
-      if (selectedAnswerText) {
-        const answerIndex = question.options.indexOf(selectedAnswerText);
-        if (answerIndex !== -1) {
-          const answerLetter = String.fromCharCode(65 + answerIndex); // Convert 0,1,2,3 to A,B,C,D
-          if (answerLetter === question.correctAnswer) {
-            correctCount++;
+    setIsSubmitting(true); // Set submitting state to true
+    
+    try {
+      // Calculate score
+      let correctCount = 0;
+      questions.forEach((question, index) => {
+        // Convert the selected answer (full text) to the corresponding letter (A, B, C, D)
+        const selectedAnswerText = selectedAnswers[index];
+        if (selectedAnswerText) {
+          const answerIndex = question.options.indexOf(selectedAnswerText);
+          if (answerIndex !== -1) {
+            const answerLetter = String.fromCharCode(65 + answerIndex); // Convert 0,1,2,3 to A,B,C,D
+            if (answerLetter === question.correctAnswer) {
+              correctCount++;
+            }
           }
         }
-      }
-    });
-    
-    const score = Math.round((correctCount / questions.length) * 100);
-    const timeTaken = 15 * 60 - timeLeft;
-    
-    // Save practice questions to Supabase (for subtopic practice) with user answers
-    try {
-      // Prepare questions with user answers for storage
-      const questionsWithUserAnswers = questions.map((q, index) => ({
-        ...q,
-        userAnswer: selectedAnswers[index] || undefined
-      }));
+      });
       
-      await saveMockTestQuestions({
-        chapter_id: chapter,
-        chapter_name: chapter,
-        subject,
-        class: "9",
-        questions: questionsWithUserAnswers,
-        test_score: score,
-        time_taken: timeTaken,
-        total_questions: questions.length,
-        correct_answers: correctCount
-      });
-    } catch (error) {
-      console.error("Error saving practice questions:", error);
-    }
-    
-    // Save score to database
-    try {
-      await saveChapterScore({
-        chapter_id: chapter,
-        chapter_name: chapter,
+      const score = Math.round((correctCount / questions.length) * 100);
+      const timeTaken = 15 * 60 - timeLeft;
+      
+      // Save practice questions to Supabase (for subtopic practice) with user answers
+      try {
+        // Prepare questions with user answers for storage
+        const questionsWithUserAnswers = questions.map((q, index) => ({
+          ...q,
+          userAnswer: selectedAnswers[index] || undefined
+        }));
+        
+        await saveMockTestQuestions({
+          chapter_id: chapter,
+          chapter_name: chapter,
+          subject,
+          class: "9",
+          questions: questionsWithUserAnswers,
+          test_score: score,
+          time_taken: timeTaken,
+          total_questions: questions.length,
+          correct_answers: correctCount
+        });
+      } catch (error) {
+        console.error("Error saving practice questions:", error);
+      }
+      
+      // Save score to database
+      try {
+        await saveChapterScore({
+          chapter_id: chapter,
+          chapter_name: chapter,
+          score,
+          time_taken: timeTaken,
+          total_questions: questions.length,
+          correct_answers: correctCount,
+          subject,
+          class: "9" // Assuming Class 9 for now
+        });
+      } catch (err) {
+        console.error("Error saving score:", err);
+      }
+      
+      // Set test results for detailed report
+      setTestResults({
         score,
-        time_taken: timeTaken,
-        total_questions: questions.length,
-        correct_answers: correctCount,
-        subject,
-        class: "9" // Assuming Class 9 for now
+        correctCount,
+        timeTaken
       });
-    } catch (err) {
-      console.error("Error saving score:", err);
+      
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error submitting test:", error);
+      // Reset submitting state if there's an error
+      setIsSubmitting(false);
     }
-    
-    // Set test results for detailed report
-    setTestResults({
-      score,
-      correctCount,
-      timeTaken
-    });
-    
-    setShowResults(true);
   };
 
   const handleNext = () => {
@@ -289,10 +298,10 @@ export const PracticeQuestions = ({ subject, chapter, userId, subtopic }: Practi
           {currentQuestionIndex === questions.length - 1 ? (
             <Button
               onClick={handleSubmit}
-              disabled={!selectedAnswers[currentQuestionIndex]}
+              disabled={!selectedAnswers[currentQuestionIndex] || isSubmitting}
               className="bg-green-600 hover:bg-green-700"
             >
-              Submit Test
+              {isSubmitting ? "Submitting..." : "Submit Test"}
             </Button>
           ) : (
             <Button

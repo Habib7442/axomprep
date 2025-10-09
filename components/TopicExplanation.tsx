@@ -16,9 +16,10 @@ interface TopicExplanationProps {
   subject: string;
   chapter: string;
   topic?: string;
+  loading?: boolean; // Add loading prop
 }
 
-export const TopicExplanation = ({ subject, chapter, topic }: TopicExplanationProps) => {
+export const TopicExplanation = ({ subject, chapter, topic, loading: parentLoading }: TopicExplanationProps) => {
   const [explanation, setExplanation] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
@@ -116,15 +117,15 @@ export const TopicExplanation = ({ subject, chapter, topic }: TopicExplanationPr
       const cleanText = stripMarkdown(explanation);
       
       // Configure VAPI assistant for voice explanation
-      const assistantOverrides: any = {
+      const assistantOverrides = {
         variableValues: { 
           subject: subject,
           topic: topic ? `${chapter} - ${topic}` : chapter,
           explanation: cleanText,
           style: "educational"
         },
-        clientMessages: ["transcript"],
-        serverMessages: [],
+        clientMessages: "transcript" as const,
+        serverMessages: undefined,
       };
       
       // Start VAPI session with the explanation
@@ -154,10 +155,10 @@ export const TopicExplanation = ({ subject, chapter, topic }: TopicExplanationPr
           </Button>
           <Button 
             onClick={handleGenerateExplanation} 
-            disabled={loading}
+            disabled={loading || saving || parentLoading} // Disable when loading, saving, or parent is loading
             className="bg-blue-600 hover:bg-blue-700"
           >
-            {loading ? "Generating..." : saving ? "Saving..." : "Generate Explanation"}
+            {loading || parentLoading ? "Loading..." : saving ? "Saving..." : "Generate Explanation"}
           </Button>
         </div>
       </div>

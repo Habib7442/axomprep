@@ -34,6 +34,7 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
   const [isRetake, setIsRetake] = useState(false);
   const [lastTestDate, setLastTestDate] = useState<Date | null>(null);
   const [canRetake, setCanRetake] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add submitting state
 
   // Timer effect
   useEffect(() => {
@@ -130,82 +131,90 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
   };
 
   const handleSubmit = async () => {
-    // Calculate score
-    let correctCount = 0;
-    questions.forEach((question, index) => {
-      // Convert the selected answer (full text) to the corresponding letter (A, B, C, D)
-      const selectedAnswerText = selectedAnswers[index];
-      if (selectedAnswerText) {
-        const answerIndex = question.options.indexOf(selectedAnswerText);
-        if (answerIndex !== -1) {
-          const answerLetter = String.fromCharCode(65 + answerIndex); // Convert 0,1,2,3 to A,B,C,D
-          if (answerLetter === question.correctAnswer) {
-            correctCount++;
+    setIsSubmitting(true); // Set submitting state to true
+    
+    try {
+      // Calculate score
+      let correctCount = 0;
+      questions.forEach((question, index) => {
+        // Convert the selected answer (full text) to the corresponding letter (A, B, C, D)
+        const selectedAnswerText = selectedAnswers[index];
+        if (selectedAnswerText) {
+          const answerIndex = question.options.indexOf(selectedAnswerText);
+          if (answerIndex !== -1) {
+            const answerLetter = String.fromCharCode(65 + answerIndex); // Convert 0,1,2,3 to A,B,C,D
+            if (answerLetter === question.correctAnswer) {
+              correctCount++;
+            }
           }
         }
+      });
+      
+      const score = Math.round((correctCount / questions.length) * 100);
+      const timeTaken = 15 * 60 - timeLeft;
+      
+      // Save mock test questions to Supabase with user answers
+      try {
+        // Prepare questions with user answers for storage
+        const questionsWithUserAnswers = questions.map((q, index) => ({
+          ...q,
+          userAnswer: selectedAnswers[index] || undefined
+        }));
+        
+        await saveMockTestQuestions({
+          chapter_id: chapterId,
+          chapter_name: chapterName,
+          subject,
+          class: "9",
+          questions: questionsWithUserAnswers,
+          test_score: score,
+          time_taken: timeTaken,
+          total_questions: questions.length,
+          correct_answers: correctCount,
+          is_retake: isRetake // Add retake flag
+        });
+      } catch (error) {
+        console.error("Error saving mock test questions:", error);
       }
-    });
-    
-    const score = Math.round((correctCount / questions.length) * 100);
-    const timeTaken = 15 * 60 - timeLeft;
-    
-    // Save mock test questions to Supabase with user answers
-    try {
-      // Prepare questions with user answers for storage
-      const questionsWithUserAnswers = questions.map((q, index) => ({
-        ...q,
-        userAnswer: selectedAnswers[index] || undefined
-      }));
       
-      await saveMockTestQuestions({
-        chapter_id: chapterId,
-        chapter_name: chapterName,
-        subject,
-        class: "9",
-        questions: questionsWithUserAnswers,
-        test_score: score,
-        time_taken: timeTaken,
-        total_questions: questions.length,
-        correct_answers: correctCount,
-        is_retake: isRetake // Add retake flag
-      });
-    } catch (error) {
-      console.error("Error saving mock test questions:", error);
-    }
-    
-    // Save score to Supabase
-    try {
-      await saveChapterScore({
-        chapter_id: chapterId,
-        chapter_name: chapterName,
+      // Save score to Supabase
+      try {
+        await saveChapterScore({
+          chapter_id: chapterId,
+          chapter_name: chapterName,
+          score,
+          time_taken: timeTaken,
+          total_questions: questions.length,
+          correct_answers: correctCount,
+          subject,
+          class: "9"
+        });
+        
+        // Update student progress
+        await updateStudentProgress({
+          chapter_id: chapterId,
+          chapter_name: chapterName,
+          mastery_percentage: score,
+          subject,
+          class: "9"
+        });
+      } catch (error) {
+        console.error("Error saving score:", error);
+      }
+      
+      // Set test results for detailed report
+      setTestResults({
         score,
-        time_taken: timeTaken,
-        total_questions: questions.length,
-        correct_answers: correctCount,
-        subject,
-        class: "9"
+        correctCount,
+        timeTaken
       });
       
-      // Update student progress
-      await updateStudentProgress({
-        chapter_id: chapterId,
-        chapter_name: chapterName,
-        mastery_percentage: score,
-        subject,
-        class: "9"
-      });
+      setShowResults(true);
     } catch (error) {
-      console.error("Error saving score:", error);
+      console.error("Error submitting test:", error);
+      // Reset submitting state if there's an error
+      setIsSubmitting(false);
     }
-    
-    // Set test results for detailed report
-    setTestResults({
-      score,
-      correctCount,
-      timeTaken
-    });
-    
-    setShowResults(true);
   };
 
   const handleRetake = async () => {
@@ -399,10 +408,10 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
             {currentQuestionIndex === questions.length - 1 ? (
               <Button
                 onClick={handleSubmit}
-                disabled={!selectedAnswers[currentQuestionIndex]}
+                disabled={!selectedAnswers[currentQuestionIndex] || isSubmitting}
                 className="bg-green-600 hover:bg-green-700"
               >
-                Submit Test
+                {isSubmitting ? "Submitting..." : "Submit Test"}
               </Button>
             ) : (
               <Button
