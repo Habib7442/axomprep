@@ -77,6 +77,73 @@ export const getChapterLeaderboard = async (chapterId: string, limit = 10) => {
   }));
 };
 
+// Get leaderboard for a chapter based on mock test scores (highest score per user)
+export const getChapterMockTestLeaderboard = async (chapterId: string, limit = 10) => {
+  const supabase = createSupabaseClient();
+
+  // First, get all mock test scores for the chapter
+  const { data: allScores, error: scoresError } = await supabase
+    .from("mock_test_questions")
+    .select("user_id, test_score, created_at")
+    .eq("chapter_id", chapterId)
+    .order("created_at", { ascending: false });
+
+  if (scoresError) throw new Error(scoresError.message);
+
+  // Group scores by user and get the highest score for each user
+  const userScoresMap = new Map();
+  allScores.forEach((score) => {
+    const userId = score.user_id;
+    const testScore = score.test_score;
+    
+    if (!userScoresMap.has(userId) || userScoresMap.get(userId).test_score < testScore) {
+      userScoresMap.set(userId, {
+        user_id: userId,
+        test_score: testScore,
+        created_at: score.created_at
+      });
+    }
+  });
+
+  // Convert map to array and sort by score (descending)
+  const userScores = Array.from(userScoresMap.values())
+    .sort((a, b) => b.test_score - a.test_score)
+    .slice(0, limit);
+
+  // Add rank to each entry
+  const leaderboardData = userScores.map((entry, index) => ({
+    ...entry,
+    rank: index + 1
+  }));
+
+  // Fetch user names for each entry
+  const userIds = leaderboardData.map(entry => entry.user_id);
+  const { data: usersData, error: usersError } = await supabase
+    .from("companion_users")
+    .select("id, name")
+    .in("id", userIds);
+
+  if (usersError) {
+    console.error("Error fetching user names:", usersError);
+    // Return leaderboard data without user names if there's an error
+    return leaderboardData;
+  }
+
+  // Create a map of user IDs to names
+  const userNamesMap = new Map();
+  usersData.forEach(user => {
+    userNamesMap.set(user.id, user.name);
+  });
+
+  // Add user names to leaderboard data
+  const leaderboardDataWithNames = leaderboardData.map(entry => ({
+    ...entry,
+    user_name: userNamesMap.get(entry.user_id) || `User ${entry.user_id.substring(0, 10)}`
+  }));
+
+  return leaderboardDataWithNames;
+};
+
 // Update leaderboard table
 export const updateLeaderboard = async (scoreData: {
   chapter_id: string;

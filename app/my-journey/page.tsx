@@ -40,32 +40,36 @@ export default function MyJourneyPage() {
   const [savedFlashcards, setSavedFlashcards] = useState<SavedFlashcard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTest, setSelectedTest] = useState<MockTestQuestion | null>(null);
+  const [selectedTest, setSelectedTest] = useState<MockTestQuestion | null>(
+    null,
+  );
   const [activeTab, setActiveTab] = useState<"tests" | "flashcards">("tests");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch test history
         const testResponse = await fetch("/api/my-journey");
         const testData = await testResponse.json();
-        
+
         if (!testResponse.ok) {
           throw new Error(testData.error || "Failed to fetch test history");
         }
-        
+
         setTestHistory(testData.data);
-        
+
         // Fetch saved flashcards
         const flashcardResponse = await fetch("/api/my-journey/flashcards");
         const flashcardData = await flashcardResponse.json();
-        
+
         if (!flashcardResponse.ok) {
-          throw new Error(flashcardData.error || "Failed to fetch saved flashcards");
+          throw new Error(
+            flashcardData.error || "Failed to fetch saved flashcards",
+          );
         }
-        
+
         setSavedFlashcards(flashcardData.data);
       } catch (err) {
         setError("Failed to load data. Please try again.");
@@ -102,9 +106,7 @@ export default function MyJourneyPage() {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 text-red-700 p-4 rounded mb-4">
-          {error}
-        </div>
+        <div className="bg-red-50 text-red-700 p-4 rounded mb-4">{error}</div>
       </div>
     );
   }
@@ -112,8 +114,8 @@ export default function MyJourneyPage() {
   if (selectedTest) {
     return (
       <div>
-        <Button 
-          onClick={() => setSelectedTest(null)} 
+        <Button
+          onClick={() => setSelectedTest(null)}
           className="mb-6"
           variant="outline"
         >
@@ -136,8 +138,10 @@ export default function MyJourneyPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">My Learning Journey</h1>
-      
+      <h1 className="text-3xl font-bold mb-8">
+        My Learning Journey with Converso
+      </h1>
+
       {/* Tabs */}
       <div className="flex border-b mb-6">
         <button
@@ -153,12 +157,14 @@ export default function MyJourneyPage() {
           Saved Flashcards
         </button>
       </div>
-      
+
       {activeTab === "tests" ? (
         testHistory.length === 0 ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <h2 className="text-xl font-medium mb-4">No test history yet</h2>
-            <p className="text-gray-600 mb-6">Take a mock test to see your progress here.</p>
+            <p className="text-gray-600 mb-6">
+              Take a mock test to see your progress here.
+            </p>
             <Button className="bg-blue-600 hover:bg-blue-700">
               Take a Mock Test
             </Button>
@@ -167,16 +173,22 @@ export default function MyJourneyPage() {
           <div className="bg-white rounded-lg shadow">
             <div className="p-6 border-b">
               <h2 className="text-xl font-medium">Test History</h2>
-              <p className="text-gray-600">Review your past tests and track your progress</p>
+              <p className="text-gray-600">
+                Review your past tests and track your progress
+              </p>
             </div>
-            
+
             <div className="divide-y">
               {testHistory.map((test) => (
                 <div key={test.id} className="p-6 hover:bg-gray-50">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-lg font-medium">{test.chapter_name}</h3>
-                      <p className="text-gray-600">{test.subject} • Class {test.class}</p>
+                      <h3 className="text-lg font-medium">
+                        {test.chapter_name}
+                      </h3>
+                      <p className="text-gray-600">
+                        {test.subject} • Class {test.class}
+                      </p>
                       <p className="text-sm text-gray-500 mt-1">
                         Taken on {formatDate(test.created_at)}
                         {test.is_retake && (
@@ -186,7 +198,7 @@ export default function MyJourneyPage() {
                         )}
                       </p>
                     </div>
-                    
+
                     <div className="text-right">
                       <div className="text-2xl font-bold text-blue-600">
                         {test.test_score}%
@@ -199,9 +211,9 @@ export default function MyJourneyPage() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="mt-4 flex justify-end">
-                    <Button 
+                    <Button
                       onClick={() => setSelectedTest(test)}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
@@ -213,44 +225,48 @@ export default function MyJourneyPage() {
             </div>
           </div>
         )
+      ) : savedFlashcards.length === 0 ? (
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <h2 className="text-xl font-medium mb-4">No saved flashcards yet</h2>
+          <p className="text-gray-600 mb-6">
+            Create and save flashcards to review them here.
+          </p>
+          <Button className="bg-blue-600 hover:bg-blue-700">
+            Create Flashcards
+          </Button>
+        </div>
       ) : (
-        savedFlashcards.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <h2 className="text-xl font-medium mb-4">No saved flashcards yet</h2>
-            <p className="text-gray-600 mb-6">Create and save flashcards to review them here.</p>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              Create Flashcards
-            </Button>
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 border-b">
+            <h2 className="text-xl font-medium">Saved Flashcards</h2>
+            <p className="text-gray-600">
+              Review your saved flashcards across all chapters
+            </p>
           </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b">
-              <h2 className="text-xl font-medium">Saved Flashcards</h2>
-              <p className="text-gray-600">Review your saved flashcards across all chapters</p>
-            </div>
-            
-            <div className="divide-y">
-              {savedFlashcards.map((flashcard) => (
-                <div key={flashcard.id} className="p-6 hover:bg-gray-50">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-medium">{flashcard.chapter_name}</h3>
-                      <p className="text-gray-600">{flashcard.subject}</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Saved on {formatDate(flashcard.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <p className="font-medium">{flashcard.front_text}</p>
-                    <p className="mt-2 text-gray-600">{flashcard.back_text}</p>
+
+          <div className="divide-y">
+            {savedFlashcards.map((flashcard) => (
+              <div key={flashcard.id} className="p-6 hover:bg-gray-50">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-medium">
+                      {flashcard.chapter_name}
+                    </h3>
+                    <p className="text-gray-600">{flashcard.subject}</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Saved on {formatDate(flashcard.created_at)}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                  <p className="font-medium">{flashcard.front_text}</p>
+                  <p className="mt-2 text-gray-600">{flashcard.back_text}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        )
+        </div>
       )}
     </div>
   );

@@ -60,7 +60,11 @@ const CompanionComponent = ({
     const onSpeechStart = () => setIsSpeaking(true);
     const onSpeechEnd = () => setIsSpeaking(false);
 
-    const onError = (error: Error) => console.log("Error", error);
+    const onError = (error: Error) => {
+      console.log("VAPI Error", error);
+      // Show a more detailed error message to the user
+      alert(`VAPI Error: ${error.message}`);
+    };
 
     vapi.on("call-start", onCallStart);
     vapi.on("call-end", onCallEnd);
@@ -80,9 +84,14 @@ const CompanionComponent = ({
   }, []);
 
   const toggleMicrophone = () => {
-    const isMuted = vapi.isMuted();
-    vapi.setMuted(!isMuted);
-    setIsMuted(!isMuted);
+    try {
+      const isMuted = vapi.isMuted();
+      vapi.setMuted(!isMuted);
+      setIsMuted(!isMuted);
+    } catch (error) {
+      console.error("Error toggling microphone:", error);
+      alert("Failed to toggle microphone. Please try again.");
+    }
   };
 
   const handleCall = async () => {
@@ -94,6 +103,7 @@ const CompanionComponent = ({
       serverMessages: [],
     };
 
+    // @ts-expect-error - Using the same pattern as CompanionComponent which works fine
     vapi.start(configureAssistant(voice, style), assistantOverrides);
   };
 
@@ -159,7 +169,13 @@ const CompanionComponent = ({
             <p className="font-bold text-2xl">{userName}</p>
           </div>
           <button
-            className="btn-mic"
+            className={`btn-mic flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              callStatus === CallStatus.ACTIVE 
+                ? isMuted 
+                  ? "bg-gray-200 hover:bg-gray-300" 
+                  : "bg-green-200 hover:bg-green-300"
+                : "bg-gray-200 cursor-not-allowed"
+            }`}
             onClick={toggleMicrophone}
             disabled={callStatus !== CallStatus.ACTIVE}
           >
@@ -172,6 +188,13 @@ const CompanionComponent = ({
             <p className="max-sm:hidden">
               {isMuted ? "Turn on microphone" : "Turn off microphone"}
             </p>
+            {callStatus === CallStatus.ACTIVE && !isMuted && isSpeaking && (
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse delay-75"></div>
+                <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse delay-150"></div>
+              </div>
+            )}
           </button>
           <button
             className={cn(

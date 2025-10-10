@@ -17,9 +17,10 @@ interface TopicExplanationProps {
   chapter: string;
   topic?: string;
   loading?: boolean; // Add loading prop
+  onSubtopicVoiceTutor?: (subtopic: string) => void; // Add subtopic voice tutor callback
 }
 
-export const TopicExplanation = ({ subject, chapter, topic, loading: parentLoading }: TopicExplanationProps) => {
+export const TopicExplanation = ({ subject, chapter, topic, loading: parentLoading, onSubtopicVoiceTutor }: TopicExplanationProps) => {
   const [explanation, setExplanation] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
@@ -124,12 +125,11 @@ export const TopicExplanation = ({ subject, chapter, topic, loading: parentLoadi
           explanation: cleanText,
           style: "educational"
         },
-        clientMessages: ["transcript"],
-        serverMessages: [],
+        clientMessages: "transcript" as const,
+        serverMessages: undefined,
       };
       
       // Start VAPI session with the explanation
-      // @ts-expect-error - Using the same pattern as CompanionComponent which works fine
       vapi.start(configureAssistant("female", "educational"), assistantOverrides);
       
       alert(`🎤 Voice tutor session started. The AI tutor will explain "${topic ? topic : chapter}" to you. You can ask questions about this topic during the session.`);
