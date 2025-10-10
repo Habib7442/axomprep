@@ -258,7 +258,7 @@ export const saveFlashcard = async (flashcardData: {
   }
 };
 
-// Update student progress
+// Update student progress with subtopic mastery tracking
 export const updateStudentProgress = async (progressData: {
   chapter_id: string;
   chapter_name: string;
@@ -284,11 +284,23 @@ export const updateStudentProgress = async (progressData: {
 
   let result;
   if (existingProgress) {
+    // Merge topic mastery data
+    let updatedTopicMastery = existingProgress.topic_mastery || {};
+    
+    // If new topic mastery data is provided, merge it
+    if (progressData.topic_mastery) {
+      updatedTopicMastery = {
+        ...updatedTopicMastery,
+        ...progressData.topic_mastery
+      };
+    }
+    
     // Update existing progress
     const { data, error } = await supabase
       .from("student_progress")
       .update({
         ...progressData,
+        topic_mastery: updatedTopicMastery,
         updated_at: new Date().toISOString(),
         last_practiced: new Date().toISOString(),
       })
@@ -347,7 +359,7 @@ interface MockTestQuestion {
   userAnswer?: string; // Make userAnswer optional
 }
 
-// Save mock test questions
+// Save mock test questions with improved tracking
 export const saveMockTestQuestions = async (testData: {
   chapter_id: string;
   chapter_name: string;
@@ -358,7 +370,9 @@ export const saveMockTestQuestions = async (testData: {
   time_taken: number;
   total_questions: number;
   correct_answers: number;
-  is_retake?: boolean; // Add is_retake parameter
+  is_retake?: boolean;
+  // Add subtopic information
+  subtopic?: string;
 }) => {
   const { userId } = await auth();
   if (!userId) throw new Error("User not authenticated");
@@ -383,11 +397,69 @@ export const saveMockTestQuestions = async (testData: {
       questions: questionsWithoutUserAnswers,
       user_answers: userAnswers,
       user_id: userId,
-      is_retake: testData.is_retake || false, // Add is_retake field
+      is_retake: testData.is_retake || false,
+      // Add subtopic field
+      subtopic: testData.subtopic || null,
     })
     .select();
 
   if (error) throw new Error(error.message);
+
+  // Update student progress with subtopic mastery and overall chapter mastery
+  try {
+    // Get existing progress
+    const { data: existingProgress, error: fetchError } = await supabase
+      .from("student_progress")
+      .select()
+      .eq("user_id", userId)
+      .eq("chapter_id", testData.chapter_id)
+      .maybeSingle();
+
+    if (fetchError) throw new Error(fetchError.message);
+
+    let updatedSubtopicMastery = {};
+    
+    if (existingProgress && existingProgress.subtopic_mastery) {
+      updatedSubtopicMastery = { ...existingProgress.subtopic_mastery };
+    }
+    
+    // If subtopic is provided, update subtopic mastery
+    if (testData.subtopic) {
+      // Update the specific subtopic mastery
+      updatedSubtopicMastery = {
+        ...updatedSubtopicMastery,
+        [testData.subtopic]: testData.test_score
+      };
+    }
+
+    // Update or create progress entry with subtopic mastery and overall chapter mastery
+    if (existingProgress) {
+      await supabase
+        .from("student_progress")
+        .update({
+          mastery_percentage: testData.test_score, // Update overall chapter mastery
+          subtopic_mastery: updatedSubtopicMastery,
+          updated_at: new Date().toISOString(),
+          last_practiced: new Date().toISOString(),
+        })
+        .eq("id", existingProgress.id);
+    } else {
+      await supabase
+        .from("student_progress")
+        .insert({
+          chapter_id: testData.chapter_id,
+          chapter_name: testData.chapter_name,
+          mastery_percentage: testData.test_score, // Set overall chapter mastery
+          subtopic_mastery: updatedSubtopicMastery,
+          subject: testData.subject,
+          class: testData.class,
+          user_id: userId,
+          last_practiced: new Date().toISOString(),
+        });
+    }
+  } catch (progressError) {
+    console.error("Error updating student progress:", progressError);
+  }
 
   return data[0];
 };
@@ -415,6 +487,49 @@ export const getUserMockTestQuestions = async (chapterId?: string) => {
   if (error) throw new Error(error.message);
 
   return data;
+};
+
+// Get weakest topics for a student based on test history
+export const getWeakestTopics = async (chapterId: string) => {
+  const { userId } = await auth();
+  if (!userId) throw new Error("User not authenticated");
+
+  const supabase = createSupabaseClient();
+
+  // Get all mock test questions for this chapter and user
+  const { data: testHistory, error } = await supabase
+    .from("mock_test_questions")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("chapter_id", chapterId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+
+  // If no test history, return empty array
+  if (!testHistory || testHistory.length === 0) {
+    return [];
+  }
+
+  // Group tests by subtopic (simplified - in reality you'd need to map questions to subtopics)
+  // For now, we'll just look at overall test scores
+  const scores = testHistory.map(test => test.test_score);
+  
+  // Find tests with scores below 30%
+  const weakPerformance = testHistory.filter(test => test.test_score < 30);
+  
+  // Return unique chapter names with weak performance
+  const weakTopics = weakPerformance
+    .map(test => ({
+      chapter_name: test.chapter_name,
+      score: test.test_score,
+      created_at: test.created_at
+    }))
+    .filter((topic, index, self) => 
+      index === self.findIndex(t => t.chapter_name === topic.chapter_name)
+    );
+
+  return weakTopics;
 };
 
 // Save subtopic content

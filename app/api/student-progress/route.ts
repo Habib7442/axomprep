@@ -21,12 +21,11 @@ export async function GET(request: Request) {
     // Map chapter ID to chapter name
     const chapterName = chapterId === "1" ? "Matter in Our Surroundings" : chapterId;
     
-    // Get all mock test questions for the user
+    // Get student progress
     let query = supabase
-      .from("mock_test_questions")
+      .from("student_progress")
       .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+      .eq("user_id", userId);
 
     // Filter by chapterId if provided
     if (chapterId) {
@@ -44,7 +43,7 @@ export async function GET(request: Request) {
       data
     });
   } catch (error) {
-    console.error("Error fetching user journey data:", error);
+    console.error("Error fetching student progress:", error);
     return NextResponse.json({ 
       success: false, 
       error: (error as Error).message 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { saveChapterScore, saveMockTestQuestions } from "@/lib/actions/chapter.actions";
 import { DetailedReportCard } from "@/components/DetailedReportCard";
@@ -34,6 +34,24 @@ export const PracticeQuestions = ({ subject, chapter, userId, subtopic }: Practi
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false); // Add submitting state
 
+  // Add timer effect
+  useEffect(() => {
+    if (questions.length > 0 && !showResults) {
+      const timer = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(timer);
+            handleSubmit(); // Auto-submit when time runs out
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [questions, showResults]);
+
   const handleGenerateQuestions = async () => {
     setLoading(true);
     setError(null);
@@ -59,6 +77,11 @@ export const PracticeQuestions = ({ subject, chapter, userId, subtopic }: Practi
       
       if (!response.ok) {
         throw new Error(data.error || "Failed to generate practice questions");
+      }
+      
+      // Check if we received valid questions
+      if (!data.result || !Array.isArray(data.result) || data.result.length === 0) {
+        throw new Error("Failed to generate valid questions. Please try again.");
       }
       
       const generatedQuestions = data.result;
@@ -123,7 +146,9 @@ export const PracticeQuestions = ({ subject, chapter, userId, subtopic }: Practi
           test_score: score,
           time_taken: timeTaken,
           total_questions: questions.length,
-          correct_answers: correctCount
+          correct_answers: correctCount,
+          // Add subtopic information
+          subtopic: subtopic || undefined
         });
       } catch (error) {
         console.error("Error saving practice questions:", error);
@@ -207,7 +232,7 @@ export const PracticeQuestions = ({ subject, chapter, userId, subtopic }: Practi
     return (
       <div className="bg-white rounded-lg shadow p-6 text-center">
         <h3 className="text-xl font-bold mb-4">Practice Questions</h3>
-        <p className="text-gray-600 mb-6">Generate practice questions to test your understanding of this chapter.</p>
+        <p className="text-gray-600 mb-6">Generate practice questions to test your understanding of this topic.</p>
         <Button 
           onClick={handleGenerateQuestions}
           className="bg-blue-600 hover:bg-blue-700"

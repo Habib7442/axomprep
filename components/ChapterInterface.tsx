@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { TopicExplanation } from "@/components/TopicExplanation";
 import { PracticeQuestions } from "@/components/PracticeQuestions";
 import { AIFlashcards } from "@/components/AIFlashcards";
-import { MockTest } from "@/components/MockTest";
+import { MockTest } from "@/components/MockTest"; // Keep import for mock tab usage
 import { saveChapterScore, updateStudentProgress } from "@/lib/actions/chapter.actions";
 import { stripMarkdown } from "@/utils/markdown-stripper";
 import { vapi } from "@/lib/vapi.sdk";
@@ -54,6 +54,30 @@ interface FunctionCallResultMessage {
 
 type Message = TranscriptMessage | FunctionCallMessage | FunctionCallResultMessage;
 
+// Define type for mock test questions
+interface MockTestQuestion {
+  id: string;
+  created_at: string;
+  chapter_id: string;
+  chapter_name: string;
+  subject: string;
+  class: string;
+  questions: {
+    question: string;
+    options: string[];
+    correctAnswer: string;
+    explanation: string;
+  }[];
+  user_id: string;
+  test_score: number;
+  time_taken: number;
+  total_questions: number;
+  correct_answers: number;
+  user_answers?: Record<string, string>;
+  is_retake?: boolean;
+  subtopic?: string;
+}
+
 interface Topic {
   id: string;
   title: string;
@@ -66,7 +90,6 @@ interface Topic {
 interface WeakestTopic {
   id: string;
   title: string;
-  description: string;
   mastery: number;
 }
 
@@ -87,8 +110,16 @@ interface ChapterInterfaceProps {
   userId: string;
 }
 
+// Define type for student progress
+interface StudentProgress {
+  mastery_percentage: number;
+  subtopic_mastery: Record<string, number>;
+}
+
 export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps) => {
   const [activeTab, setActiveTab] = useState<"topics" | "mock" | "flashcards">("topics");
+  
+
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
   const [loadingTopics, setLoadingTopics] = useState<Record<string, boolean>>({});
   // VAPI states
@@ -98,6 +129,13 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [currentTopic, setCurrentTopic] = useState<string | null>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
+
+  // Add state for student progress with subtopic mastery
+  const [studentProgress, setStudentProgress] = useState<StudentProgress | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState(true);
+  const [showResults, setShowResults] = useState(false); // For tracking mock test results
+  
+
 
   // Get color based on subject
   const getSubjectColor = (subject: string) => {
@@ -232,6 +270,161 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
     // @ts-expect-error - Using the same pattern as CompanionComponent which works fine
     vapi.start(configureAssistant("female", "casual"), assistantOverrides);
   };
+
+  // Add state for user's test scores
+  const [userTestScores, setUserTestScores] = useState<MockTestQuestion[]>([]);
+  const [loadingScores, setLoadingScores] = useState(true);
+
+  // Fetch user's test scores to determine unlocked topics
+  useEffect(() => {
+    const fetchUserScores = async () => {
+      try {
+        setLoadingScores(true);
+        const response = await fetch(`/api/my-journey?chapterId=${chapterData.id}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setUserTestScores(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching user scores:", error);
+      } finally {
+        setLoadingScores(false);
+      }
+    };
+
+    fetchUserScores();
+  }, [chapterData.id]);
+
+  // Fetch student progress with subtopic mastery
+  const fetchStudentProgress = async () => {
+    try {
+      setLoadingProgress(true);
+      const response = await fetch(`/api/student-progress?chapterId=${chapterData.id}`);
+      const result = await response.json();
+      
+      if (result.success && result.data.length > 0) {
+        setStudentProgress(result.data[0]);
+      } else {
+        // Initialize with default values
+        setStudentProgress({
+          mastery_percentage: chapterData.masteryPercentage,
+          subtopic_mastery: {}
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching student progress:", error);
+      // Fallback to chapter data
+      setStudentProgress({
+        mastery_percentage: chapterData.masteryPercentage,
+        subtopic_mastery: {}
+      });
+    } finally {
+      setLoadingProgress(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudentProgress();
+  }, [chapterData.id, chapterData.masteryPercentage, userId]);
+
+  // Log when component re-renders with new studentProgress
+  useEffect(() => {
+    console.log('ChapterInterface re-rendering with studentProgress:', studentProgress);
+  }, [studentProgress]);
+  
+  // Refresh student progress when switching to topics tab (after potentially completing a mock test)
+  useEffect(() => {
+    if (activeTab === "topics") {
+      // Add a small delay to ensure data is saved
+      const timer = setTimeout(() => {
+        const fetchStudentProgress = async () => {
+          try {
+            const response = await fetch(`/api/student-progress?chapterId=${chapterData.id}`);
+            const result = await response.json();
+            
+            if (result.success && result.data.length > 0) {
+              setStudentProgress(result.data[0]);
+            }
+          } catch (error) {
+            console.error("Error refreshing student progress:", error);
+          }
+        };
+
+        fetchStudentProgress();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, chapterData.id]);
+
+  // Function to check if a topic is unlocked (all topics unlocked from start)
+  const isTopicUnlocked = (topicIndex: number, topicTitle: string) => {
+    // All topics are unlocked from the start
+    return true;
+  };
+
+  // Function to identify weakest topics
+  const getWeakestTopics = () => {
+    return chapterData.topics
+      .filter(topic => topic.mastery < 30)
+      .sort((a, b) => a.mastery - b.mastery)
+      .slice(0, 3);
+  };
+
+  // Add state for weakest topics
+  const [weakestTopics, setWeakestTopics] = useState<WeakestTopic[]>([]);
+  const [loadingWeakestTopics, setLoadingWeakestTopics] = useState(true);
+
+  // Fetch weakest topics from mock_test_questions
+  useEffect(() => {
+    const fetchWeakestTopics = async () => {
+      try {
+        setLoadingWeakestTopics(true);
+        const response = await fetch(`/api/my-journey?chapterId=${chapterData.id}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          // Process mock test data to find weakest topics
+          const topicScores: Record<string, number[]> = {};
+          
+          // Group scores by subtopic
+          result.data.forEach((test: MockTestQuestion) => {
+            if (test.subtopic && test.test_score !== undefined) {
+              if (!topicScores[test.subtopic]) {
+                topicScores[test.subtopic] = [];
+              }
+              topicScores[test.subtopic].push(test.test_score);
+            }
+          });
+          
+          // Calculate best score for each topic and filter weak ones
+          const weakTopics = Object.entries(topicScores)
+            .map(([topic, scores]) => {
+              // Find the highest score for this topic
+              const bestScore = Math.max(...scores);
+              return { topic, bestScore };
+            })
+            .filter(({ bestScore }) => bestScore <= 30)
+            .sort((a, b) => a.bestScore - b.bestScore)
+            .slice(0, 3)
+            .map(({ topic, bestScore }) => ({
+              id: topic.replace(/\s+/g, '-').toLowerCase(),
+              title: topic,
+              mastery: Math.round(bestScore)
+            }));
+          
+          setWeakestTopics(weakTopics);
+        }
+      } catch (error) {
+        console.error("Error fetching weakest topics:", error);
+      } finally {
+        setLoadingWeakestTopics(false);
+      }
+    };
+
+    fetchWeakestTopics();
+  }, [chapterData.id]);
 
   return (
     <div className="chapter-interface">
@@ -460,16 +653,46 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
         
         <div className="bg-white p-4 rounded-lg shadow">
           <h3 className="font-bold mb-2">Weakest Topics</h3>
-          <ul className="space-y-2">
-            {chapterData.weakestTopics.slice(0, 3).map((topic) => (
-              <li key={topic.id} className="py-2 border-b border-gray-100 last:border-0">
-                <div className="flex justify-between">
-                  <span className="font-medium">{topic.title}</span>
-                  <span className="text-red-600">{topic.mastery}%</span>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {loadingWeakestTopics ? (
+            <div className="flex justify-center py-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
+            </div>
+          ) : weakestTopics.length > 0 ? (
+            <ul className="space-y-2">
+              {weakestTopics.slice(0, 3).map((topic) => (
+                <li key={topic.id} className="py-2 border-b border-gray-100 last:border-0">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{topic.title}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-red-600 text-sm">{topic.mastery}%</span>
+                      <Button 
+                        size="sm"
+                        className="bg-orange-500 hover:bg-orange-600 text-white h-6 px-2 text-xs"
+                        onClick={() => {
+                          // Find the topic index and expand it
+                          const topicIndex = chapterData.topics.findIndex(t => t.id === topic.id);
+                          if (topicIndex !== -1) {
+                            toggleTopic(topic.id);
+                            // Scroll to the topic
+                            setTimeout(() => {
+                              const topicElement = document.getElementById(`topic-${topic.id}`);
+                              if (topicElement) {
+                                topicElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              }
+                            }, 100);
+                          }
+                        }}
+                      >
+                        Practice Now
+                      </Button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 text-sm">No weak topics identified. Keep up the good work!</p>
+          )}
         </div>
       </div>
 
@@ -498,71 +721,85 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
       {/* Content based on active tab */}
       {activeTab === "topics" && (
         <div className="bg-white rounded-lg shadow">
-          {chapterData.topics.map((topic) => (
-            <div 
-              key={topic.id} 
-              className="border-b last:border-b-0"
-            >
+          {chapterData.topics.map((topic, index) => {
+            const unlocked = true; // All topics are unlocked
+            const isWeakest = topic.mastery < 30;
+            
+            return (
               <div 
-                className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50"
-                onClick={() => toggleTopic(topic.id)}
+                key={topic.id} 
+                className="border-b last:border-b-0"
+                id={`topic-${topic.id}`}
               >
-                <div>
-                  <h3 className="font-medium">{topic.title}</h3>
-                  <p className="text-sm text-gray-600">{topic.description}</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  {/* Mastery and expansion controls only */}
-                  <div className="w-24 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full" 
-                      style={{ width: `${topic.mastery}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm">{topic.mastery}%</span>
-                  <button className="text-gray-500">
-                    {loadingTopics[topic.id] ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
-                    ) : expandedTopic === topic.id ? (
-                      "▲"
-                    ) : (
-                      "▼"
+                <div 
+                  className={`flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50`}
+                  onClick={() => toggleTopic(topic.id)}
+                >
+                  <div>
+                    <h3 className="font-medium">{topic.title}</h3>
+                    <p className="text-sm text-gray-600">{topic.description}</p>
+                    {isWeakest && (
+                      <p className="text-xs text-orange-600 mt-1">
+                        🔥 Weakest topic
+                      </p>
                     )}
-                  </button>
-                </div>
-              </div>
-
-              {loadingTopics[topic.id] || expandedTopic === topic.id ? (
-                <div className="px-4 pb-4">
-                  {loadingTopics[topic.id] ? (
-                    <div className="flex justify-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {/* Mastery and expansion controls only */}
+                    <div className="w-24 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${isWeakest ? 'bg-orange-500' : 'bg-blue-600'}`} 
+                        style={{ width: `${topic.mastery}%` }}
+                      ></div>
                     </div>
-                  ) : (
-                    <>
-                      <div className="mb-4">
-                        <TopicExplanation 
-                          subject={chapterData.subject} 
-                          chapter={chapterData.title} 
-                          topic={topic.title} 
-                          loading={loadingTopics[topic.id]} // Pass loading state
-                        />
-                      </div>
-                      <div className="mb-4">
-                        <PracticeQuestions 
-                          subject={chapterData.subject} 
-                          chapter={chapterData.title} 
-                          userId={userId}
-                          subtopic={topic.title} // Pass the subtopic
-                        />
-                      </div>
-                    </>
-                  )}
+                    <span className={`text-sm ${isWeakest ? 'text-orange-600 font-bold' : ''}`}>
+                      {topic.mastery}%
+                    </span>
+                    <button className="text-gray-500">
+                      {loadingTopics[topic.id] ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
+                      ) : expandedTopic === topic.id ? (
+                        "▲"
+                      ) : (
+                        "▼"
+                      )}
+                    </button>
+                  </div>
                 </div>
-              ) : null}
 
-            </div>
-          ))}
+                {loadingTopics[topic.id] || expandedTopic === topic.id ? (
+                  <div className="px-4 pb-4">
+                    {loadingTopics[topic.id] ? (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="mb-4">
+                          <TopicExplanation 
+                            subject={chapterData.subject} 
+                            chapter={chapterData.title} 
+                            topic={topic.title} 
+                            loading={loadingTopics[topic.id]} // Pass loading state
+                          />
+                        </div>
+                        <div className="mb-4">
+                          <PracticeQuestions 
+                            subject={chapterData.subject} 
+                            chapter={chapterData.title} 
+                            userId={userId}
+                            subtopic={topic.title} // Pass the subtopic
+                          />
+                        </div>
+                        {/* Remove the Practice This Topic button as requested */}
+
+                      </>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -572,6 +809,7 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
             chapterId={chapterData.id}
             chapterName={chapterData.title}
             subject={chapterData.subject} 
+            onTestComplete={fetchStudentProgress}
           />
         </div>
       )}

@@ -26,6 +26,13 @@ export async function POST(request: Request) {
         console.log("Generated questions:", questions);
         console.log("Number of questions:", questions.length);
         
+        // Validate that we have questions
+        if (!questions || !Array.isArray(questions) || questions.length === 0) {
+          return NextResponse.json({ 
+            error: "Failed to generate valid questions" 
+          }, { status: 500 });
+        }
+        
         return NextResponse.json({ result: questions });
         
       case "generateFlashcards":

@@ -95,7 +95,7 @@ Return ONLY a JSON array in this exact format:
   }
 ]
 
-Do not include any other text, just the JSON array.
+Do not include any other text, just the JSON array. Ensure all text is in English and properly formatted JSON.
 
 Request ID: ${timestamp}`
       : `Generate exactly ${count} multiple choice questions for the chapter "${chapter}" in ${subject} for CBSE Class 9 students.
@@ -121,7 +121,7 @@ Return ONLY a JSON array in this exact format:
   }
 ]
 
-Do not include any other text, just the JSON array.
+Do not include any other text, just the JSON array. Ensure all text is in English and properly formatted JSON.
 
 Request ID: ${timestamp}`;
 
@@ -149,8 +149,15 @@ Request ID: ${timestamp}`;
         throw new Error("No response text received");
       }
       
-      // Clean the text to remove any markdown formatting
+      // Clean the text to remove any markdown formatting and fix common JSON issues
       let cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      
+      // Remove any non-English characters that might break JSON parsing
+      cleanText = cleanText.replace(/[^\x20-\x7E\s\n\r\t\[\]\{\}",:]/g, '');
+      
+      // Fix common JSON formatting issues
+      cleanText = cleanText.replace(/,\s*}/g, '}'); // Remove trailing commas before closing braces
+      cleanText = cleanText.replace(/,\s*\]/g, ']'); // Remove trailing commas before closing brackets
       
       // If the text is wrapped in brackets, keep it as is
       // Otherwise, try to extract JSON array

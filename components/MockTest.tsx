@@ -16,9 +16,13 @@ interface MockTestProps {
   chapterId: string;
   chapterName: string;
   subject: string;
+  // Add subtopic parameter
+  subtopic?: string;
+  // Add callback for test completion
+  onTestComplete?: () => void;
 }
 
-export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => {
+export const MockTest = ({ chapterId, chapterName, subject, subtopic, onTestComplete }: MockTestProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
@@ -33,8 +37,8 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
   } | null>(null);
   const [isRetake, setIsRetake] = useState(false);
   const [lastTestDate, setLastTestDate] = useState<Date | null>(null);
-  const [canRetake, setCanRetake] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Add submitting state
+  const [canRetake, setCanRetake] = useState(true); // Always allow retake
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Timer effect
   useEffect(() => {
@@ -47,7 +51,7 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
     return () => clearInterval(timerId);
   }, [timeLeft, showResults]);
 
-  // Check if user can retake the test (24-hour cooldown)
+  // Remove the 24-hour cooldown check
   useEffect(() => {
     const checkRetakeEligibility = async () => {
       try {
@@ -60,10 +64,8 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
           const testDate = new Date(recentTest.created_at);
           setLastTestDate(testDate);
           
-          // Check if 24 hours have passed
-          const now = new Date();
-          const hoursSinceLastTest = (now.getTime() - testDate.getTime()) / (1000 * 60 * 60);
-          setCanRetake(hoursSinceLastTest >= 24);
+          // Always allow retake (remove 24-hour restriction)
+          setCanRetake(true);
         }
       } catch (err) {
         console.error("Error checking retake eligibility:", err);
@@ -101,10 +103,6 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
         if (!response.ok) {
           throw new Error(data.error || "Failed to generate mock test questions");
         }
-        
-        // Log the received data for debugging
-        console.log("Received data from API:", data);
-        console.log("Number of questions received:", data.result?.length);
         
         setQuestions(data.result);
         setCurrentQuestionIndex(0);
@@ -171,7 +169,8 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
           time_taken: timeTaken,
           total_questions: questions.length,
           correct_answers: correctCount,
-          is_retake: isRetake // Add retake flag
+          is_retake: isRetake, // Add retake flag
+          subtopic: subtopic || undefined // Pass subtopic information
         });
       } catch (error) {
         console.error("Error saving mock test questions:", error);
@@ -189,15 +188,6 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
           subject,
           class: "9"
         });
-        
-        // Update student progress
-        await updateStudentProgress({
-          chapter_id: chapterId,
-          chapter_name: chapterName,
-          mastery_percentage: score,
-          subject,
-          class: "9"
-        });
       } catch (error) {
         console.error("Error saving score:", error);
       }
@@ -210,6 +200,11 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
       });
       
       setShowResults(true);
+      
+      // Call the callback if provided
+      if (onTestComplete) {
+        onTestComplete();
+      }
     } catch (error) {
       console.error("Error submitting test:", error);
       // Reset submitting state if there's an error
@@ -337,7 +332,7 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
         questions={questions}
         userAnswers={selectedAnswers}
         isRetake={isRetake}
-        onRetake={canRetake ? handleRetake : undefined}
+        onRetake={handleRetake} // Always allow retake
       />
     );
   }
@@ -365,7 +360,7 @@ export const MockTest = ({ chapterId, chapterName, subject }: MockTestProps) => 
         <div className="px-6 py-3 bg-gray-50">
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-blue-600 h-2 rounded-full" 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
               style={{ width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }}
             ></div>
           </div>
