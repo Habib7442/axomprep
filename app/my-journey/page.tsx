@@ -3,6 +3,18 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DetailedReportCard } from "@/components/DetailedReportCard";
+// Add AlertDialog components
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface MockTestQuestion {
   id: string;
@@ -44,6 +56,8 @@ export default function MyJourneyPage() {
     null,
   );
   const [activeTab, setActiveTab] = useState<"tests" | "flashcards">("tests");
+  // Add state for tracking which test is being deleted
+  const [deletingTestId, setDeletingTestId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -212,13 +226,67 @@ export default function MyJourneyPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-4 flex justify-end space-x-2">
                     <Button
                       onClick={() => setSelectedTest(test)}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       View Detailed Report
                     </Button>
+                    {/* Add AlertDialog for delete confirmation */}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="text-red-600 border-red-600 hover:bg-red-50"
+                        >
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the test history for &quot;{test.chapter_name}&quot;.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={async () => {
+                              try {
+                                setDeletingTestId(test.id);
+                                const response = await fetch("/api/my-journey/test-history", {
+                                  method: "DELETE",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({ testId: test.id }),
+                                });
+
+                                const result = await response.json();
+
+                                if (!response.ok || !result.success) {
+                                  throw new Error(result.error || "Failed to delete test history");
+                                }
+
+                                // Remove the deleted test from state
+                                setTestHistory(prev => prev.filter(t => t.id !== test.id));
+                              } catch (error) {
+                                console.error("Error deleting test history:", error);
+                                alert("Failed to delete test history. Please try again.");
+                              } finally {
+                                setDeletingTestId(null);
+                              }
+                            }}
+                            className="bg-red-600 hover:bg-red-700"
+                            disabled={deletingTestId === test.id}
+                          >
+                            {deletingTestId === test.id ? "Deleting..." : "Delete"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               ))}
