@@ -65,7 +65,7 @@ const HomePage = () => {
             and Land Your Dream Job
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Converso is your AI-powered interview coach that helps you practice real interview scenarios, 
+            RehearsAI is your AI-powered interview coach that helps you practice real interview scenarios, 
             improve your English speaking skills, and build confidence for any job interview.
           </p>
         </div>
@@ -132,7 +132,7 @@ const HomePage = () => {
         <div className="mb-20">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-gray-800">
-              Why Choose Converso?
+              Why Choose RehearsAI?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Experience the future of interview preparation with our AI-powered platform
@@ -171,38 +171,19 @@ const HomePage = () => {
           </h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
             Join thousands of professionals who have improved their interview skills with 
-            Converso&apos;s AI-powered interview coach
+            RehearsAI&apos;s AI-powered interview coach
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button
-              onClick={() => document.getElementById('interview-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
-            >
-              Start Practicing Now 🎯
-            </button>
+            <Link href="/interview">
+              <button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg">
+                Start Practicing Now 🎯
+              </button>
+            </Link>
             <Link href="/companions">
               <button className="border-2 border-white/30 hover:border-white text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:bg-white/10">
                 Browse AI Tutors 🤖
               </button>
             </Link>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="p-6">
-            <div className="text-4xl font-bold text-orange-600 mb-2">
-              15,000+
-            </div>
-            <div className="text-gray-600">Interviews Practiced</div>
-          </div>
-          <div className="p-6">
-            <div className="text-4xl font-bold text-orange-600 mb-2">87%</div>
-            <div className="text-gray-600">Confidence Increase</div>
-          </div>
-          <div className="p-6">
-            <div className="text-4xl font-bold text-orange-600 mb-2">24/7</div>
-            <div className="text-gray-600">AI Interview Coach</div>
           </div>
         </div>
       </div>

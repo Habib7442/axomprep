@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 
 const bricolage = Bricolage_Grotesque({
@@ -10,9 +11,9 @@ const bricolage = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: "Converso — Your AI Study Tutor",
+  title: "Converso — Your AI Interview Coach",
   description:
-    "Learn Smarter, Speak Confidently, and Score Higher with Converso. AI-powered learning tutor that helps students understand concepts, practice with voice, and track progress in one intelligent ecosystem.",
+    "Master Interviews, Speak Fluently, and Land Your Dream Job with Converso. AI-powered interview coach that helps you practice real interview scenarios, improve your English speaking skills, and build confidence for any job interview.",
 };
 
 export default function RootLayout({
@@ -23,9 +24,12 @@ export default function RootLayout({
   return (
     <ClerkProvider appearance={{ variables: { colorPrimary: "#fe5933" } }}>
       <html lang="en">
-        <body className={`${bricolage.variable} antialiased`}>
+        <body className={`${bricolage.variable} antialiased flex flex-col min-h-screen`}>
           <Navbar />
-          {children}
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
         </body>
       </html>
     </ClerkProvider>
