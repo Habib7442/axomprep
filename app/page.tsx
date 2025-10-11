@@ -62,7 +62,7 @@ const HomePage = () => {
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-orange-600 to-red-600 bg-clip-text text-transparent">
             Master Interviews, Speak Fluently,
             <br />
-            and Land Your Dream Job
+            and Build Interview Confidence
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
             RehearsAI is your AI-powered interview coach that helps you practice real interview scenarios, 
