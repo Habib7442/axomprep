@@ -36,7 +36,7 @@ type FormValues = {
 };
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: "Companion is required" }),
+  name: z.string().min(1, { message: "AI Tutor name is required" }),
   subject: z.string().min(1, { message: "Subject is required" }),
   topic: z.string().min(1, { message: "Topic is required" }),
   voice: z.string().min(1, { message: "Voice is required" }),
@@ -68,7 +68,7 @@ const CompanionForm = () => {
     if(companion){
       redirect(`/companions/${companion.id}`)
     } else {
-      console.log("Failed to create a companion")
+      console.log("Failed to create an AI Tutor")
       redirect("/")
     }
   };
@@ -83,10 +83,10 @@ const CompanionForm = () => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Companion Name</FormLabel>
+              <FormLabel>AI Tutor Name</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter the companion name"
+                  placeholder="Enter the AI Tutor name"
                   {...field}
                   className="input"
                 />
@@ -132,7 +132,7 @@ const CompanionForm = () => {
           name="topic"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>What should the companion help with</FormLabel>
+              <FormLabel>What should the AI Tutor help with</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Ex. Percentage, Discount"
@@ -216,7 +216,7 @@ const CompanionForm = () => {
           )}
         />
         <Button type="submit" className="w-full cursor-pointer">
-          Build Your Companion
+          Build Your AI Tutor
         </Button>
       </form>
     </Form>

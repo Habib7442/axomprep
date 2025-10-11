@@ -10,9 +10,9 @@ const bricolage = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: "Converso — Your AI Study Companion",
+  title: "Converso — Your AI Study Tutor",
   description:
-    "Learn Smarter, Speak Confidently, and Score Higher with Converso. AI-powered learning companion that helps students understand concepts, practice with voice, and track progress in one intelligent ecosystem.",
+    "Learn Smarter, Speak Confidently, and Score Higher with Converso. AI-powered learning tutor that helps students understand concepts, practice with voice, and track progress in one intelligent ecosystem.",
 };
 
 export default function RootLayout({

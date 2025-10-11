@@ -1,71 +1,51 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 
 const HomePage = () => {
-  const scrollToLearningPath = () => {
-    const element = document.getElementById("learning-path");
-    if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+  const [topic, setTopic] = useState("");
+  
+  const handleStartInterview = () => {
+    if (topic.trim()) {
+      // Redirect to a new interview page with the topic
+      window.location.href = `/interview?topic=${encodeURIComponent(topic)}`;
     }
   };
-  const classes = [
-    {
-      name: "Class 9",
-      description: "Foundation for board exams",
-      icon: "📚",
-      color: "bg-blue-100 text-blue-800 border-blue-200",
-      gradient: "from-blue-50 to-blue-100",
-    },
-    {
-      name: "Class 10",
-      description: "Board exam preparation",
-      icon: "🎯",
-      color: "bg-green-100 text-green-800 border-green-200",
-      gradient: "from-green-50 to-green-100",
-    },
-    {
-      name: "Class 11",
-      description: "Higher secondary education",
-      icon: "📈",
-      color: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      gradient: "from-yellow-50 to-yellow-100",
-    },
-    {
-      name: "Class 12",
-      description: "Final board exams",
-      icon: "🎓",
-      color: "bg-red-100 text-red-800 border-red-200",
-      gradient: "from-red-50 to-red-100",
-    },
-  ];
 
   const features = [
     {
       icon: "🎙️",
-      title: "AI Voice Tutoring",
+      title: "AI Voice Interview Practice",
       description:
-        "Interactive voice conversations with your AI tutor for better understanding and retention",
+        "Realistic mock interviews with conversational AI that simulates actual interview scenarios",
       highlight: "Speak Confidently",
     },
     {
       icon: "🧠",
-      title: "Smart Learning",
+      title: "Smart Interview Prep",
       description:
-        "AI-powered personalized learning paths that adapt to your pace and style",
-      highlight: "Learn Smarter",
+        "Personalized interview questions and feedback based on your chosen topic and industry",
+      highlight: "Prepare Smarter",
     },
     {
-      icon: "🏆",
-      title: "Performance Tracking",
+      icon: "📊",
+      title: "Performance Analytics",
       description:
-        "Real-time progress monitoring and competitive leaderboards to keep you motivated",
-      highlight: "Score Higher",
+        "Detailed analysis of your interview performance with actionable insights for improvement",
+      highlight: "Improve Faster",
     },
+  ];
+
+  const interviewTopics = [
+    "Software Engineering",
+    "Product Management",
+    "Data Science",
+    "Marketing",
+    "Finance",
+    "Human Resources",
+    "Sales",
+    "Customer Service"
   ];
 
   return (
@@ -75,59 +55,76 @@ const HomePage = () => {
         <div className="text-center mb-16">
           <div className="mb-6">
             <span className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
-              ✨ Your AI Study Companion
+              ✨ Your Personalized AI Tutor
             </span>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-orange-600 to-red-600 bg-clip-text text-transparent">
-            Learn Smarter, Speak Confidently,
+            Master Interviews, Speak Fluently,
             <br />
-            and Score Higher
+            and Land Your Dream Job
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Converso is your AI-powered learning companion that helps you
-            understand concepts, practice with voice, and track progress — all
-            in one intelligent ecosystem.
+            Converso is your AI-powered interview coach that helps you practice real interview scenarios, 
+            improve your English speaking skills, and build confidence for any job interview.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <button
-              onClick={scrollToLearningPath}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
-            >
-              Start Your Journey 🚀
-            </button>
-            <button className="border-2 border-gray-300 hover:border-orange-500 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:bg-orange-50">
-              Watch Demo 🎥
-            </button>
+        </div>
+
+        {/* Interview Practice Section */}
+        <div className="mb-20">
+          <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl p-8 md:p-12">
+            <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">
+              Start Your Interview Practice
+            </h2>
+            <p className="text-center text-gray-600 mb-8">
+              Choose a topic or enter your own to begin a realistic mock interview
+            </p>
+            
+            <div className="flex flex-col md:flex-row gap-4 mb-8">
+              <input
+                type="text"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="Enter interview topic (e.g., React Developer, Marketing Manager, Data Analyst)"
+                className="flex-grow px-6 py-4 text-lg border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
+              />
+              <button
+                onClick={handleStartInterview}
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg whitespace-nowrap"
+              >
+                Start Interview
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-gray-600 mb-4">Popular Interview Topics:</p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {interviewTopics.map((topic, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setTopic(topic)}
+                    className="px-4 py-2 bg-orange-100 text-orange-800 rounded-full hover:bg-orange-200 transition-colors"
+                  >
+                    {topic}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Class Selection */}
-        <div id="learning-path" className="mb-20">
-          <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">
-            Choose Your Learning Path
+        {/* Create Your Own AI Tutor Section */}
+        <div className="mb-20 text-center">
+          <h2 className="text-3xl font-bold mb-4 text-gray-800">
+            Create Your Own AI Tutor
           </h2>
-          <p className="text-center text-gray-600 mb-12">
-            Select your class to begin your personalized AI learning journey
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            Build a personalized AI tutor for any subject or skill you want to master
           </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {classes.map((classItem, index) => (
-              <Link
-                key={index}
-                href={`/class${classItem.name.split(" ")[1]}`}
-                className={`group block p-8 rounded-2xl border-2 hover:border-orange-400 transition-all duration-300 transform hover:scale-105 hover:shadow-xl bg-gradient-to-br ${classItem.gradient} ${classItem.color}`}
-              >
-                <div className="text-6xl mb-6 group-hover:animate-bounce">
-                  {classItem.icon}
-                </div>
-                <h3 className="text-2xl font-bold mb-3">{classItem.name}</h3>
-                <p className="mb-6 opacity-80">{classItem.description}</p>
-                <button className="w-full py-3 bg-white text-gray-800 font-semibold rounded-xl hover:bg-gray-50 transition-colors shadow-md group-hover:shadow-lg">
-                  Select Class →
-                </button>
-              </Link>
-            ))}
-          </div>
+          <Link href="/companions/new">
+            <button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg">
+              Build Custom AI Tutor
+            </button>
+          </Link>
         </div>
 
         {/* Features Section */}
@@ -137,8 +134,7 @@ const HomePage = () => {
               Why Choose Converso?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Experience the future of learning with our AI-powered study
-              ecosystem designed for modern students
+              Experience the future of interview preparation with our AI-powered platform
             </p>
           </div>
 
@@ -170,22 +166,24 @@ const HomePage = () => {
         {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-3xl p-12 shadow-2xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Transform Your Learning?
+            Ready to Ace Your Next Interview?
           </h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Join thousands of students who are already learning smarter with
-            Converso's AI-powered study companion
+            Join thousands of professionals who have improved their interview skills with 
+            Converso&apos;s AI-powered interview coach
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
-              onClick={scrollToLearningPath}
+              onClick={() => document.getElementById('interview-section')?.scrollIntoView({ behavior: 'smooth' })}
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
             >
-              Get Started Free 🎯
+              Start Practicing Now 🎯
             </button>
-            <button className="border-2 border-white/30 hover:border-white text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:bg-white/10">
-              Learn More 📚
-            </button>
+            <Link href="/companions">
+              <button className="border-2 border-white/30 hover:border-white text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:bg-white/10">
+                Browse AI Tutors 🤖
+              </button>
+            </Link>
           </div>
         </div>
 
@@ -193,17 +191,17 @@ const HomePage = () => {
         <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
           <div className="p-6">
             <div className="text-4xl font-bold text-orange-600 mb-2">
-              10,000+
+              15,000+
             </div>
-            <div className="text-gray-600">Active Students</div>
+            <div className="text-gray-600">Interviews Practiced</div>
           </div>
           <div className="p-6">
-            <div className="text-4xl font-bold text-orange-600 mb-2">95%</div>
-            <div className="text-gray-600">Improvement Rate</div>
+            <div className="text-4xl font-bold text-orange-600 mb-2">87%</div>
+            <div className="text-gray-600">Confidence Increase</div>
           </div>
           <div className="p-6">
             <div className="text-4xl font-bold text-orange-600 mb-2">24/7</div>
-            <div className="text-gray-600">AI Support</div>
+            <div className="text-gray-600">AI Interview Coach</div>
           </div>
         </div>
       </div>

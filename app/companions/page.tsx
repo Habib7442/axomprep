@@ -4,6 +4,7 @@ import SubjectFilter from "@/components/SubjectFilter";
 import { getAllCompanions } from "@/lib/actions/companion.actions";
 import { getSubjectColor } from "@/lib/utils";
 import React from "react";
+import CTA from "@/components/CTA";
 
 const CompanionsLibrary = async ({ searchParams }: SearchParams) => {
   const filters = await searchParams;
@@ -15,13 +16,13 @@ const CompanionsLibrary = async ({ searchParams }: SearchParams) => {
     console.log(companions, "companions");
 
     if (!companions) {
-      return <div>No companions found.</div>;
+      return <div>No AI Tutors found.</div>;
     }
 
     return (
       <main>
         <section className="flex justify-between gap-4 max-sm:flex-col">
-          <h1>AI Companion Library</h1>
+          <h1>AI Tutor Library</h1>
           <div className="flex gap-4">
             <SearchInput />
             <SubjectFilter />
@@ -36,11 +37,12 @@ const CompanionsLibrary = async ({ searchParams }: SearchParams) => {
             />
           ))}
         </section>
+        <CTA />
       </main>
     );
   } catch (error) {
-    console.error("Error fetching companions:", error);
-    return <div>Error loading companions</div>;
+    console.error("Error fetching AI Tutors:", error);
+    return <div>Error loading AI Tutors</div>;
   }
 };
 
