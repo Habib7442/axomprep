@@ -1,90 +1,49 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { DetailedReportCard } from "@/components/DetailedReportCard";
-// Add AlertDialog components
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
-interface MockTestQuestion {
+// Add interface for interview reports
+interface InterviewReport {
   id: string;
   created_at: string;
-  chapter_id: string;
-  chapter_name: string;
-  subject: string;
-  class: string;
-  questions: {
-    question: string;
-    options: string[];
-    correctAnswer: string;
-    explanation: string;
-  }[];
-  user_answers?: Record<string, string>; // Add user answers
-  test_score: number;
-  time_taken: number;
-  total_questions: number;
-  correct_answers: number;
-  is_retake?: boolean; // Add retake flag
-}
-
-interface SavedFlashcard {
-  id: string;
-  created_at: string;
-  chapter_id: string;
-  chapter_name: string;
-  subject: string;
-  front_text: string;
-  back_text: string;
+  user_id: string;
+  session_id: string;
+  interview_type: string;
+  topic: string;
+  job_description: string | null;
+  transcript: Array<{ role: string; content: string }>;
+  strengths: string[];
+  weaknesses: string[];
+  improvements: string[];
+  score: number;
+  feedback: string;
+  recommendations: string[];
 }
 
 export default function MyJourneyPage() {
-  const [testHistory, setTestHistory] = useState<MockTestQuestion[]>([]);
-  const [savedFlashcards, setSavedFlashcards] = useState<SavedFlashcard[]>([]);
+  const [interviewReports, setInterviewReports] = useState<InterviewReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTest, setSelectedTest] = useState<MockTestQuestion | null>(
-    null,
-  );
-  const [activeTab, setActiveTab] = useState<"tests" | "flashcards">("tests");
-  // Add state for tracking which test is being deleted
-  const [deletingTestId, setDeletingTestId] = useState<string | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInterviewReports = async () => {
       try {
         setLoading(true);
 
-        // Fetch test history
-        const testResponse = await fetch("/api/my-journey");
-        const testData = await testResponse.json();
+        // Fetch interview reports
+        const { data: reportsData, error: reportsError } = await supabase
+          .from('interview_reports')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-        if (!testResponse.ok) {
-          throw new Error(testData.error || "Failed to fetch test history");
+        if (reportsError) {
+          throw new Error(reportsError.message || "Failed to fetch interview reports");
         }
 
-        setTestHistory(testData.data);
-
-        // Fetch saved flashcards
-        const flashcardResponse = await fetch("/api/my-journey/flashcards");
-        const flashcardData = await flashcardResponse.json();
-
-        if (!flashcardResponse.ok) {
-          throw new Error(
-            flashcardData.error || "Failed to fetch saved flashcards",
-          );
-        }
-
-        setSavedFlashcards(flashcardData.data);
+        setInterviewReports(reportsData || []);
       } catch (err) {
         setError("Failed to load data. Please try again.");
         console.error("Error fetching data:", err);
@@ -93,14 +52,8 @@ export default function MyJourneyPage() {
       }
     };
 
-    fetchData();
+    fetchInterviewReports();
   }, []);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}m ${secs}s`;
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -109,9 +62,21 @@ export default function MyJourneyPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <Link href="/" className="text-blue-600 hover:text-blue-800">
+              ← Back to Home
+            </Link>
+            <h1 className="text-3xl font-bold text-center">My Interview Journey</h1>
+            <div></div>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-lg">Loading your interview reports...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -119,223 +84,123 @@ export default function MyJourneyPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-50 text-red-700 p-4 rounded mb-4">{error}</div>
-      </div>
-    );
-  }
-
-  if (selectedTest) {
-    return (
-      <div>
-        <Button
-          onClick={() => setSelectedTest(null)}
-          className="mb-6"
-          variant="outline"
-        >
-          ← Back to Test History
-        </Button>
-        <DetailedReportCard
-          subject={selectedTest.subject}
-          chapter={selectedTest.chapter_name}
-          score={selectedTest.test_score}
-          totalQuestions={selectedTest.total_questions}
-          correctAnswers={selectedTest.correct_answers}
-          timeTaken={selectedTest.time_taken}
-          questions={selectedTest.questions}
-          userAnswers={selectedTest.user_answers}
-          isRetake={selectedTest.is_retake || false}
-        />
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <Link href="/" className="text-blue-600 hover:text-blue-800">
+              ← Back to Home
+            </Link>
+            <h1 className="text-3xl font-bold text-center">My Interview Journey</h1>
+            <div></div>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="bg-red-50 text-red-700 p-4 rounded mb-4">{error}</div>
+              <Link href="/interview">
+                <button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg">
+                  Start Interview Practice
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">
-        My Learning Journey with Converso
-      </h1>
-
-      {/* Tabs */}
-      <div className="flex border-b mb-6">
-        <button
-          className={`py-2 px-4 font-medium ${activeTab === "tests" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-          onClick={() => setActiveTab("tests")}
-        >
-          Test History
-        </button>
-        <button
-          className={`py-2 px-4 font-medium ${activeTab === "flashcards" ? "border-b-2 border-blue-500 text-blue-600" : "text-gray-500"}`}
-          onClick={() => setActiveTab("flashcards")}
-        >
-          Saved Flashcards
-        </button>
-      </div>
-
-      {activeTab === "tests" ? (
-        testHistory.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <h2 className="text-xl font-medium mb-4">No test history yet</h2>
-            <p className="text-gray-600 mb-6">
-              Take a mock test to see your progress here.
-            </p>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              Take a Mock Test
-            </Button>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b">
-              <h2 className="text-xl font-medium">Test History</h2>
-              <p className="text-gray-600">
-                Review your past tests and track your progress
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center mb-8">
+          <Link href="/" className="text-blue-600 hover:text-blue-800">
+            ← Back to Home
+          </Link>
+          <h1 className="text-3xl font-bold text-center">My Interview Journey</h1>
+          <Link href="/interview" className="text-blue-600 hover:text-blue-800">
+            Practice
+          </Link>
+        </div>
+        <div className="max-w-4xl mx-auto">
+          {interviewReports.length === 0 ? (
+            <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+              <h2 className="text-2xl font-bold mb-4">No Interview Reports Yet</h2>
+              <p className="text-gray-600 mb-6">
+                Complete an interview to generate your first detailed report with feedback and recommendations.
               </p>
+              <Link href="/interview">
+                <button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg">
+                  Start Interview Practice
+                </button>
+              </Link>
             </div>
-
-            <div className="divide-y">
-              {testHistory.map((test) => (
-                <div key={test.id} className="p-6 hover:bg-gray-50">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-medium">
-                        {test.chapter_name}
-                      </h3>
-                      <p className="text-gray-600">
-                        {test.subject} • Class {test.class}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Taken on {formatDate(test.created_at)}
-                        {test.is_retake && (
-                          <span className="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs">
-                            Retake
-                          </span>
-                        )}
-                      </p>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {test.test_score}%
+          ) : (
+            <div className="space-y-6">
+              {interviewReports.map((report) => (
+                <div key={report.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+                      <div>
+                        <h2 className="text-xl font-bold">
+                          {report.interview_type === "resume-based" 
+                            ? "Resume-Based Interview" 
+                            : report.topic}
+                        </h2>
+                        <p className="text-gray-600">
+                          {formatDate(report.created_at)} • Score: {report.score}/100
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        {test.correct_answers}/{test.total_questions} correct
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Time: {formatTime(test.time_taken)}
-                      </p>
+                      <div className="mt-4 md:mt-0">
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                          {report.interview_type === "resume-based" ? "Resume-Based" : "Topic-Based"}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="mt-4 flex justify-end space-x-2">
-                    <Button
-                      onClick={() => setSelectedTest(test)}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      View Detailed Report
-                    </Button>
-                    {/* Add AlertDialog for delete confirmation */}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="text-red-600 border-red-600 hover:bg-red-50"
-                        >
-                          Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the test history for &quot;{test.chapter_name}&quot;.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={async () => {
-                              try {
-                                setDeletingTestId(test.id);
-                                const response = await fetch("/api/my-journey/test-history", {
-                                  method: "DELETE",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                  },
-                                  body: JSON.stringify({ testId: test.id }),
-                                });
-
-                                const result = await response.json();
-
-                                if (!response.ok || !result.success) {
-                                  throw new Error(result.error || "Failed to delete test history");
-                                }
-
-                                // Remove the deleted test from state
-                                setTestHistory(prev => prev.filter(t => t.id !== test.id));
-                              } catch (error) {
-                                console.error("Error deleting test history:", error);
-                                alert("Failed to delete test history. Please try again.");
-                              } finally {
-                                setDeletingTestId(null);
-                              }
-                            }}
-                            className="bg-red-600 hover:bg-red-700"
-                            disabled={deletingTestId === test.id}
-                          >
-                            {deletingTestId === test.id ? "Deleting..." : "Delete"}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    
+                    {/* Score Visualization */}
+                    <div className="mt-4">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium">Overall Score</span>
+                        <span className="text-sm font-bold">{report.score}/100</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 h-2 rounded-full" 
+                          style={{ width: `${report.score}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    
+                    {/* Key highlights */}
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <h3 className="font-bold text-green-800 text-sm">Strengths</h3>
+                        <p className="text-green-600 text-sm mt-1">{report.strengths.length} identified</p>
+                      </div>
+                      <div className="bg-orange-50 p-3 rounded-lg">
+                        <h3 className="font-bold text-orange-800 text-sm">Improvements</h3>
+                        <p className="text-orange-600 text-sm mt-1">{report.improvements.length} suggestions</p>
+                      </div>
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <h3 className="font-bold text-blue-800 text-sm">Recommendations</h3>
+                        <p className="text-blue-600 text-sm mt-1">{report.recommendations.length} provided</p>
+                      </div>
+                    </div>
+                    
+                    {/* View Report Button */}
+                    <div className="mt-6">
+                      <Link href={`/my-journey/report/${report.id}`}>
+                        <button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white py-3 rounded-xl font-semibold transition-all transform hover:scale-[1.02] shadow-lg">
+                          View Detailed Report
+                        </button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        )
-      ) : savedFlashcards.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <h2 className="text-xl font-medium mb-4">No saved flashcards yet</h2>
-          <p className="text-gray-600 mb-6">
-            Create and save flashcards to review them here.
-          </p>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            Create Flashcards
-          </Button>
+          )}
         </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-medium">Saved Flashcards</h2>
-            <p className="text-gray-600">
-              Review your saved flashcards across all chapters
-            </p>
-          </div>
-
-          <div className="divide-y">
-            {savedFlashcards.map((flashcard) => (
-              <div key={flashcard.id} className="p-6 hover:bg-gray-50">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-medium">
-                      {flashcard.chapter_name}
-                    </h3>
-                    <p className="text-gray-600">{flashcard.subject}</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Saved on {formatDate(flashcard.created_at)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                  <p className="font-medium">{flashcard.front_text}</p>
-                  <p className="mt-2 text-gray-600">{flashcard.back_text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { vapi } from "@/lib/vapi.sdk";
 import Image from "next/image";
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
 import soundwaves from "@/constants/soundwaves.json";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { createPartFromUri, GoogleGenAI } from "@google/genai";
+import ReactMarkdown from "react-markdown";
 import { configureAssistant } from "@/lib/utils";
 
 interface InterviewReport {
@@ -25,22 +27,24 @@ enum CallStatus {
   FINISHED = "FINISHED",
 }
 
-const InterviewClient = ({ user, initialTopic }: { 
+const ResumeInterviewClient = ({ user }: { 
   user: { 
     id: string;
     firstName: string | null;
     imageUrl: string | null;
   };
-  initialTopic: string;
 }) => {
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
-  const [topic, setTopic] = useState(initialTopic);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [jobDescription, setJobDescription] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState("");
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const supabase = createClient();
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (lottieRef.current) {
@@ -57,7 +61,7 @@ const InterviewClient = ({ user, initialTopic }: {
     // This useEffect is no longer needed as we're generating reports immediately
     // when the session ends via the generateReport function
     return () => {};
-  }, [callStatus, user, topic, messages, supabase]);
+  }, [callStatus, user, messages, supabase, jobDescription]);
 
   const startTime = useRef<number>(Date.now());
 
@@ -114,32 +118,175 @@ const InterviewClient = ({ user, initialTopic }: {
     }
   };
 
-  const handleStartInterview = () => {
-    if (!topic.trim()) {
-      alert("Please enter an interview topic");
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.type === "application/pdf") {
+        setResumeFile(file);
+      } else {
+        alert("Please upload a PDF file");
+      }
+    }
+  };
+
+  const handleAnalyzeResume = async () => {
+    if (!resumeFile || !jobDescription.trim()) {
+      alert("Please upload a resume and enter a job description");
       return;
     }
 
-    setCallStatus(CallStatus.CONNECTING);
+    setIsAnalyzing(true);
+    setAnalysisResult("");
 
-    const assistantOverrides = {
-      variableValues: { 
-        topic,
-        userName: user?.firstName || "Candidate",
-        subject: "interview"
-      },
-      clientMessages: ["transcript"],
-      serverMessages: [],
-    };
+    try {
+      // Initialize Google GenAI with the API key from environment variables
+      const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || "" });
 
-    // Configure the assistant for interview practice using the same pattern as CompanionComponent
-    // Using "male" and "formal" as default values that match the available voices
-    const assistantConfig = configureAssistant("male", "formal");
-    assistantConfig.name = "Interview Coach";
-    assistantConfig.firstMessage = `Hello! I'm your interview coach for ${topic}. Let's start with some basic questions about this topic. Please introduce yourself and tell me about your experience with ${topic}.`;
-    
-    // @ts-expect-error - Using the same pattern as CompanionComponent which works fine
-    vapi.start(assistantConfig, assistantOverrides);
+      // Convert file to ArrayBuffer
+      const arrayBuffer = await resumeFile.arrayBuffer();
+      const fileBlob = new Blob([arrayBuffer], { type: 'application/pdf' });
+
+      // Upload file to Google GenAI
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fileResponse: any = await ai.files.upload({
+        file: fileBlob,
+        config: {
+          displayName: resumeFile.name,
+        },
+      });
+      
+      const file = fileResponse.file || fileResponse;
+
+      // Wait for the file to be processed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let getFile: any = await ai.files.get({ name: file.name });
+      while (getFile && getFile.state === 'PROCESSING') {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const response: any = await ai.files.get({ name: file.name });
+        getFile = response.file || response;
+      }
+
+      if (getFile && getFile.state === 'FAILED') {
+        throw new Error('File processing failed.');
+      }
+
+      // Analyze the resume with the job description
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const content: any[] = [
+        `Analyze this resume against the following job description: "${jobDescription}". 
+        Provide detailed feedback on:
+        1. How well the resume matches the job requirements
+        2. Strengths in the resume
+        3. Areas for improvement
+        4. Specific suggestions to tailor the resume for this position`,
+      ];
+
+      if (getFile && getFile.uri && getFile.mimeType) {
+        const fileContent = createPartFromUri(getFile.uri, getFile.mimeType);
+        content.push(fileContent);
+      }
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: content,
+      });
+
+      setAnalysisResult(response.text || "Unable to generate analysis.");
+    } catch (error) {
+      console.error("Error analyzing resume:", error);
+      setAnalysisResult("Sorry, there was an error analyzing your resume. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleStartInterview = async () => {
+    if (!resumeFile || !jobDescription.trim()) {
+      alert("Please upload a resume and enter a job description");
+      return;
+    }
+
+    setIsAnalyzing(true);
+
+    try {
+      // Initialize Google GenAI with the API key from environment variables
+      const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || "" });
+
+      // Convert file to ArrayBuffer
+      const arrayBuffer = await resumeFile.arrayBuffer();
+      const fileBlob = new Blob([arrayBuffer], { type: 'application/pdf' });
+
+      // Upload file to Google GenAI
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fileResponse: any = await ai.files.upload({
+        file: fileBlob,
+        config: {
+          displayName: resumeFile.name,
+        },
+      });
+      
+      const file = fileResponse.file || fileResponse;
+
+      // Wait for the file to be processed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let getFile: any = await ai.files.get({ name: file.name });
+      while (getFile && getFile.state === 'PROCESSING') {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const response: any = await ai.files.get({ name: file.name });
+        getFile = response.file || response;
+      }
+
+      if (getFile && getFile.state === 'FAILED') {
+        throw new Error('File processing failed.');
+      }
+
+      // Get a summary of the resume
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const content: any[] = [
+        'Summarize this resume in detail, focusing on work experience, skills, and education.',
+      ];
+
+      if (getFile && getFile.uri && getFile.mimeType) {
+        const fileContent = createPartFromUri(getFile.uri, getFile.mimeType);
+        content.push(fileContent);
+      }
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: content,
+      });
+
+      const resumeSummary = response.text || "No summary available.";
+
+      // Start the VAPI interview with resume context
+      setCallStatus(CallStatus.CONNECTING);
+      setIsAnalyzing(false);
+
+      // Configure VAPI for resume-based interview using the same pattern as other components
+      const assistantOverrides = {
+        variableValues: { 
+          resumeContent: resumeSummary,
+          jobDescription: jobDescription,
+          interviewType: "resume-based"
+        },
+        clientMessages: ["transcript"],
+        serverMessages: [],
+      };
+
+      // Configure the assistant for resume interview using the same pattern as CompanionComponent
+      const assistantConfig = configureAssistant("male", "professional");
+      assistantConfig.name = "Resume Interview Coach";
+      assistantConfig.firstMessage = `Hello! I'm your interview coach. I've reviewed your resume and the job description for ${jobDescription}. Let's have a conversation about your experience and how it relates to this position. Please tell me about your background and why you're interested in this role.`;
+      
+      // @ts-expect-error - Using the same pattern as CompanionComponent which works fine
+      vapi.start(assistantConfig, assistantOverrides);
+    } catch (error) {
+      console.error("Error processing resume:", error);
+      setIsAnalyzing(false);
+      alert("Sorry, there was an error processing your resume. Please try again.");
+    }
   };
 
   const handleEndInterview = () => {
@@ -151,7 +298,7 @@ const InterviewClient = ({ user, initialTopic }: {
 
   // Function to generate report immediately after session ends
   const generateReport = async () => {
-    if (!user?.id || !topic) return;
+    if (!user?.id) return;
     
     try {
       // Show loading state
@@ -162,7 +309,7 @@ const InterviewClient = ({ user, initialTopic }: {
         {
           user_id: user.id,
           companion_id: null,
-          topic: topic,
+          topic: "Resume-based Interview",
           messages: messages,
           duration: Date.now() - startTime.current,
           created_at: new Date().toISOString()
@@ -180,7 +327,7 @@ const InterviewClient = ({ user, initialTopic }: {
       
       if (sessionId) {
         // Generate and save interview report
-        await generateAndSaveInterviewReport(sessionId, "topic-based", topic, null);
+        await generateAndSaveInterviewReport(sessionId, "resume-based", "Resume-based Interview", jobDescription);
       }
       
       setIsAnalyzing(false);
@@ -188,6 +335,24 @@ const InterviewClient = ({ user, initialTopic }: {
       console.error('Error generating report:', error);
       setIsAnalyzing(false);
     }
+  };
+
+  // Function to remove markdown formatting
+  const removeMarkdown = (text: string) => {
+    if (!text) return text;
+    
+    return text
+      .replace(/(^|\s)#+\s/g, '$1') // Remove headers
+      .replace(/\*{1,2}(.*?)\*{1,2}/g, '$1') // Remove bold/italic
+      .replace(/~~(.*?)~~/g, '$1') // Remove strikethrough
+      .replace(/`{1,3}(.*?)`{1,3}/g, '$1') // Remove inline code
+      .replace(/!\[.*?\]\(.*?\)/g, '') // Remove images
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove links but keep text
+      .replace(/>\s/g, '') // Remove blockquotes
+      .replace(/(-|\*|\+)\s/g, '') // Remove list markers
+      .replace(/\d+\.\s/g, '') // Remove numbered list markers
+      .replace(/\n{3,}/g, '\n\n') // Reduce multiple newlines
+      .trim();
   };
 
   // Function to generate and save interview report
@@ -252,26 +417,26 @@ const InterviewClient = ({ user, initialTopic }: {
       const mockReport: InterviewReport = {
         strengths: [
           "Good communication skills",
-          "Relevant experience mentioned",
+          "Relevant experience aligned with job description",
           "Clear structure in responses"
         ],
         weaknesses: [
-          "Could provide more specific examples",
-          "Sometimes went off-topic",
-          "Needed more technical details"
+          "Could provide more quantifiable achievements",
+          "Sometimes lacked specific technical details",
+          "Needed more examples of problem-solving"
         ],
         improvements: [
-          "Use STAR method for behavioral questions",
-          "Prepare specific examples for common questions",
-          "Practice concise responses"
+          "Include metrics and numbers in your responses",
+          "Prepare deeper technical explanations",
+          "Use more concrete examples of challenges faced and solutions implemented"
         ],
         score: Math.floor(Math.random() * 41) + 60, // Random score between 60-100
-        feedback: `Overall, you demonstrated good communication skills and relevant experience for the ${topic} position. Your responses were generally clear and well-structured. To improve, focus on providing more specific examples using the STAR method (Situation, Task, Action, Result) and prepare technical details relevant to the role.`,
+        feedback: `Overall, you demonstrated good communication skills and relevant experience that aligns well with the job description. Your responses were clear and structured. To improve, focus on including more quantifiable achievements and deeper technical explanations relevant to the role requirements.`,
         recommendations: [
-          "Research common interview questions for this role",
-          "Practice with a friend or mentor",
-          "Record yourself to identify areas for improvement",
-          "Prepare questions to ask the interviewer"
+          "Review the job description again and prepare specific examples",
+          "Practice explaining technical concepts clearly",
+          "Prepare stories that demonstrate problem-solving abilities",
+          "Work on providing concise, impactful answers"
         ]
       };
 
@@ -305,49 +470,112 @@ const InterviewClient = ({ user, initialTopic }: {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
-          <Link href="/" className="text-blue-600 hover:text-blue-800">
-            ← Back to Home
+          <Link href="/interview" className="text-blue-600 hover:text-blue-800">
+            ← Back to Interview Topics
           </Link>
-          <h1 className="text-3xl font-bold text-center">Interview Practice</h1>
+          <h1 className="text-3xl font-bold text-center">Resume-Based Interview Practice</h1>
           <Link href="/interview/reports" className="text-blue-600 hover:text-blue-800">
             Reports
           </Link>
         </div>
 
         <div className="max-w-4xl mx-auto">
-          {/* Topic Selection */}
-          {callStatus === CallStatus.INACTIVE && (
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-              <h2 className="text-2xl font-bold mb-6 text-center">Choose Your Interview Topic</h2>
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="Enter interview topic (e.g., React Developer, Marketing Manager)"
-                  className="flex-grow px-6 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors"
+          {/* Resume Upload Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-center">Upload Your Resume & Job Description</h2>
+            <p className="text-gray-600 text-center mb-6">
+              Upload your resume and enter a job description to get personalized feedback and practice interview questions
+            </p>
+            
+            <div className="space-y-6">
+              {/* Resume Upload */}
+              <div>
+                <label className="block text-lg font-medium mb-2">Upload Your Resume (PDF)</label>
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-orange-500 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept=".pdf"
+                    className="hidden"
+                  />
+                  {resumeFile ? (
+                    <p className="text-green-600 font-medium">✓ {resumeFile.name} uploaded</p>
+                  ) : (
+                    <>
+                      <p className="text-gray-500 mb-2">Click to upload or drag and drop</p>
+                      <p className="text-sm text-gray-400">PDF files only (max 5MB)</p>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              {/* Job Description */}
+              <div>
+                <label className="block text-lg font-medium mb-2">Job Description</label>
+                <textarea
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder="Paste the job description here..."
+                  className="w-full px-4 py-3 text-lg border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none transition-colors h-32"
                 />
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={handleAnalyzeResume}
+                  disabled={isAnalyzing || !resumeFile || !jobDescription.trim()}
+                  className={`flex-1 py-3 px-6 rounded-xl font-semibold text-lg transition-all ${
+                    isAnalyzing || !resumeFile || !jobDescription.trim()
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white hover:scale-105 shadow-lg"
+                  }`}
+                >
+                  {isAnalyzing ? "Analyzing..." : "Analyze Resume"}
+                </button>
+                
                 <button
                   onClick={handleStartInterview}
-                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg whitespace-nowrap"
+                  disabled={isAnalyzing || !resumeFile || !jobDescription.trim() || callStatus !== CallStatus.INACTIVE}
+                  className={`flex-1 py-3 px-6 rounded-xl font-semibold text-lg transition-all ${
+                    isAnalyzing || !resumeFile || !jobDescription.trim() || callStatus !== CallStatus.INACTIVE
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white hover:scale-105 shadow-lg"
+                  }`}
                 >
-                  Start Interview
+                  {isAnalyzing ? "Processing..." : "Start Interview"}
                 </button>
               </div>
-              <p className="text-gray-600 text-center">
-                Practice real interview scenarios with our AI coach. Get feedback on your answers and improve your confidence.
-              </p>
               
-              <div className="text-center mt-8 pt-6 border-t border-gray-200">
-                <p className="text-gray-600 mb-4">Or try our resume-based interview practice:</p>
-                <Link href="/interview/resume">
-                  <button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg">
-                    Upload Resume & Practice
-                  </button>
-                </Link>
-              </div>
+              {/* Analysis Results */}
+              {analysisResult && (
+                <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+                  <h3 className="text-xl font-bold mb-3 text-blue-800">Resume Analysis</h3>
+                  <div className="prose max-w-none">
+                    <ReactMarkdown
+                      components={{
+                        h1: ({node, ...props}) => <h1 className="text-2xl font-bold mt-4 mb-2" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-3 mb-2" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-lg font-bold mt-2 mb-1" {...props} />,
+                        p: ({node, ...props}) => <p className="mb-3" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-3" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-3" {...props} />,
+                        li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                        strong: ({node, ...props}) => <span className="font-bold" {...props} />,
+                        em: ({node, ...props}) => <span className="italic" {...props} />,
+                      }}
+                    >
+                      {analysisResult}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Interview Interface */}
           {(callStatus === CallStatus.CONNECTING || callStatus === CallStatus.ACTIVE || callStatus === CallStatus.FINISHED) && (
@@ -357,7 +585,7 @@ const InterviewClient = ({ user, initialTopic }: {
                 <div className="md:w-1/2">
                   <div className="text-center mb-6">
                     <h2 className="text-2xl font-bold">AI Interview Coach</h2>
-                    <p className="text-gray-600">Topic: {topic}</p>
+                    <p className="text-gray-600">Resume-based Interview</p>
                   </div>
                   
                   <div className="flex justify-center mb-6">
@@ -552,4 +780,4 @@ const InterviewClient = ({ user, initialTopic }: {
   );
 };
 
-export default InterviewClient;
+export default ResumeInterviewClient;

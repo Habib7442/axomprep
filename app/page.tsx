@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import CTA from "@/components/CTA";
 
 const HomePage = () => {
   const [topic, setTopic] = useState("");
@@ -120,11 +121,11 @@ const HomePage = () => {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
             Build a personalized AI tutor for any subject or skill you want to master
           </p>
-          <Link href="/companions/new">
-            <button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all transform hover:scale-105 shadow-lg">
-              Build Custom AI Tutor
-            </button>
-          </Link>
+          <div className="flex justify-center">
+            <div className="w-full flex justify-center">
+              <CTA />
+            </div>
+          </div>
         </div>
 
         {/* Features Section */}

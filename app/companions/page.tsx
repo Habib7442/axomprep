@@ -4,7 +4,6 @@ import SubjectFilter from "@/components/SubjectFilter";
 import { getAllCompanions } from "@/lib/actions/companion.actions";
 import { getSubjectColor } from "@/lib/utils";
 import React from "react";
-import CTA from "@/components/CTA";
 
 const CompanionsLibrary = async ({ searchParams }: SearchParams) => {
   const filters = await searchParams;
@@ -37,7 +36,6 @@ const CompanionsLibrary = async ({ searchParams }: SearchParams) => {
             />
           ))}
         </section>
-        <CTA />
       </main>
     );
   } catch (error) {
