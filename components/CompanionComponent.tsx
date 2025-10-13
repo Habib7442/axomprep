@@ -127,6 +127,20 @@ const CompanionComponent = ({
   };
 
   const handleCall = async () => {
+    // Check if user can start an interview by calling the API
+    try {
+      const response = await fetch('/api/billing?action=can-start-interview');
+      const data = await response.json();
+      
+      if (!data.canStart) {
+        alert("You've reached your interview limit for your current plan. Please upgrade to continue practicing.");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking interview permission:", error);
+      // Continue with session start even if we can't check permissions
+    }
+
     setCallStatus(CallStatus.CONNECTING);
     setIsAnalyzing(false); // Ensure isAnalyzing is false when starting a new session
 

@@ -116,10 +116,24 @@ const InterviewClient = ({ user, initialTopic }: {
     }
   };
 
-  const handleStartInterview = () => {
+  const handleStartInterview = async () => {
     if (!topic.trim()) {
       alert("Please enter an interview topic");
       return;
+    }
+
+    // Check if user can start an interview by calling the API
+    try {
+      const response = await fetch('/api/billing?action=can-start-interview');
+      const data = await response.json();
+      
+      if (!data.canStart) {
+        alert("You've reached your interview limit for your current plan. Please upgrade to continue practicing.");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking interview permission:", error);
+      // Continue with interview start even if we can't check permissions
     }
 
     setCallStatus(CallStatus.CONNECTING);

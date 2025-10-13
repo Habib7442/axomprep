@@ -1,12 +1,56 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import NavItems from "./NavItems";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import { useBilling } from "@/hooks/useBilling";
 
 const Navbar = () => {
+  const { user, isLoaded } = useUser();
+  const { plan, loading } = useBilling();
+
+  // Get plan display name
+  const getPlanDisplayName = () => {
+    switch (plan) {
+      case 'free': return 'Free';
+      case 'basic': return 'Basic Core Learner';
+      case 'pro': return 'Pro Companion';
+      default: return 'Free';
+    }
+  };
+
+  // Get plan color
+  const getPlanColor = () => {
+    switch (plan) {
+      case 'free': return 'bg-gray-200 text-gray-800';
+      case 'basic': return 'bg-blue-100 text-blue-800';
+      case 'pro': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-gray-200 text-gray-800';
+    }
+  };
+
+  // Wait for both user and billing data to load
+  if (!isLoaded || loading) {
+    return (
+      <nav className="navbar">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 bg-gray-200 rounded-full animate-pulse"></div>
+            <div className="w-24 h-6 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="hidden md:flex items-center gap-6">
+            <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="md:hidden w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav className="navbar">
       <div className="flex items-center justify-between w-full">
@@ -28,7 +72,17 @@ const Navbar = () => {
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            <UserButton />
+            <div className="flex items-center gap-3">
+              {plan !== 'free' && (
+                <Link 
+                  href="/subscription" 
+                  className={`text-xs px-2 py-1 rounded-full font-medium ${getPlanColor()}`}
+                >
+                  {getPlanDisplayName()}
+                </Link>
+              )}
+              <UserButton />
+            </div>
           </SignedIn>
         </div>
         
@@ -40,6 +94,14 @@ const Navbar = () => {
             </SignInButton>
           </SignedOut>
           <SignedIn>
+            {plan !== 'free' && (
+              <Link 
+                href="/subscription" 
+                className={`text-xs px-2 py-1 rounded-full font-medium ${getPlanColor()}`}
+              >
+                {getPlanDisplayName()}
+              </Link>
+            )}
             <UserButton />
           </SignedIn>
           
@@ -79,6 +141,14 @@ const Navbar = () => {
                     </SignedOut>
                     <SignedIn>
                       <div className="flex items-center gap-2">
+                        {plan !== 'free' && (
+                          <Link 
+                            href="/subscription" 
+                            className={`text-xs px-2 py-1 rounded-full font-medium ${getPlanColor()}`}
+                          >
+                            {getPlanDisplayName()}
+                          </Link>
+                        )}
                         <UserButton />
                         <span className="text-sm text-gray-600">Account</span>
                       </div>

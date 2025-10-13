@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import UsageLimits from "@/components/UsageLimits";
 
 // Add interface for interview reports
 interface InterviewReport {
@@ -126,6 +127,11 @@ export default function MyJourneyPage() {
           </div>
         </div>
         <div className="max-w-4xl mx-auto">
+          {/* Usage Limits Component */}
+          <div className="mb-8">
+            <UsageLimits />
+          </div>
+          
           {interviewReports.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
               <h2 className="text-2xl font-bold mb-4">No Interview Reports Yet</h2>

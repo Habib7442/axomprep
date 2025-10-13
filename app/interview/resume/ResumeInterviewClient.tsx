@@ -133,6 +133,20 @@ const ResumeInterviewClient = ({ user }: {
   };
 
   const handleAnalyzeResume = async () => {
+    // Check if user has access to resume analysis by calling the API
+    try {
+      const response = await fetch('/api/billing?action=has-feature&feature=resume_analysis');
+      const data = await response.json();
+      
+      if (!data.hasFeature) {
+        alert("Resume analysis is not available on your current plan. Please upgrade to access this feature.");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking feature access:", error);
+      // Continue with resume analysis even if we can't check permissions
+    }
+
     if (!resumeFile || !jobDescription.trim()) {
       alert("Please upload a resume and enter a job description");
       return;
@@ -207,6 +221,34 @@ const ResumeInterviewClient = ({ user }: {
   };
 
   const handleStartInterview = async () => {
+    // Check if user has access to resume-based interviews by calling the API
+    try {
+      const response = await fetch('/api/billing?action=has-feature&feature=resume_analysis');
+      const data = await response.json();
+      
+      if (!data.hasFeature) {
+        alert("Resume-based interviews are not available on your current plan. Please upgrade to access this feature.");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking feature access:", error);
+      // Continue with interview start even if we can't check permissions
+    }
+
+    // Check if user can start an interview by calling the API
+    try {
+      const response = await fetch('/api/billing?action=can-start-interview');
+      const data = await response.json();
+      
+      if (!data.canStart) {
+        alert("You've reached your interview limit for your current plan. Please upgrade to continue practicing.");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking interview permission:", error);
+      // Continue with interview start even if we can't check permissions
+    }
+
     if (!resumeFile || !jobDescription.trim()) {
       alert("Please upload a resume and enter a job description");
       return;
