@@ -397,7 +397,7 @@ const CompanionComponent = ({
         <div className="companion-section w-full lg:w-7/12 xl:w-8/12">
           <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
             <div
-              className="companion-avatar w-[120px] h-[120px] md:w-[150px] md:h-[150px] lg:w-[180px] lg:h-[180px]"
+              className="companion-avatar w-[120px] h-[120px] md:w-[150px] md:h-[150px] lg:w-[180px] lg:h-[180px] rounded-full overflow-hidden flex items-center justify-center"
               style={{ backgroundColor: getSubjectColor(subject) }}
             >
               <div
@@ -412,11 +412,11 @@ const CompanionComponent = ({
                 )}
               >
                 <Image
-                  src={`/icons/${subject}.svg`}
-                  alt={subject}
-                  width={80}
-                  height={80}
-                  className="md:w-[100px] md:h-[100px] lg:w-[120px] lg:h-[120px]"
+                  src={voice === "female" ? "/icons/female-ai-assistant.png" : "/icons/male-ai-assistant.png"}
+                  alt={`${name} - ${voice} voice`}
+                  width={120}
+                  height={120}
+                  className="w-full h-full object-cover"
                 />
               </div>
 
@@ -461,7 +461,7 @@ const CompanionComponent = ({
                   alt={userName}
                   width={100}
                   height={100}
-                  className="rounded-full border-4 border-[#FFF7F2]"
+                  className="rounded-full border-4 border-[#FFF7F2] w-[100px] h-[100px] object-cover"
                 />
                 {callStatus === CallStatus.ACTIVE && !isMuted && isSpeaking && (
                   <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-2">

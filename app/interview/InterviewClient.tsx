@@ -373,7 +373,7 @@ const InterviewClient = ({ user, initialTopic }: {
                   </div>
                   
                   <div className="flex justify-center mb-6">
-                    <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                    <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden">
                       <div
                         className={`absolute transition-opacity duration-1000 ${
                           (callStatus as CallStatus) === CallStatus.FINISHED || (callStatus as CallStatus) === CallStatus.INACTIVE
@@ -384,11 +384,11 @@ const InterviewClient = ({ user, initialTopic }: {
                         }`}
                       >
                         <Image
-                          src="/icons/interview.svg"
-                          alt="Interview"
-                          width={150}
-                          height={150}
-                          className="max-sm:w-fit"
+                          src="/icons/male-ai-assistant.png"
+                          alt="Interview Coach - Male Voice"
+                          width={192}
+                          height={192}
+                          className="w-full h-full object-cover"
                         />
                       </div>
 
@@ -433,17 +433,17 @@ const InterviewClient = ({ user, initialTopic }: {
                   </div>
                   
                   <div className="flex justify-center mb-6">
-                    <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
+                    <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center overflow-hidden">
                       {user?.imageUrl ? (
                         <Image
                           src={user.imageUrl}
                           alt={user.firstName || "User"}
-                          width={150}
-                          height={150}
-                          className="rounded-full"
+                          width={192}
+                          height={192}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="text-6xl">
+                        <div className="text-6xl flex items-center justify-center w-full h-full">
                           {user?.firstName?.charAt(0) || "U"}
                         </div>
                       )}
