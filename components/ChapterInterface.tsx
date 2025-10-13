@@ -438,27 +438,27 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
   return (
     <div className="chapter-interface">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
-          <button className="text-blue-600 hover:text-blue-800 mb-2">
+          <button className="text-blue-600 hover:text-blue-800 mb-2 text-sm">
             ← Back to Subjects
           </button>
-          <div className="flex items-center gap-2">
-            <span className="bg-gray-200 px-2 py-1 rounded text-sm">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="bg-gray-200 px-2 py-1 rounded text-xs">
               Class {chapterData.class}
             </span>
             <span 
-              className="px-2 py-1 rounded text-sm text-white"
+              className="px-2 py-1 rounded text-xs text-white"
               style={{ backgroundColor: getSubjectColor(chapterData.subject) }}
             >
               {chapterData.subject}
             </span>
           </div>
-          <h1 className="text-3xl font-bold mt-2">{chapterData.title}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mt-2">{chapterData.title}</h1>
         </div>
         <div className="text-center">
-          <div className="relative w-20 h-20">
-            <svg viewBox="0 0 36 36" className="w-20 h-20">
+          <div className="relative w-16 h-16 md:w-20 md:h-20">
+            <svg viewBox="0 0 36 36" className="w-16 h-16 md:w-20 md:h-20">
               <path
                 d="M18 2.0845
                   a 15.9155 15.9155 0 0 1 0 31.831
@@ -481,15 +481,15 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
               </text>
             </svg>
           </div>
-          <p className="text-sm mt-1">Chapter Mastery</p>
+          <p className="text-xs md:text-sm mt-1">Chapter Mastery</p>
         </div>
       </div>
 
       {/* Hero Area */}
-      <div className="bg-gray-50 rounded-lg p-6 mb-8">
-        <p className="text-lg mb-4">{chapterData.objective}</p>
+      <div className="bg-gray-50 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+        <p className="text-base md:text-lg mb-4">{chapterData.objective}</p>
         <Button 
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg text-sm md:text-base"
           onClick={() => handleCall("Chapter Overview")}
         >
           Practice Chapter with Voice Tutor
@@ -498,23 +498,23 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
 
       {/* VAPI Voice Tutor Section - Only show when active */}
       {(callStatus === CallStatus.ACTIVE || callStatus === CallStatus.CONNECTING || callStatus === CallStatus.FINISHED) && (
-        <div id="vapi-section" className="bg-white rounded-lg shadow p-6 mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">
+        <div id="vapi-section" className="bg-white rounded-lg shadow p-4 md:p-6 mb-6 md:mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+            <h2 className="text-lg md:text-xl font-bold">
               {currentTopic ? `Voice Tutor: ${chapterData.title} - ${currentTopic}` : `Voice Tutor: ${chapterData.title}`}
             </h2>
             <button 
               onClick={handleDisconnect}
-              className="text-red-500 hover:text-red-700"
+              className="text-red-500 hover:text-red-700 text-sm"
             >
               Close
             </button>
           </div>
           
-          <div className="flex gap-8 mb-6">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
             <div className="companion-section">
               <div
-                className="companion-avatar relative w-32 h-32 rounded-full flex items-center justify-center"
+                className="companion-avatar relative w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: getSubjectColor(chapterData.subject) }}
               >
                 <div
@@ -527,8 +527,9 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
                   <Image
                     src={`/icons/${chapterData.subject}.svg`}
                     alt={chapterData.subject}
-                    width={80}
-                    height={80}
+                    width={60}
+                    height={60}
+                    className="md:w-20 md:h-20"
                   />
                 </div>
 
@@ -541,29 +542,29 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
                     lottieRef={lottieRef}
                     animationData={soundwaves}
                     autoplay={false}
-                    className="w-32 h-32"
+                    className="w-24 h-24 md:w-32 md:h-32"
                   />
                 </div>
               </div>
             </div>
 
             <div className="flex-1">
-              <div className="flex gap-4 mb-4">
+              <div className="flex flex-wrap gap-3 mb-4">
                 <button
-                  className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg"
+                  className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded-lg text-sm"
                   onClick={toggleMicrophone}
                   disabled={callStatus !== CallStatus.ACTIVE}
                 >
                   <Image
                     src={isMuted ? "/icons/mic-off.svg" : "/icons/mic-on.svg"}
                     alt="mic"
-                    width={24}
-                    height={24}
+                    width={20}
+                    height={20}
                   />
                   <span>{isMuted ? "Unmute" : "Mute"}</span>
                 </button>
                 <button
-                  className={`rounded-lg py-2 px-4 cursor-pointer transition-colors text-white ${
+                  className={`rounded-lg py-2 px-4 cursor-pointer transition-colors text-white text-sm ${
                     callStatus === CallStatus.ACTIVE ? "bg-red-700" : "bg-primary"
                   } ${callStatus === CallStatus.CONNECTING && "animate-pulse"}`}
                   onClick={handleDisconnect}
@@ -576,28 +577,28 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
                 </button>
               </div>
               
-              <div className="bg-gray-100 rounded-lg p-4 h-32 overflow-y-auto">
+              <div className="bg-gray-100 rounded-lg p-3 md:p-4 h-24 md:h-32 overflow-y-auto">
                 {callStatus === CallStatus.CONNECTING && (
-                  <p>Connecting to voice tutor for {currentTopic ? `${currentTopic}` : "chapter overview"}...</p>
+                  <p className="text-sm">Connecting to voice tutor for {currentTopic ? `${currentTopic}` : "chapter overview"}...</p>
                 )}
                 {callStatus === CallStatus.ACTIVE && (
-                  <p>Session active. Speak to interact with your tutor about {currentTopic ? `${currentTopic}` : "this chapter"}.</p>
+                  <p className="text-sm">Session active. Speak to interact with your tutor about {currentTopic ? `${currentTopic}` : "this chapter"}.</p>
                 )}
                 {callStatus === CallStatus.FINISHED && (
-                  <p>Session ended. Click &quot;Start Session&quot; to begin a new session.</p>
+                  <p className="text-sm">Session ended. Click &quot;Start Session&quot; to begin a new session.</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Transcript */}
-          <div className="bg-gray-50 rounded-lg p-4 h-40 overflow-y-auto">
-            <h3 className="font-bold mb-2">Conversation Transcript</h3>
+          <div className="bg-gray-50 rounded-lg p-3 md:p-4 h-32 md:h-40 overflow-y-auto">
+            <h3 className="font-bold mb-2 text-sm">Conversation Transcript</h3>
             <div className="space-y-2">
               {messages.map((message, index) => (
                 <div 
                   key={index} 
-                  className={`p-2 rounded ${
+                  className={`p-2 rounded text-sm ${
                     message.role === "assistant" 
                       ? "bg-blue-100 text-blue-800" 
                       : "bg-green-100 text-green-800"
@@ -607,7 +608,7 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
                 </div>
               ))}
               {messages.length === 0 && (
-                <p className="text-gray-500">Conversation will appear here...</p>
+                <p className="text-gray-500 text-sm">Conversation will appear here...</p>
               )}
             </div>
           </div>
@@ -615,23 +616,23 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
       )}
 
       {/* Chapter Snapshot */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="font-bold mb-2">Key Topics</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+        <div className="bg-white p-3 md:p-4 rounded-lg shadow">
+          <h3 className="font-bold mb-2 text-sm md:text-base">Key Topics</h3>
           <ul className="space-y-2">
             {chapterData.topics.slice(0, 3).map((topic) => (
-              <li key={topic.id} className="py-2 border-b border-gray-100 last:border-0">
-                <span className="font-medium">{topic.title}</span>
+              <li key={topic.id} className="py-1.5 border-b border-gray-100 last:border-0">
+                <span className="font-medium text-sm">{topic.title}</span>
               </li>
             ))}
           </ul>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="font-bold mb-2">Chapter Mastery</h3>
-          <div className="flex items-center justify-center h-24">
-            <div className="relative w-16 h-16">
-              <svg viewBox="0 0 36 36" className="w-16 h-16">
+        <div className="bg-white p-3 md:p-4 rounded-lg shadow">
+          <h3 className="font-bold mb-2 text-sm md:text-base">Chapter Mastery</h3>
+          <div className="flex items-center justify-center h-20">
+            <div className="relative w-14 h-14 md:w-16 md:h-16">
+              <svg viewBox="0 0 36 36" className="w-14 h-14 md:w-16 md:h-16">
                 <path
                   d="M18 2.0845
                     a 15.9155 15.9155 0 0 1 0 31.831
@@ -655,13 +656,13 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
               </svg>
             </div>
           </div>
-          <p className="text-center text-sm mt-2">
+          <p className="text-center text-xs md:text-sm mt-2">
             Last practiced: {studentProgress?.last_practiced ? new Date(studentProgress.last_practiced).toLocaleDateString() : "Never"}
           </p>
         </div>
         
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h3 className="font-bold mb-2">Weakest Topics</h3>
+        <div className="bg-white p-3 md:p-4 rounded-lg shadow">
+          <h3 className="font-bold mb-2 text-sm md:text-base">Weakest Topics</h3>
           {loadingWeakestTopics ? (
             <div className="flex justify-center py-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
@@ -669,14 +670,14 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
           ) : weakestTopics.length > 0 ? (
             <ul className="space-y-2">
               {weakestTopics.slice(0, 3).map((topic) => (
-                <li key={topic.id} className="py-2 border-b border-gray-100 last:border-0">
+                <li key={topic.id} className="py-1.5 border-b border-gray-100 last:border-0">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium">{topic.title}</span>
+                    <span className="font-medium text-sm">{topic.title}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-red-600 text-sm">{topic.mastery}%</span>
+                      <span className="text-red-600 text-xs">{topic.mastery}%</span>
                       <Button 
                         size="sm"
-                        className="bg-orange-500 hover:bg-orange-600 text-white h-6 px-2 text-xs"
+                        className="bg-orange-500 hover:bg-orange-600 text-white h-5 px-2 text-xs"
                         onClick={() => {
                           // Find the topic index and expand it
                           const topicIndex = chapterData.topics.findIndex(t => t.id === topic.id);
@@ -700,27 +701,27 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500 text-sm">No weak topics identified. Keep up the good work!</p>
+            <p className="text-gray-500 text-xs">No weak topics identified. Keep up the good work!</p>
           )}
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b mb-6">
+      <div className="flex border-b mb-6 overflow-x-auto">
         <button
-          className={`py-2 px-4 font-medium ${activeTab === "topics" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"}`}
+          className={`py-2 px-3 md:px-4 font-medium text-sm md:text-base whitespace-nowrap ${activeTab === "topics" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"}`}
           onClick={() => setActiveTab("topics")}
         >
           Topics
         </button>
         <button
-          className={`py-2 px-4 font-medium ${activeTab === "mock" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"}`}
+          className={`py-2 px-3 md:px-4 font-medium text-sm md:text-base whitespace-nowrap ${activeTab === "mock" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"}`}
           onClick={() => setActiveTab("mock")}
         >
           Mock Tests
         </button>
         <button
-          className={`py-2 px-4 font-medium ${activeTab === "flashcards" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"}`}
+          className={`py-2 px-3 md:px-4 font-medium text-sm md:text-base whitespace-nowrap ${activeTab === "flashcards" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500"}`}
           onClick={() => setActiveTab("flashcards")}
         >
           Flashcards
@@ -741,27 +742,27 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
                 id={`topic-${topic.id}`}
               >
                 <div 
-                  className={`flex justify-between items-center p-4 cursor-pointer hover:bg-gray-50`}
+                  className={`flex flex-col md:flex-row md:justify-between md:items-center p-3 md:p-4 cursor-pointer hover:bg-gray-50 gap-2`}
                   onClick={() => toggleTopic(topic.id)}
                 >
-                  <div>
-                    <h3 className="font-medium">{topic.title}</h3>
-                    <p className="text-sm text-gray-600">{topic.description}</p>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-sm md:text-base">{topic.title}</h3>
+                    <p className="text-xs md:text-sm text-gray-600">{topic.description}</p>
                     {isWeakest && (
                       <p className="text-xs text-orange-600 mt-1">
                         🔥 Weakest topic
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 md:gap-4">
                     {/* Mastery and expansion controls only */}
-                    <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div className="w-16 md:w-24 bg-gray-200 rounded-full h-1.5 md:h-2">
                       <div 
-                        className={`h-2 rounded-full ${isWeakest ? 'bg-orange-500' : 'bg-blue-600'}`} 
+                        className={`h-1.5 md:h-2 rounded-full ${isWeakest ? 'bg-orange-500' : 'bg-blue-600'}`} 
                         style={{ width: `${topic.mastery}%` }}
                       ></div>
                     </div>
-                    <span className={`text-sm ${isWeakest ? 'text-orange-600 font-bold' : ''}`}>
+                    <span className={`text-xs md:text-sm ${isWeakest ? 'text-orange-600 font-bold' : ''}`}>
                       {topic.mastery}%
                     </span>
                     <button className="text-gray-500">
@@ -777,10 +778,10 @@ export const ChapterInterface = ({ chapterData, userId }: ChapterInterfaceProps)
                 </div>
 
                 {loadingTopics[topic.id] || expandedTopic === topic.id ? (
-                  <div className="px-4 pb-4">
+                  <div className="px-3 md:px-4 pb-4">
                     {loadingTopics[topic.id] ? (
-                      <div className="flex justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <div className="flex justify-center py-6">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                       </div>
                     ) : (
                       <>

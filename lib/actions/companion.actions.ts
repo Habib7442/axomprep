@@ -118,29 +118,48 @@ export const newCompanionPermissions = async () => {
     const { userId, has } = await auth();
     const supabase = createSupabaseClient();
 
-    let limit = 0;
-
+    // Check if user has pro plan first
     if(has({ plan: 'pro' })) {
         return true;
-    } else if(has({ feature: "3_companion_limit" })) {
-        limit = 3;
-    } else if(has({ feature: "10_companion_limit" })) {
-        limit = 10;
     }
 
-    const { data, error } = await supabase
+    // For basic plan, check companion limit
+    let companionLimit = 0;
+    if(has({ feature: "1_companion_limit" })) {
+        companionLimit = 1;
+    } else if(has({ feature: "10_companion_limit" })) {
+        companionLimit = 10;
+    }
+
+    // Check current companion count
+    const { data: companions, error } = await supabase
         .from('companions')
         .select('id', { count: 'exact' })
         .eq('author', userId)
 
     if(error) throw new Error(error.message);
 
-    const companionCount = data?.length;
+    const companionCount = companions?.length || 0;
 
-    if(companionCount >= limit) {
-        return false
-    } else {
+    // Check session limit for basic plan (2 interviews/month)
+    const { data: sessions, error: sessionError } = await supabase
+        .from('session_history')
+        .select('id', { count: 'exact' })
+        .eq('user_id', userId)
+        .gte('created_at', new Date(new Date().setDate(1)).toISOString()) // From start of current month
+
+    if(sessionError) throw new Error(sessionError.message);
+
+    const sessionCount = sessions?.length || 0;
+    const sessionLimit = 2; // 2 interviews per month for basic plan
+
+    // User can create new companion if:
+    // 1. They haven't reached companion limit AND
+    // 2. They haven't reached session limit
+    if(companionCount < companionLimit && sessionCount < sessionLimit) {
         return true;
+    } else {
+        return false;
     }
 }
 

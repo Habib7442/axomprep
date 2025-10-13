@@ -155,6 +155,8 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                   <h2 className="text-2xl font-bold">
                     {report.interview_type === "resume-based" 
                       ? "Resume-Based Interview" 
+                      : report.interview_type === "companion-based"
+                      ? `AI Tutor Session: ${report.topic}`
                       : report.topic}
                   </h2>
                   <p className="opacity-90">
@@ -163,7 +165,11 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                 </div>
                 <div className="mt-4 md:mt-0">
                   <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm text-black">
-                    {report.interview_type === "resume-based" ? "Resume-Based" : "Topic-Based"}
+                    {report.interview_type === "resume-based" 
+                      ? "Resume-Based" 
+                      : report.interview_type === "companion-based"
+                      ? "AI Tutor"
+                      : "Topic-Based"}
                   </span>
                 </div>
               </div>
@@ -241,6 +247,30 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
                     </li>
                   ))}
                 </ul>
+              </div>
+              
+              {/* Transcript Section */}
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-4 text-gray-800">Conversation Transcript</h3>
+                <div className="bg-gray-50 rounded-xl p-4 max-h-96 overflow-y-auto">
+                  <div className="space-y-4">
+                    {report.transcript.map((message, index) => (
+                      <div
+                        key={index}
+                        className={`p-4 rounded-lg ${
+                          message.role === "assistant"
+                            ? "bg-blue-100 border border-blue-200"
+                            : "bg-orange-100 border border-orange-200"
+                        }`}
+                      >
+                        <div className="font-bold mb-2">
+                          {message.role === "assistant" ? "AI Tutor" : "You"}
+                        </div>
+                        <p>{message.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

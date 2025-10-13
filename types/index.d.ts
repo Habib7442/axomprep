@@ -80,4 +80,5 @@ interface CompanionComponentProps {
   userImage: string;
   voice: string;
   style: string;
+  userId?: string; // Make userId optional
 }

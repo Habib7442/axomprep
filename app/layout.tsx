@@ -24,11 +24,11 @@ export default function RootLayout({
   return (
     <ClerkProvider appearance={{ variables: { colorPrimary: "#fe5933" } }}>
       <html lang="en">
-        <body className={`${bricolage.variable} antialiased flex flex-col min-h-screen`}>
+        <body
+          className={`${bricolage.variable} antialiased flex flex-col min-h-screen`}
+        >
           <Navbar />
-          <main className="flex-grow">
-            {children}
-          </main>
+          {children}
           <Footer />
         </body>
       </html>

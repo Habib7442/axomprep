@@ -116,9 +116,14 @@ export default function MyJourneyPage() {
             ← Back to Home
           </Link>
           <h1 className="text-3xl font-bold text-center">My Interview Journey</h1>
-          <Link href="/interview" className="text-blue-600 hover:text-blue-800">
-            Practice
-          </Link>
+          <div className="flex gap-4">
+            <Link href="/interview" className="text-blue-600 hover:text-blue-800">
+              Practice
+            </Link>
+            <Link href="/companions" className="text-blue-600 hover:text-blue-800">
+              Tutors
+            </Link>
+          </div>
         </div>
         <div className="max-w-4xl mx-auto">
           {interviewReports.length === 0 ? (
@@ -127,11 +132,18 @@ export default function MyJourneyPage() {
               <p className="text-gray-600 mb-6">
                 Complete an interview to generate your first detailed report with feedback and recommendations.
               </p>
-              <Link href="/interview">
-                <button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg">
-                  Start Interview Practice
-                </button>
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/interview">
+                  <button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg">
+                    Start Interview Practice
+                  </button>
+                </Link>
+                <Link href="/companions">
+                  <button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg">
+                    Try AI Tutors
+                  </button>
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="space-y-6">
@@ -143,6 +155,8 @@ export default function MyJourneyPage() {
                         <h2 className="text-xl font-bold">
                           {report.interview_type === "resume-based" 
                             ? "Resume-Based Interview" 
+                            : report.interview_type === "companion-based"
+                            ? `AI Tutor: ${report.topic}`
                             : report.topic}
                         </h2>
                         <p className="text-gray-600">
@@ -151,7 +165,11 @@ export default function MyJourneyPage() {
                       </div>
                       <div className="mt-4 md:mt-0">
                         <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                          {report.interview_type === "resume-based" ? "Resume-Based" : "Topic-Based"}
+                          {report.interview_type === "resume-based" 
+                            ? "Resume-Based" 
+                            : report.interview_type === "companion-based"
+                            ? "AI Tutor"
+                            : "Topic-Based"}
                         </span>
                       </div>
                     </div>

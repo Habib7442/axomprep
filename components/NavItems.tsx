@@ -8,6 +8,7 @@ const navItems = [
   { label: "Home", href: "/" },
   { label: "AI Tutors", href: "/companions" },
   { label: "My Journey", href: "/my-journey" },
+  { label: "Pricing", href: "/subscription" },
 ];
 
 const NavItems = () => {
@@ -22,8 +23,10 @@ const NavItems = () => {
             href={href} 
             key={label} 
             className={cn(
-              "px-3 py-2 rounded-md hover:bg-gray-100 transition-colors",
-              pathName === href ? "text-orange-500 font-semibold" : "text-gray-700"
+              "px-4 py-2 rounded-lg transition-colors font-medium",
+              pathName === href 
+                ? "bg-gradient-to-r from-[#FF6B35] to-[#FF914D] text-white shadow-lg" 
+                : "text-gray-700 hover:bg-gray-100"
             )}
           >
             {label}
@@ -38,8 +41,10 @@ const NavItems = () => {
             href={href} 
             key={label} 
             className={cn(
-              "px-3 py-3 rounded-md hover:bg-gray-100 transition-colors text-lg",
-              pathName === href ? "text-orange-500 font-semibold" : "text-gray-700"
+              "px-4 py-3 rounded-lg transition-colors text-lg font-medium",
+              pathName === href 
+                ? "bg-gradient-to-r from-[#FF6B35] to-[#FF914D] text-white shadow-lg" 
+                : "text-gray-700 hover:bg-gray-100"
             )}
           >
             {label}

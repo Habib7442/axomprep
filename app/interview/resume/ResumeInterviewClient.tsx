@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { createPartFromUri, GoogleGenAI } from "@google/genai";
 import ReactMarkdown from "react-markdown";
 import { configureAssistant } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface InterviewReport {
   strengths: string[];
@@ -41,10 +42,12 @@ const ResumeInterviewClient = ({ user }: {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analyzingType, setAnalyzingType] = useState<'resume' | 'interview' | 'report' | null>(null);
   const [analysisResult, setAnalysisResult] = useState("");
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (lottieRef.current) {
@@ -136,6 +139,7 @@ const ResumeInterviewClient = ({ user }: {
     }
 
     setIsAnalyzing(true);
+    setAnalyzingType('resume');
     setAnalysisResult("");
 
     try {
@@ -198,6 +202,7 @@ const ResumeInterviewClient = ({ user }: {
       setAnalysisResult("Sorry, there was an error analyzing your resume. Please try again.");
     } finally {
       setIsAnalyzing(false);
+      setAnalyzingType(null);
     }
   };
 
@@ -208,6 +213,7 @@ const ResumeInterviewClient = ({ user }: {
     }
 
     setIsAnalyzing(true);
+    setAnalyzingType('interview');
 
     try {
       // Initialize Google GenAI with the API key from environment variables
@@ -263,6 +269,7 @@ const ResumeInterviewClient = ({ user }: {
       // Start the VAPI interview with resume context
       setCallStatus(CallStatus.CONNECTING);
       setIsAnalyzing(false);
+      setAnalyzingType(null);
 
       // Configure VAPI for resume-based interview using the same pattern as other components
       const assistantOverrides = {
@@ -285,6 +292,7 @@ const ResumeInterviewClient = ({ user }: {
     } catch (error) {
       console.error("Error processing resume:", error);
       setIsAnalyzing(false);
+      setAnalyzingType(null);
       alert("Sorry, there was an error processing your resume. Please try again.");
     }
   };
@@ -303,6 +311,7 @@ const ResumeInterviewClient = ({ user }: {
     try {
       // Show loading state
       setIsAnalyzing(true);
+      setAnalyzingType('report');
       
       // Save session to Supabase first
       const { data: sessionData, error: sessionError } = await supabase.from('session_history').insert([
@@ -319,6 +328,7 @@ const ResumeInterviewClient = ({ user }: {
       if (sessionError) {
         console.error('Error saving session to Supabase:', sessionError);
         setIsAnalyzing(false);
+        setAnalyzingType(null);
         return;
       }
 
@@ -327,13 +337,21 @@ const ResumeInterviewClient = ({ user }: {
       
       if (sessionId) {
         // Generate and save interview report
-        await generateAndSaveInterviewReport(sessionId, "resume-based", "Resume-based Interview", jobDescription);
+        const reportId = await generateAndSaveInterviewReport(sessionId, "resume-based", "Resume-based Interview", jobDescription);
+        
+        // Redirect directly to the report page if report was generated successfully
+        if (reportId) {
+          router.push(`/my-journey/report/${reportId}`);
+          return;
+        }
       }
       
       setIsAnalyzing(false);
+      setAnalyzingType(null);
     } catch (error) {
       console.error('Error generating report:', error);
       setIsAnalyzing(false);
+      setAnalyzingType(null);
     }
   };
 
@@ -361,7 +379,7 @@ const ResumeInterviewClient = ({ user }: {
     interviewType: string, 
     topic: string, 
     jobDescription: string | null
-  ) => {
+  ): Promise<string | null> => {
     try {
       // Create a transcript string for analysis
       const transcriptText = messages.map(msg => 
@@ -404,12 +422,14 @@ const ResumeInterviewClient = ({ user }: {
           feedback: analysis.feedback,
           recommendations: analysis.recommendations
         }
-      ]);
+      ]).select();
 
       if (supabaseError) {
         console.error('Error saving interview report:', supabaseError);
+        return null;
       } else {
         console.log('Interview report saved:', data);
+        return data?.[0]?.id || null;
       }
     } catch (error) {
       console.error('Error generating interview report:', error);
@@ -456,12 +476,14 @@ const ResumeInterviewClient = ({ user }: {
           feedback: mockReport.feedback,
           recommendations: mockReport.recommendations
         }
-      ]);
+      ]).select();
 
       if (supabaseError) {
         console.error('Error saving mock interview report:', supabaseError);
+        return null;
       } else {
         console.log('Mock interview report saved:', data);
+        return data?.[0]?.id || null;
       }
     }
   };
@@ -771,8 +793,16 @@ const ResumeInterviewClient = ({ user }: {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <h3 className="text-xl font-bold mb-2">Generating Your Report</h3>
-            <p className="text-gray-600">Analyzing your interview performance...</p>
+            <h3 className="text-xl font-bold mb-2">
+              {analyzingType === 'resume' ? 'Analyzing Your Resume' : 
+               analyzingType === 'interview' ? 'Processing Your Resume' : 
+               'Generating Your Report'}
+            </h3>
+            <p className="text-gray-600">
+              {analyzingType === 'resume' ? 'Analyzing your resume against the job description...' : 
+               analyzingType === 'interview' ? 'Processing your resume for the interview...' : 
+               'Analyzing your interview performance...'}
+            </p>
           </div>
         </div>
       )}

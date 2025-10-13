@@ -8,6 +8,7 @@ import soundwaves from "@/constants/soundwaves.json";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { configureAssistant } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface InterviewReport {
   strengths: string[];
@@ -41,6 +42,7 @@ const InterviewClient = ({ user, initialTopic }: {
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const supabase = createClient();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (lottieRef.current) {
@@ -180,7 +182,13 @@ const InterviewClient = ({ user, initialTopic }: {
       
       if (sessionId) {
         // Generate and save interview report
-        await generateAndSaveInterviewReport(sessionId, "topic-based", topic, null);
+        const reportId = await generateAndSaveInterviewReport(sessionId, "topic-based", topic, null);
+        
+        // Redirect directly to the report page if report was generated successfully
+        if (reportId) {
+          router.push(`/my-journey/report/${reportId}`);
+          return;
+        }
       }
       
       setIsAnalyzing(false);
@@ -196,7 +204,7 @@ const InterviewClient = ({ user, initialTopic }: {
     interviewType: string, 
     topic: string, 
     jobDescription: string | null
-  ) => {
+  ): Promise<string | null> => {
     try {
       // Create a transcript string for analysis
       const transcriptText = messages.map(msg => 
@@ -239,12 +247,14 @@ const InterviewClient = ({ user, initialTopic }: {
           feedback: analysis.feedback,
           recommendations: analysis.recommendations
         }
-      ]);
+      ]).select();
 
       if (supabaseError) {
         console.error('Error saving interview report:', supabaseError);
+        return null;
       } else {
         console.log('Interview report saved:', data);
+        return data?.[0]?.id || null;
       }
     } catch (error) {
       console.error('Error generating interview report:', error);
@@ -291,12 +301,14 @@ const InterviewClient = ({ user, initialTopic }: {
           feedback: mockReport.feedback,
           recommendations: mockReport.recommendations
         }
-      ]);
+      ]).select();
 
       if (supabaseError) {
         console.error('Error saving mock interview report:', supabaseError);
+        return null;
       } else {
         console.log('Mock interview report saved:', data);
+        return data?.[0]?.id || null;
       }
     }
   };
