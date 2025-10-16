@@ -13,19 +13,6 @@ const isProtectedRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
     await auth.protect()
-    
-    // For authenticated users, ensure they have a trial record
-    const { userId } = await auth()
-    if (userId) {
-      // Try to initialize trial for the user
-      try {
-        // Import and call the trial initialization function
-        const { initializeUserTrial } = await import('@/lib/actions/trial.actions')
-        await initializeUserTrial()
-      } catch (error) {
-        console.error("Error initializing trial in middleware:", error)
-      }
-    }
   }
 })
 

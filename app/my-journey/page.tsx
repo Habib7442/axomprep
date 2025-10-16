@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import UsageLimits from "@/components/UsageLimits";
+import { useUser } from "@clerk/nextjs"; // Import useUser hook from Clerk
 
 // Add interface for interview reports
 interface InterviewReport {
@@ -28,22 +29,36 @@ export default function MyJourneyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const { user, isLoaded } = useUser(); // Get user and loading state from Clerk
 
   useEffect(() => {
+    // Only fetch reports when Clerk user is loaded
+    if (!isLoaded) return;
+    
+    // If user is not authenticated, redirect to sign-in page
+    if (!user) {
+      window.location.href = "/sign-in";
+      return;
+    }
+
     const fetchInterviewReports = async () => {
       try {
         setLoading(true);
+        console.log("Fetching reports for user ID:", user.id);
 
-        // Fetch interview reports
+        // Fetch interview reports for the current user only
         const { data: reportsData, error: reportsError } = await supabase
           .from('interview_reports')
           .select('*')
+          .eq('user_id', user.id) // Filter by current user ID from Clerk
           .order('created_at', { ascending: false });
 
         if (reportsError) {
+          console.error("Error fetching interview reports:", reportsError);
           throw new Error(reportsError.message || "Failed to fetch interview reports");
         }
 
+        console.log("Fetched reports:", reportsData);
         setInterviewReports(reportsData || []);
       } catch (err) {
         // Only set error if it's not because there are no reports yet
@@ -56,22 +71,22 @@ export default function MyJourneyPage() {
     };
 
     fetchInterviewReports();
-  }, []);
+  }, [user, isLoaded, supabase]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + " " + date.toLocaleTimeString();
   };
 
-  if (loading) {
+  if (loading || !isLoaded) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <Link href="/" className="text-blue-600 hover:text-blue-800">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+            <Link href="/" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
               ← Back to Home
             </Link>
-            <h1 className="text-3xl font-bold text-center">My Interview Journey</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-center">My Interview Journey</h1>
             <div></div>
           </div>
           <div className="max-w-4xl mx-auto">
@@ -89,11 +104,11 @@ export default function MyJourneyPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <Link href="/" className="text-blue-600 hover:text-blue-800">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+            <Link href="/" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
               ← Back to Home
             </Link>
-            <h1 className="text-3xl font-bold text-center">My Interview Journey</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-center">My Interview Journey</h1>
             <div></div>
           </div>
           <div className="max-w-4xl mx-auto">
@@ -115,16 +130,16 @@ export default function MyJourneyPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-8">
-          <Link href="/" className="text-blue-600 hover:text-blue-800">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+          <Link href="/" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
             ← Back to Home
           </Link>
-          <h1 className="text-3xl font-bold text-center">My Interview Journey</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-center">My Interview Journey</h1>
           <div className="flex gap-4">
-            <Link href="/interview" className="text-blue-600 hover:text-blue-800">
+            <Link href="/interview" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
               Practice
             </Link>
-            <Link href="/companions" className="text-blue-600 hover:text-blue-800">
+            <Link href="/companions" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
               Tutors
             </Link>
           </div>

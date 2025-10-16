@@ -1,5 +1,5 @@
 import React from "react";
-import CompanionForm from "@/components/CompanionForm";
+import NewCompanionClient from "./NewCompanionClient";
 import Image from "next/image";
 import { newCompanionPermissions } from "@/lib/actions/companion.actions";
 import { currentUser } from "@clerk/nextjs/server";
@@ -30,7 +30,7 @@ const NewCompanion = async () => {
           <p className="text-[#4B5563] mb-8 text-lg">
             Create your personalized AI Tutor for focused learning
           </p>
-          <CompanionForm />
+          <NewCompanionClient />
         </div>
       </div>
     </div>

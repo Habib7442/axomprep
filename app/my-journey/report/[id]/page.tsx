@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs"; // Import useUser hook from Clerk
 
 // Add interface for interview reports
 interface InterviewReport {
@@ -30,6 +31,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
   const supabase = createClient();
   const router = useRouter();
   const [reportId, setReportId] = useState<string | null>(null);
+  const { user, isLoaded } = useUser(); // Get user and loading state from Clerk
 
   useEffect(() => {
     const unwrapParams = async () => {
@@ -42,20 +44,35 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     const fetchReport = async () => {
+      // Wait for Clerk user to be loaded
+      if (!isLoaded) return;
+      
+      // If user is not authenticated, redirect to sign-in
+      if (!user) {
+        window.location.href = "/sign-in";
+        return;
+      }
+      
       if (!reportId) return;
       
       try {
         setLoading(true);
 
-        // Fetch the specific interview report
+        // Fetch the specific interview report and ensure it belongs to the current user
         const { data: reportData, error: reportError } = await supabase
           .from('interview_reports')
           .select('*')
           .eq('id', reportId)
+          .eq('user_id', user.id) // Ensure the report belongs to the current user
           .single();
 
         if (reportError) {
           throw new Error(reportError.message || "Failed to fetch interview report");
+        }
+
+        // If no report is found (either doesn't exist or doesn't belong to user)
+        if (!reportData) {
+          throw new Error("Report not found or access denied");
         }
 
         setReport(reportData);
@@ -67,17 +84,17 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
       }
     };
 
-    if (reportId) {
+    if (reportId && isLoaded) {
       fetchReport();
     }
-  }, [reportId, supabase]);
+  }, [reportId, supabase, user, isLoaded]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + " " + date.toLocaleTimeString();
   };
 
-  if (loading) {
+  if (loading || !isLoaded) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 py-12">
         <div className="container mx-auto px-4">

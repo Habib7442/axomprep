@@ -4,9 +4,14 @@ import React, { useState } from "react";
 import Link from "next/link";
 import CTA from "@/components/CTA";
 import Image from "next/image";
+import { useUser } from "@clerk/nextjs";
 
 const HomePage = () => {
   const [topic, setTopic] = useState("");
+
+  const { user } = useUser();
+
+  console.log(user);
 
   const handleStartInterview = () => {
     if (topic.trim()) {
@@ -47,8 +52,7 @@ const HomePage = () => {
       {/* Announcement Banner */}
       <div className="bg-[#1E293B] text-white py-2 text-center text-xs md:text-sm">
         <span className="opacity-90">
-          🎉 Join professionals who have aced their interviews with
-          AxomPrep.
+          🎉 Join professionals who have aced their interviews with AxomPrep.
         </span>{" "}
         <Link
           href="/companions"
@@ -65,11 +69,11 @@ const HomePage = () => {
             {/* Badge */}
             <div className="mb-6">
               <div className="inline-flex items-center justify-center border-2 border-teal-500 rounded-full p-1">
-                <Image 
-                  src="/images/logo.png" 
-                  alt="AxomPrep Logo" 
-                  width={40} 
-                  height={40} 
+                <Image
+                  src="/images/logo.png"
+                  alt="AxomPrep Logo"
+                  width={40}
+                  height={40}
                   className="rounded-full"
                 />
               </div>
@@ -78,12 +82,15 @@ const HomePage = () => {
             {/* Main Heading */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6 text-[#0F172A] tracking-tight max-w-5xl leading-tight">
               AxomPrep: Your Gateway to <br className="hidden md:block" />
-              English Fluency and <span className="text-[#6366F1]">Career Success</span>
+              English Fluency and{" "}
+              <span className="text-[#6366F1]">Career Success</span>
             </h1>
 
             {/* Subheading */}
             <p className="text-base md:text-xl lg:text-2xl text-[#4B5563] mb-6 md:mb-8 max-w-3xl leading-relaxed font-normal">
-              AxomPrep empowers Indian learners with AI-powered English learning and interview practice. Master conversational English and ace job interviews from home.
+              AxomPrep empowers Indian learners with AI-powered English learning
+              and interview practice. Master conversational English and ace job
+              interviews from home.
             </p>
           </div>
         </div>
@@ -200,7 +207,9 @@ const HomePage = () => {
                 key={index}
                 className="group bg-white text-center p-6 md:p-8 lg:p-10 rounded-xl md:rounded-2xl border border-[#E2E8F0] hover:border-[#6366F1] hover:shadow-xl transition-all duration-300"
               >
-                <div className="text-4xl md:text-5xl mb-4 md:mb-6">{feature.icon}</div>
+                <div className="text-4xl md:text-5xl mb-4 md:mb-6">
+                  {feature.icon}
+                </div>
                 <div className="mb-3 md:mb-4">
                   <span className="inline-block bg-[#EEF2FF] text-[#6366F1] px-3 py-1 md:px-4 md:py-1.5 rounded-full text-xs md:text-sm font-semibold">
                     {feature.highlight}
@@ -214,7 +223,7 @@ const HomePage = () => {
                 </p>
               </div>
             ))}
-            
+
             {/* More Features Coming Soon Card */}
             <div className="group bg-white text-center p-6 md:p-8 lg:p-10 rounded-xl md:rounded-2xl border border-[#E2E8F0] hover:border-[#6366F1] hover:shadow-xl transition-all duration-300 flex flex-col items-center justify-center">
               <div className="text-4xl md:text-5xl mb-4 md:mb-6">🚀</div>
@@ -222,7 +231,8 @@ const HomePage = () => {
                 More Features Coming Soon
               </h3>
               <p className="text-[#64748B] leading-relaxed text-base md:text-lg">
-                We&apos;re constantly working to improve your experience with new features and enhancements.
+                We&apos;re constantly working to improve your experience with
+                new features and enhancements.
               </p>
             </div>
           </div>
@@ -277,7 +287,6 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

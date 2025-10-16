@@ -33,6 +33,7 @@ const InterviewReportsPage = () => {
       if (!user?.id) return;
 
       try {
+        console.log("Fetching reports for user ID:", user.id);
         const { data, error } = await supabase
           .from('interview_reports')
           .select('*')
@@ -42,6 +43,7 @@ const InterviewReportsPage = () => {
         if (error) {
           console.error('Error fetching reports:', error);
         } else {
+          console.log("Fetched reports:", data);
           setReports(data || []);
         }
       } catch (error) {

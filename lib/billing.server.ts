@@ -143,8 +143,8 @@ export async function canCreateCompanionServer(): Promise<boolean> {
 
         if (error) {
           console.error("Error checking companion count:", error);
-          // If we can't check the count, allow creation to avoid blocking new users
-          return true;
+          // If we can't check the count, do NOT allow creation to avoid bypassing limits
+          return false;
         }
 
         const companionCount = companions?.length || 0;
@@ -174,16 +174,16 @@ export async function canCreateCompanionServer(): Promise<boolean> {
 
     if (error) {
       console.error("Error checking companion count:", error);
-      // If we can't check the count, allow creation to avoid blocking new users
-      return true;
+      // If we can't check the count, do NOT allow creation to avoid bypassing limits
+      return false;
     }
 
     const companionCount = companions?.length || 0;
     return companionCount < companionLimit;
   } catch (error) {
     console.error("Error in canCreateCompanionServer:", error);
-    // If there's any other error, allow creation to avoid blocking new users
-    return true;
+    // If there's any other error, do NOT allow creation to avoid bypassing limits
+    return false;
   }
 }
 
@@ -222,8 +222,8 @@ export async function canStartInterviewServer(): Promise<boolean> {
 
         if (error) {
           console.error("Error checking session count:", error);
-          // If we can't check the count, allow starting interview to avoid blocking new users
-          return true;
+          // If we can't check the count, do NOT allow starting interview to avoid bypassing limits
+          return false;
         }
 
         const sessionCount = sessions?.length || 0;
@@ -257,16 +257,16 @@ export async function canStartInterviewServer(): Promise<boolean> {
 
     if (error) {
       console.error("Error checking session count:", error);
-      // If we can't check the count, allow starting interview to avoid blocking new users
-      return true;
+      // If we can't check the count, do NOT allow starting interview to avoid bypassing limits
+      return false;
     }
 
     const sessionCount = sessions?.length || 0;
     return sessionCount < interviewLimit;
   } catch (error) {
     console.error("Error in canStartInterviewServer:", error);
-    // If there's any other error, allow starting interview to avoid blocking new users
-    return true;
+    // If there's any other error, do NOT allow starting interview to avoid bypassing limits
+    return false;
   }
 }
 

@@ -56,6 +56,29 @@ const CompanionComponent = ({
   }, [supabase, propUserId]);
 
   useEffect(() => {
+    // Initialize trial for new users
+    const initializeTrial = async () => {
+      try {
+        const response = await fetch('/api/user/trial', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+          console.log('Trial initialized:', data.message);
+        } else {
+          console.log('Trial initialization failed or already exists:', data.error || data.message);
+        }
+      } catch (error) {
+        console.error('Error initializing trial:', error);
+      }
+    };
+
+    // Only initialize trial if user is authenticated
+    if (userId) {
+      initializeTrial();
+    }
+  }, [userId]);
+
+  useEffect(() => {
     if (lottieRef) {
       if (isSpeaking) {
         lottieRef.current?.play();
