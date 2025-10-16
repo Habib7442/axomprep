@@ -58,7 +58,7 @@ const Navbar = () => {
           <div className="flex items-center gap-2 cursor-pointer">
             <Image src="/images/logo.png" alt="logo" width={36} height={34} />
             <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent max-sm:text-lg">
-              RehearsAI
+              AxomPrep
             </span>
           </div>
         </Link>
@@ -121,7 +121,7 @@ const Navbar = () => {
                   <div className="flex items-center gap-2">
                     <Image src="/images/logo.png" alt="logo" width={32} height={30} />
                     <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                      RehearsAI
+                      AxomPrep
                     </span>
                   </div>
                 </div>

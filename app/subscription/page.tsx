@@ -1,5 +1,4 @@
 import React from 'react';
-import { PricingTable } from "@clerk/nextjs";
 import Link from "next/link";
 
 const Subscription = () => {
@@ -8,15 +7,23 @@ const Subscription = () => {
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
                     <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
-                        Choose Your Plan
+                        Pricing
                     </h1>
                     <p className="text-xl text-[#475569] max-w-2xl mx-auto">
                         Start building interview confidence with our AI-powered coaching platform
                     </p>
                 </div>
                 
-                <div className="max-w-5xl mx-auto">
-                    <PricingTable />
+                <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-8 md:p-12 text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#0F172A]">Coming Soon</h2>
+                    <p className="text-lg text-[#475569] mb-8 max-w-2xl mx-auto">
+                        We&apos;re working hard to bring you our new pricing plans. Stay tuned for updates!
+                    </p>
+                    <div className="flex justify-center">
+                        <Link href="/" className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] text-white px-6 py-3 rounded-lg font-semibold text-base md:text-lg hover:from-[#FF844B] hover:to-[#FFB088] transition-all shadow-lg inline-block">
+                            Back to Home
+                        </Link>
+                    </div>
                 </div>
                 
                 {/* Plan Features Comparison */}

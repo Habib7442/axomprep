@@ -11,9 +11,9 @@ const bricolage = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: "RehearsAI — Your AI Interview Coach",
+  title: "AxomPrep — Your AI Interview Coach",
   description:
-    "Master Interviews, Speak Fluently, and Build Interview Confidence with RehearsAI. AI-powered interview coach that helps you practice real interview scenarios, improve your English speaking skills, and build confidence for any job interview.",
+    "Master Interviews, Speak Fluently, and Build Interview Confidence with AxomPrep. AI-powered interview coach that helps you practice real interview scenarios, improve your English speaking skills, and build confidence for any job interview.",
 };
 
 export default function RootLayout({

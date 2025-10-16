@@ -23,18 +23,11 @@ const HomePage = () => {
       highlight: "Speak Confidently",
     },
     {
-      icon: "🧠",
-      title: "Smart Interview Prep",
+      icon: "🤖",
+      title: "Personal AI Tutor",
       description:
-        "Personalized interview questions and feedback based on your chosen topic and industry",
-      highlight: "Prepare Smarter",
-    },
-    {
-      icon: "📊",
-      title: "Performance Analytics",
-      description:
-        "Detailed analysis of your interview performance with actionable insights for improvement",
-      highlight: "Improve Faster",
+        "Create your own AI tutor personalized to your learning style and preferences",
+      highlight: "Learn Smarter",
     },
   ];
 
@@ -55,7 +48,7 @@ const HomePage = () => {
       <div className="bg-[#1E293B] text-white py-2 text-center text-xs md:text-sm">
         <span className="opacity-90">
           🎉 Join 10,000+ professionals who have aced their interviews with
-          RehearsAI.
+          AxomPrep.
         </span>{" "}
         <Link
           href="/companions"
@@ -71,29 +64,26 @@ const HomePage = () => {
           <div className="flex flex-col items-center text-center">
             {/* Badge */}
             <div className="mb-6">
-              <span className="inline-flex items-center gap-2 bg-[#EEF2FF] text-[#4F46E5] px-3 py-1.5 rounded-full text-xs md:text-sm font-medium border border-[#C7D2FE]">
-                <svg
-                  className="w-3 h-3 md:w-4 md:h-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                #1 AI INTERVIEW PLATFORM
-              </span>
+              <div className="inline-flex items-center justify-center border-2 border-teal-500 rounded-full p-1">
+                <Image 
+                  src="/images/logo.png" 
+                  alt="AxomPrep Logo" 
+                  width={40} 
+                  height={40} 
+                  className="rounded-full"
+                />
+              </div>
             </div>
 
             {/* Main Heading */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6 text-[#0F172A] tracking-tight max-w-5xl leading-tight">
-              Got an Interview Next Week? <br className="hidden md:block" />
-              Practice Now with <span className="text-[#6366F1]">AI Coach</span>
+              AxomPrep: Your Gateway to <br className="hidden md:block" />
+              English Fluency and <span className="text-[#6366F1]">Career Success</span>
             </h1>
 
             {/* Subheading */}
-            <p className="text-base md:text-xl lg:text-2xl text-[#475569] mb-6 md:mb-8 max-w-3xl leading-relaxed font-normal">
-              RehearsAI is your AI-powered interview coach that helps you
-              practice real interview scenarios, improve your English speaking
-              skills, and build confidence for any job interview.
+            <p className="text-base md:text-xl lg:text-2xl text-[#4B5563] mb-6 md:mb-8 max-w-3xl leading-relaxed font-normal">
+              AxomPrep empowers Indian learners with AI-powered English learning and interview practice. Master conversational English and ace job interviews from home.
             </p>
           </div>
         </div>
@@ -196,7 +186,7 @@ const HomePage = () => {
         <div className="mb-16 md:mb-32">
           <div className="text-center mb-10 md:mb-16">
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-[#0F172A]">
-              Why Choose RehearsAI?
+              Why Choose AxomPrep?
             </h2>
             <p className="text-base md:text-xl text-[#475569] max-w-2xl mx-auto">
               Experience the future of interview preparation with our AI-powered
@@ -224,6 +214,17 @@ const HomePage = () => {
                 </p>
               </div>
             ))}
+            
+            {/* More Features Coming Soon Card */}
+            <div className="group bg-white text-center p-6 md:p-8 lg:p-10 rounded-xl md:rounded-2xl border border-[#E2E8F0] hover:border-[#6366F1] hover:shadow-xl transition-all duration-300 flex flex-col items-center justify-center">
+              <div className="text-4xl md:text-5xl mb-4 md:mb-6">🚀</div>
+              <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-[#0F172A]">
+                More Features Coming Soon
+              </h3>
+              <p className="text-[#64748B] leading-relaxed text-base md:text-lg">
+                We&apos;re constantly working to improve your experience with new features and enhancements.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -234,7 +235,7 @@ const HomePage = () => {
           </h2>
           <p className="text-base md:text-xl mb-8 md:mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
             Join thousands of professionals who have improved their interview
-            skills with RehearsAI&apos;s AI-powered interview coach
+            skills with AxomPrep&apos;s AI-powered interview coach
           </p>
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center">
             <Link href="/interview">
