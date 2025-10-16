@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "../supabase";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export const createCompanion = async (formData: CreateCompanion) => {
   const { userId: author } = await auth();
@@ -10,8 +11,6 @@ export const createCompanion = async (formData: CreateCompanion) => {
 
   // Check if user can create a companion by calling our API
   try {
-    // In a real implementation, we would check the user's permissions directly
-    // For now, we'll just allow creation but in a real app you would implement proper checks
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/billing?action=can-create-companion`, {
       method: 'GET',
       headers: {
@@ -22,11 +21,14 @@ export const createCompanion = async (formData: CreateCompanion) => {
     const data = await response.json();
     
     if (!data.canCreate) {
-      throw new Error("You've reached your companion limit for your current plan. Please upgrade to create more AI Tutors.");
+      // Redirect to limit reached page when user exceeds companion limit
+      redirect("/limit-reached");
     }
   } catch (error) {
-    // If we can't check permissions, we'll allow creation
+    // If we can't check permissions, we should block creation for safety
     console.error("Error checking companion creation permission:", error);
+    // Redirect to limit reached page when we can't verify permissions
+    redirect("/limit-reached");
   }
 
   const { data, error } = await supabase
@@ -149,8 +151,8 @@ export const newCompanionPermissions = async () => {
     return data.canCreate;
   } catch (error) {
     console.error("Error checking companion creation permission:", error);
-    // If we can't check permissions, we'll allow creation
-    return true;
+    // If we can't check permissions, we should block creation for safety
+    return false;
   }
 }
 

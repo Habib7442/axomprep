@@ -44,12 +44,34 @@ const ResumeInterviewClient = ({ user }: {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzingType, setAnalyzingType] = useState<'resume' | 'interview' | 'report' | null>(null);
   const [analysisResult, setAnalysisResult] = useState("");
+  const [isResumeAnalyzed, setIsResumeAnalyzed] = useState(false); // New state to track if resume has been analyzed
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const supabase = createClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
+    // Initialize trial for new users
+    const initializeTrial = async () => {
+      try {
+        const response = await fetch('/api/user/trial', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+          console.log('Trial initialized:', data.message);
+        } else {
+          console.log('Trial initialization failed or already exists:', data.error || data.message);
+        }
+      } catch (error) {
+        console.error('Error initializing trial:', error);
+      }
+    };
+
+    // Only initialize trial if user is authenticated
+    if (user?.id) {
+      initializeTrial();
+    }
+
     if (lottieRef.current) {
       if (isSpeaking) {
         lottieRef.current?.play();
@@ -57,7 +79,7 @@ const ResumeInterviewClient = ({ user }: {
         lottieRef.current?.stop();
       }
     }
-  }, [isSpeaking]);
+  }, [user?.id, isSpeaking]);
 
   // Save session to Supabase when interview finishes
   useEffect(() => {
@@ -126,6 +148,9 @@ const ResumeInterviewClient = ({ user }: {
       const file = e.target.files[0];
       if (file.type === "application/pdf") {
         setResumeFile(file);
+        // Reset resume analysis state when a new file is uploaded
+        setIsResumeAnalyzed(false);
+        setAnalysisResult("");
       } else {
         alert("Please upload a PDF file");
       }
@@ -211,6 +236,7 @@ const ResumeInterviewClient = ({ user }: {
       });
 
       setAnalysisResult(response.text || "Unable to generate analysis.");
+      setIsResumeAnalyzed(true); // Set the resume as analyzed
     } catch (error) {
       console.error("Error analyzing resume:", error);
       setAnalysisResult("Sorry, there was an error analyzing your resume. Please try again.");
@@ -241,12 +267,19 @@ const ResumeInterviewClient = ({ user }: {
       const data = await response.json();
       
       if (!data.canStart) {
-        alert("You've reached your interview limit for your current plan. Please upgrade to continue practicing.");
+        // Redirect to limit reached page when user exceeds interview limit
+        window.location.href = "/limit-reached";
         return;
       }
     } catch (error) {
       console.error("Error checking interview permission:", error);
       // Continue with interview start even if we can't check permissions
+    }
+
+    // Check if resume has been analyzed
+    if (!isResumeAnalyzed) {
+      alert("Please analyze your resume first before starting the interview.");
+      return;
     }
 
     if (!resumeFile || !jobDescription.trim()) {
@@ -318,7 +351,8 @@ const ResumeInterviewClient = ({ user }: {
         variableValues: { 
           resumeContent: resumeSummary,
           jobDescription: jobDescription,
-          interviewType: "resume-based"
+          interviewType: "resume-based",
+          resumeAnalysis: analysisResult // Pass the analysis result to the voice AI
         },
         clientMessages: ["transcript"],
         serverMessages: [],
@@ -327,7 +361,7 @@ const ResumeInterviewClient = ({ user }: {
       // Configure the assistant for resume interview using the same pattern as CompanionComponent
       const assistantConfig = configureAssistant("male", "professional");
       assistantConfig.name = "Resume Interview Coach";
-      assistantConfig.firstMessage = `Hello! I'm your interview coach. I've reviewed your resume and the job description for ${jobDescription}. Let's have a conversation about your experience and how it relates to this position. Please tell me about your background and why you're interested in this role.`;
+      assistantConfig.firstMessage = `Hello! I'm your interview coach. I've reviewed your resume and the job description for ${jobDescription}. Based on my analysis, ${analysisResult.substring(0, 200)}... Let's have a conversation about your experience and how it relates to this position. Please tell me about your background and why you're interested in this role.`;
       
       // @ts-expect-error - Using the same pattern as CompanionComponent which works fine
       vapi.start(assistantConfig, assistantOverrides);
@@ -604,11 +638,11 @@ const ResumeInterviewClient = ({ user }: {
                 
                 <button
                   onClick={handleStartInterview}
-                  disabled={isAnalyzing || !resumeFile || !jobDescription.trim() || callStatus !== CallStatus.INACTIVE}
+                  disabled={isAnalyzing || !resumeFile || !jobDescription.trim() || callStatus !== CallStatus.INACTIVE || !isResumeAnalyzed}
                   className={`flex-1 py-3 px-6 rounded-xl font-semibold text-lg transition-all ${
-                    isAnalyzing || !resumeFile || !jobDescription.trim() || callStatus !== CallStatus.INACTIVE
+                    isAnalyzing || !resumeFile || !jobDescription.trim() || callStatus !== CallStatus.INACTIVE || !isResumeAnalyzed
                       ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white hover:scale-105 shadow-lg"
+                      : "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-500 text-white hover:scale-105 shadow-lg"
                   }`}
                 >
                   {isAnalyzing ? "Processing..." : "Start Interview"}

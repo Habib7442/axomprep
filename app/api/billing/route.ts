@@ -53,9 +53,13 @@ export async function GET(request: Request) {
         return NextResponse.json({ hasFeature });
         
       case 'usage':
-        // Get both companions and interviews count
+        // Get usage data including companions and interviews
         const usage = await getUserUsageServer();
-        return NextResponse.json(usage);
+        // Return only the companions and interviews counts for backward compatibility
+        return NextResponse.json({
+          companions: usage.companions,
+          interviews: usage.interviews
+        });
         
       case 'companions-count':
         const usage1 = await getUserUsageServer();

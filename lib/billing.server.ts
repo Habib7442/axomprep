@@ -44,6 +44,31 @@ export async function getUserPlanFeaturesServer(): Promise<PlanFeatures> {
       };
     }
 
+    // Check if user is within their 7-day free trial period
+    const supabase = createSupabaseClient();
+    const { data: trialData, error: trialError } = await supabase
+      .from('user_trials')
+      .select('trial_end_date')
+      .eq('user_id', userId)
+      .single();
+
+    // If user has an active trial, provide trial benefits
+    if (!trialError && trialData) {
+      const now = new Date();
+      const trialEndDate = new Date(trialData.trial_end_date);
+      
+      if (now < trialEndDate) {
+        // During trial: 3 companions, 10 interviews per month (same as free plan)
+        return {
+          companionsLimit: 3,
+          interviewsPerMonth: 10,
+          resumeAnalysis: true,
+          advancedReporting: false,
+          prioritySupport: false
+        };
+      }
+    }
+
     // Check if user has pro plan (Pro Companion - $20/month)
     if (has({ plan: 'pro' })) {
       return {
@@ -66,11 +91,11 @@ export async function getUserPlanFeaturesServer(): Promise<PlanFeatures> {
       };
     }
 
-    // Free plan
+    // Free plan - 3 companions, 10 interviews per month
     return {
-      companionsLimit: 1,
-      interviewsPerMonth: 2,
-      resumeAnalysis: false,
+      companionsLimit: 3,
+      interviewsPerMonth: 10,
+      resumeAnalysis: true, // Allow resume analysis for free users
       advancedReporting: false,
       prioritySupport: false
     };
@@ -78,9 +103,9 @@ export async function getUserPlanFeaturesServer(): Promise<PlanFeatures> {
     console.error("Error in getUserPlanFeaturesServer:", error);
     // Return default free plan features on error
     return {
-      companionsLimit: 1,
-      interviewsPerMonth: 2,
-      resumeAnalysis: false,
+      companionsLimit: 3,
+      interviewsPerMonth: 10,
+      resumeAnalysis: true, // Allow resume analysis for free users
       advancedReporting: false,
       prioritySupport: false
     };
@@ -97,6 +122,35 @@ export async function canCreateCompanionServer(): Promise<boolean> {
 
     if (!userId) return false;
 
+    // Check if user is within their 7-day free trial period
+    const { data: trialData, error: trialError } = await supabase
+      .from('user_trials')
+      .select('trial_end_date')
+      .eq('user_id', userId)
+      .single();
+
+    // If user has an active trial, check against trial limits
+    if (!trialError && trialData) {
+      const now = new Date();
+      const trialEndDate = new Date(trialData.trial_end_date);
+      
+      if (now < trialEndDate) {
+        // During trial: limit to 3 companions (same as free plan)
+        const { data: companions, error } = await supabase
+          .from('companions')
+          .select('id', { count: 'exact' })
+          .eq('author', userId);
+
+        if (error) {
+          console.error("Error checking companion count:", error);
+          return false;
+        }
+
+        const companionCount = companions?.length || 0;
+        return companionCount < 3; // Trial limit: 3 companions (same as free plan)
+      }
+    }
+
     // Check if user has pro plan first (unlimited companions)
     if (has({ plan: 'pro' })) {
       return true;
@@ -106,8 +160,9 @@ export async function canCreateCompanionServer(): Promise<boolean> {
     let companionLimit = 0;
     if (has({ plan: 'basic' })) {
       companionLimit = 10;
-    } else if (has({ feature: "1_companion_limit" })) {
-      companionLimit = 1;
+    } else {
+      // Free plan default (including basic without specific feature)
+      companionLimit = 3;
     }
 
     // Check current companion count
@@ -139,6 +194,39 @@ export async function canStartInterviewServer(): Promise<boolean> {
 
     if (!userId) return false;
 
+    // Check if user is within their 7-day free trial period
+    const { data: trialData, error: trialError } = await supabase
+      .from('user_trials')
+      .select('trial_end_date')
+      .eq('user_id', userId)
+      .single();
+
+    // If user has an active trial, check against trial limits
+    if (!trialError && trialData) {
+      const now = new Date();
+      const trialEndDate = new Date(trialData.trial_end_date);
+      
+      if (now < trialEndDate) {
+        // During trial: limit to 10 interviews per month (same as free plan)
+        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+        
+        const { data: sessions, error } = await supabase
+          .from('session_history')
+          .select('id', { count: 'exact' })
+          .eq('user_id', userId)
+          .is('companion_id', null) // Only count interview practice sessions, not AI tutor sessions
+          .gte('created_at', startOfMonth);
+
+        if (error) {
+          console.error("Error checking session count:", error);
+          return false;
+        }
+
+        const sessionCount = sessions?.length || 0;
+        return sessionCount < 10; // Trial limit: 10 interviews per month (same as free plan)
+      }
+    }
+
     // Check if user has pro plan (unlimited interviews)
     if (has({ plan: 'pro' })) {
       return true;
@@ -148,17 +236,19 @@ export async function canStartInterviewServer(): Promise<boolean> {
     let interviewLimit = 0;
     if (has({ plan: 'basic' })) {
       interviewLimit = 10;
-    } else if (has({ feature: "1_companion_limit" })) {
-      interviewLimit = 2;
+    } else {
+      // Free plan default
+      interviewLimit = 10;
     }
 
-    // Check current session count for this month
+    // Check current session count for this month (only interview practice sessions)
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
     
     const { data: sessions, error } = await supabase
       .from('session_history')
       .select('id', { count: 'exact' })
       .eq('user_id', userId)
+      .is('companion_id', null) // Only count interview practice sessions, not AI tutor sessions
       .gte('created_at', startOfMonth);
 
     if (error) {
@@ -189,7 +279,8 @@ export async function hasFeatureServer(feature: FeatureType): Promise<boolean> {
       case 'interviews_per_month':
         return await canStartInterviewServer();
       case 'resume_analysis':
-        return has({ plan: 'basic' }) || has({ plan: 'pro' });
+        // Allow resume analysis for all plans including free
+        return has({ plan: 'basic' }) || has({ plan: 'pro' }) || has({ plan: 'free' });
       case 'advanced_reporting':
         return has({ plan: 'pro' });
       case 'priority_support':
@@ -209,9 +300,27 @@ export async function hasFeatureServer(feature: FeatureType): Promise<boolean> {
 export async function getUserPlanServer(): Promise<PlanType> {
   try {
     const { userId, has } = await auth();
+    const supabase = createSupabaseClient();
 
     if (!userId) {
       return 'free';
+    }
+
+    // Check if user is within their 7-day free trial period
+    const { data: trialData, error: trialError } = await supabase
+      .from('user_trials')
+      .select('trial_end_date')
+      .eq('user_id', userId)
+      .single();
+
+    // If user has an active trial, return trial status
+    if (!trialError && trialData) {
+      const now = new Date();
+      const trialEndDate = new Date(trialData.trial_end_date);
+      
+      if (now < trialEndDate) {
+        return 'free'; // During trial, show as free plan with enhanced limits
+      }
     }
 
     if (has({ plan: 'pro' })) {
@@ -247,17 +356,21 @@ export async function getUserUsageServer(): Promise<{ companions: number; interv
         .select('id', { count: 'exact' })
         .eq('author', userId);
 
-      // Get interview count for this month
+      // Get interview practice sessions count for this month (sessions without companion_id)
       const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-      const { data: sessions, error: sessionsError } = await supabase
+      const { data: interviewSessions, error: interviewSessionsError } = await supabase
         .from('session_history')
         .select('id', { count: 'exact' })
         .eq('user_id', userId)
+        .is('companion_id', null)
         .gte('created_at', startOfMonth);
+
+      // Note: We're not counting AI tutor sessions separately anymore as they're counted as part of the companions limit
+      // AI tutor sessions are sessions with a companion_id which are already tracked in the companions count
 
       return {
         companions: companions?.length || 0,
-        interviews: sessions?.length || 0
+        interviews: interviewSessions?.length || 0
       };
     } catch (error) {
       console.error("Error fetching usage data:", error);

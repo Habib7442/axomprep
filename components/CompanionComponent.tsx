@@ -133,7 +133,8 @@ const CompanionComponent = ({
       const data = await response.json();
       
       if (!data.canStart) {
-        alert("You've reached your interview limit for your current plan. Please upgrade to continue practicing.");
+        // Redirect to limit reached page when user exceeds interview limit
+        window.location.href = "/limit-reached";
         return;
       }
     } catch (error) {

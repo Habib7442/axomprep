@@ -14,9 +14,9 @@ export async function getUserSubscription() {
     return { 
       plan: 'free',
       features: {
-        companionsLimit: 1,
-        interviewsPerMonth: 2,
-        resumeAnalysis: false,
+        companionsLimit: 3,
+        interviewsPerMonth: 10,
+        resumeAnalysis: true, // Allow resume analysis for free users
         mockTests: false,
         flashcards: false,
         advancedReporting: false,
@@ -71,8 +71,8 @@ export async function getUserSubscription() {
     return { 
       plan: 'free',
       features: {
-        companionsLimit: 1,
-        interviewsPerMonth: 2,
+        companionsLimit: 3,
+        interviewsPerMonth: 10,
         resumeAnalysis: false,
         mockTests: false,
         flashcards: false,

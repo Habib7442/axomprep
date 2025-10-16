@@ -33,9 +33,9 @@ export async function getUserPlanFeatures(): Promise<PlanFeatures> {
   // For now, we'll just return a default object
   // In a real implementation, this would call an API route
   return {
-    companionsLimit: 1,
-    interviewsPerMonth: 2,
-    resumeAnalysis: false,
+    companionsLimit: 3,
+    interviewsPerMonth: 10,
+    resumeAnalysis: true, // Allow resume analysis for free users
     advancedReporting: false,
     prioritySupport: false
   };

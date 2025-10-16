@@ -47,7 +47,7 @@ const HomePage = () => {
       {/* Announcement Banner */}
       <div className="bg-[#1E293B] text-white py-2 text-center text-xs md:text-sm">
         <span className="opacity-90">
-          🎉 Join 10,000+ professionals who have aced their interviews with
+          🎉 Join professionals who have aced their interviews with
           AxomPrep.
         </span>{" "}
         <Link

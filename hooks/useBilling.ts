@@ -4,10 +4,20 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { PlanType, PlanFeatures, FeatureType } from "@/lib/billing";
 
+// Define the trial info type
+interface TrialInfo {
+  hasTrial: boolean;
+  isActive: boolean;
+  daysRemaining?: number;
+  trialStartDate?: string;
+  trialEndDate?: string;
+}
+
 export const useBilling = () => {
   const [plan, setPlan] = useState<PlanType>('free');
   const [features, setFeatures] = useState<PlanFeatures | null>(null);
   const [loading, setLoading] = useState(true);
+  const [trialInfo, setTrialInfo] = useState<TrialInfo | null>(null);
   const { isLoaded, userId } = useAuth();
 
   useEffect(() => {
@@ -38,19 +48,25 @@ export const useBilling = () => {
         const featuresResponse = await fetch('/api/billing?action=features');
         const featuresData = await featuresResponse.json();
         
+        // Fetch trial info
+        const trialResponse = await fetch('/api/user/trial');
+        const trialData = await trialResponse.json();
+        
         setPlan(planData.plan);
         setFeatures(featuresData.features);
+        setTrialInfo(trialData);
       } catch (error) {
         console.error("Error fetching billing info:", error);
         // Set default values on error
         setPlan('free');
         setFeatures({
-          companionsLimit: 1,
-          interviewsPerMonth: 2,
-          resumeAnalysis: false,
+          companionsLimit: 3,
+          interviewsPerMonth: 10,
+          resumeAnalysis: true, // Allow resume analysis for free users
           advancedReporting: false,
           prioritySupport: false
         });
+        setTrialInfo(null);
       } finally {
         setLoading(false);
       }
@@ -104,6 +120,7 @@ export const useBilling = () => {
   return {
     plan,
     features,
+    trialInfo,
     loading,
     canCreateCompanion: canCreateCompanionHook,
     canStartInterview: canStartInterviewHook,

@@ -9,15 +9,15 @@ const UsageLimits = () => {
   const [features, setFeatures] = useState<PlanFeatures | null>(null);
   const [usage, setUsage] = useState<{ companions: number; interviews: number }>({ companions: 0, interviews: 0 });
   const [loading, setLoading] = useState(true);
+  const [trialInfo, setTrialInfo] = useState<{ hasTrial: boolean; isActive: boolean; daysRemaining?: number } | null>(null);
 
   useEffect(() => {
     const fetchUsageData = async () => {
       try {
         // Fetch all billing data from API
-        const [planResponse, featuresResponse, usageResponse] = await Promise.all([
+        const [planResponse, featuresResponse] = await Promise.all([
           fetch('/api/billing?action=plan'),
-          fetch('/api/billing?action=features'),
-          fetch('/api/billing?action=usage')
+          fetch('/api/billing?action=features')
         ]);
 
         const planData = await planResponse.json();
@@ -38,6 +38,15 @@ const UsageLimits = () => {
           companions: companionsData.count || 0,
           interviews: interviewsData.count || 0
         });
+
+        // Check trial status
+        try {
+          const trialResponse = await fetch('/api/user/trial');
+          const trialData = await trialResponse.json();
+          setTrialInfo(trialData);
+        } catch (trialError) {
+          console.error("Error fetching trial info:", trialError);
+        }
       } catch (error) {
         console.error("Error fetching usage data:", error);
       } finally {
@@ -95,6 +104,23 @@ const UsageLimits = () => {
         </span>
       </div>
 
+      {/* Trial Information */}
+      {trialInfo?.hasTrial && trialInfo?.isActive && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-green-800 font-medium">
+              {trialInfo.daysRemaining} days left in your free trial
+            </span>
+          </div>
+          <p className="text-green-700 text-sm mt-1">
+            During your trial: 3 AI Tutors and 10 Interviews per month
+          </p>
+        </div>
+      )}
+
       <div className="space-y-5">
         {/* Companions Usage */}
         <div>
@@ -112,7 +138,7 @@ const UsageLimits = () => {
           </div>
         </div>
 
-        {/* Interviews Usage */}
+        {/* Interview Practice Usage */}
         <div>
           <div className="flex justify-between items-center mb-2">
             <span className="font-medium text-gray-700">Interviews (This Month)</span>
@@ -129,7 +155,7 @@ const UsageLimits = () => {
         </div>
       </div>
 
-      {plan !== 'pro' && (
+      {plan !== 'pro' && !trialInfo?.isActive && (
         <div className="mt-6 pt-6 border-t border-gray-200">
           <div className="flex flex-col sm:flex-row gap-3">
             <Link 

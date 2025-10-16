@@ -45,6 +45,27 @@ const InterviewClient = ({ user, initialTopic }: {
   const router = useRouter();
 
   useEffect(() => {
+    // Initialize trial for new users
+    const initializeTrial = async () => {
+      try {
+        const response = await fetch('/api/user/trial', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+          console.log('Trial initialized:', data.message);
+        } else {
+          console.log('Trial initialization failed or already exists:', data.error || data.message);
+        }
+      } catch (error) {
+        console.error('Error initializing trial:', error);
+      }
+    };
+
+    // Only initialize trial if user is authenticated
+    if (user?.id) {
+      initializeTrial();
+    }
+
     if (lottieRef.current) {
       if (isSpeaking) {
         lottieRef.current?.play();
@@ -52,7 +73,7 @@ const InterviewClient = ({ user, initialTopic }: {
         lottieRef.current?.stop();
       }
     }
-  }, [isSpeaking]);
+  }, [user?.id, isSpeaking]);
 
   // Save session to Supabase when interview finishes
   useEffect(() => {
@@ -128,7 +149,8 @@ const InterviewClient = ({ user, initialTopic }: {
       const data = await response.json();
       
       if (!data.canStart) {
-        alert("You've reached your interview limit for your current plan. Please upgrade to continue practicing.");
+        // Redirect to limit reached page when user exceeds interview limit
+        window.location.href = "/limit-reached";
         return;
       }
     } catch (error) {

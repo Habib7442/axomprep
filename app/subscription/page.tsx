@@ -75,7 +75,7 @@ const Subscription = () => {
                                         <p className="font-medium">2 Interviews/month</p>
                                     </div>
                                     <div className="p-4">
-                                        <p className="font-medium text-gray-400">-</p>
+                                        <p className="font-medium text-green-600">2 Resume Interviews/month</p>
                                     </div>
                                     <div className="p-4">
                                         <p className="font-medium text-gray-400">-</p>
@@ -97,7 +97,7 @@ const Subscription = () => {
                                         <p className="font-medium">10 Tutors</p>
                                     </div>
                                     <div className="p-4">
-                                        <p className="font-medium">15 Interviews/month</p>
+                                        <p className="font-medium">10 Interviews/month</p>
                                     </div>
                                     <div className="p-4">
                                         <p className="font-medium text-green-600">✓</p>
