@@ -147,8 +147,8 @@ const CompanionsLibrary = async ({ searchParams }: { searchParams: { [key: strin
               My AI Tutors
             </h1>
             <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12 max-w-2xl mx-auto">
-              <h2 className="text-2xl font-bold text-[#0F172A] mb-4">Error Loading AI Tutors</h2>
-              <p className="text-[#64748B] mb-8">We encountered an issue while loading your AI Tutors. Please try again later.</p>
+              <h2 className="text-2xl font-bold text-[#0F172A] mb-4">Unable to Load AI Tutors</h2>
+              <p className="text-[#64748B] mb-8">We encountered an issue while loading your AI Tutors. This could be due to a network problem or server issue. Please try again later.</p>
               <Link href="/companions/new">
                 <button className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] text-white px-6 py-3 rounded-lg font-semibold text-base md:text-lg hover:from-[#FF844B] hover:to-[#FFB088] transition-all shadow-lg">
                   Create Your First AI Tutor

@@ -143,7 +143,8 @@ export async function canCreateCompanionServer(): Promise<boolean> {
 
         if (error) {
           console.error("Error checking companion count:", error);
-          return false;
+          // If we can't check the count, allow creation to avoid blocking new users
+          return true;
         }
 
         const companionCount = companions?.length || 0;
@@ -173,14 +174,16 @@ export async function canCreateCompanionServer(): Promise<boolean> {
 
     if (error) {
       console.error("Error checking companion count:", error);
-      return false;
+      // If we can't check the count, allow creation to avoid blocking new users
+      return true;
     }
 
     const companionCount = companions?.length || 0;
     return companionCount < companionLimit;
   } catch (error) {
     console.error("Error in canCreateCompanionServer:", error);
-    return false;
+    // If there's any other error, allow creation to avoid blocking new users
+    return true;
   }
 }
 
@@ -219,7 +222,8 @@ export async function canStartInterviewServer(): Promise<boolean> {
 
         if (error) {
           console.error("Error checking session count:", error);
-          return false;
+          // If we can't check the count, allow starting interview to avoid blocking new users
+          return true;
         }
 
         const sessionCount = sessions?.length || 0;
@@ -253,14 +257,16 @@ export async function canStartInterviewServer(): Promise<boolean> {
 
     if (error) {
       console.error("Error checking session count:", error);
-      return false;
+      // If we can't check the count, allow starting interview to avoid blocking new users
+      return true;
     }
 
     const sessionCount = sessions?.length || 0;
     return sessionCount < interviewLimit;
   } catch (error) {
     console.error("Error in canStartInterviewServer:", error);
-    return false;
+    // If there's any other error, allow starting interview to avoid blocking new users
+    return true;
   }
 }
 

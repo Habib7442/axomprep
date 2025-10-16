@@ -60,7 +60,7 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
 
         setReport(reportData);
       } catch (err) {
-        setError("Failed to load report. Please try again.");
+        setError("Unable to load interview report. Please check your connection and try again.");
         console.error("Error fetching report:", err);
       } finally {
         setLoading(false);
@@ -118,9 +118,10 @@ export default function ReportDetailPage({ params }: { params: Promise<{ id: str
           </div>
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <div className="bg-red-50 text-red-700 p-4 rounded mb-4">
-                {error || "Report not found"}
-              </div>
+              <h2 className="text-2xl font-bold text-[#0F172A] mb-4">Unable to Load Interview Report</h2>
+              <p className="text-[#64748B] mb-6">
+                {error || "We couldn't find the report you're looking for. It may have been deleted or the link might be incorrect."}
+              </p>
               <button 
                 onClick={() => router.back()}
                 className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg"

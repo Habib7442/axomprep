@@ -25,10 +25,9 @@ export const createCompanion = async (formData: CreateCompanion) => {
       redirect("/limit-reached");
     }
   } catch (error) {
-    // If we can't check permissions, we should block creation for safety
+    // If we can't check permissions, we should allow creation to avoid blocking new users
     console.error("Error checking companion creation permission:", error);
-    // Redirect to limit reached page when we can't verify permissions
-    redirect("/limit-reached");
+    // Continue with creation instead of redirecting to limit reached page
   }
 
   const { data, error } = await supabase
@@ -151,8 +150,8 @@ export const newCompanionPermissions = async () => {
     return data.canCreate;
   } catch (error) {
     console.error("Error checking companion creation permission:", error);
-    // If we can't check permissions, we should block creation for safety
-    return false;
+    // If we can't check permissions, we should allow creation to avoid blocking new users
+    return true;
   }
 }
 

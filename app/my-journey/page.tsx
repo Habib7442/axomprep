@@ -46,7 +46,9 @@ export default function MyJourneyPage() {
 
         setInterviewReports(reportsData || []);
       } catch (err) {
-        setError("Failed to load data. Please try again.");
+        // Only set error if it's not because there are no reports yet
+        // (Supabase returns an empty array when there are no matching records, not an error)
+        setError("Unable to load interview reports. Please check your connection and try again.");
         console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
@@ -96,7 +98,8 @@ export default function MyJourneyPage() {
           </div>
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <div className="bg-red-50 text-red-700 p-4 rounded mb-4">{error}</div>
+              <h2 className="text-2xl font-bold text-[#0F172A] mb-4">Unable to Load Interview Reports</h2>
+              <p className="text-[#64748B] mb-6">We encountered an issue while loading your interview reports. This could be due to a network problem or server issue. Please try again later.</p>
               <Link href="/interview">
                 <button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg">
                   Start Interview Practice
