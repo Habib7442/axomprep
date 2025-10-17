@@ -11,7 +11,7 @@ export const createCompanion = async (formData: CreateCompanion) => {
 
   // Check if user can create a companion by calling our API
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/billing?action=can-create-companion`, {
+    const response = await fetch(`/api/billing?action=can-create-companion`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export const getUserCompanions = async (userId: string) => {
 export const newCompanionPermissions = async () => {
   try {
     // Call our API to check if user can create a companion
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/billing?action=can-create-companion`, {
+    const response = await fetch(`/api/billing?action=can-create-companion`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

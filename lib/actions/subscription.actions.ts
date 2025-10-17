@@ -33,10 +33,10 @@ export async function getUserSubscription() {
     const supabase = createSupabaseClient();
     
     // Get user's plan from our API
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/billing?action=plan`);
+    const response = await fetch(`/api/billing?action=plan`);
     const planData = await response.json();
     
-    const featuresResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/billing?action=features`);
+    const featuresResponse = await fetch(`/api/billing?action=features`);
     const featuresData = await featuresResponse.json();
     
     const plan = planData.plan;

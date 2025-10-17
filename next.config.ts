@@ -8,7 +8,10 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    remotePatterns: [{ hostname: "img.clerk.com" }],
+    remotePatterns: [
+      { hostname: "img.clerk.com" },
+      { hostname: "ebzjisaqomoombvmbyyb.supabase.co" } // Add Supabase storage domain
+    ],
   },
 };
 
