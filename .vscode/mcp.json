@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "Sentry": {
+      "url": "https://mcp.sentry.dev/mcp/persist-ventures/javascript-nextjs",
+      "type": "http"
+    }
+  }
+}
