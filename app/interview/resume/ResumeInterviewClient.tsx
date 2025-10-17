@@ -11,6 +11,7 @@ import { createPartFromUri, GoogleGenAI } from "@google/genai";
 import ReactMarkdown from "react-markdown";
 import { configureAssistant } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { initializeUserTrial } from "@/lib/actions/companion.actions";
 
 interface InterviewReport {
   strengths: string[];
@@ -54,13 +55,12 @@ const ResumeInterviewClient = ({ user }: {
     // Initialize trial for new users
     const initializeTrial = async () => {
       try {
-        const response = await fetch('/api/user/trial', { method: 'POST' });
-        const data = await response.json();
+        const result = await initializeUserTrial();
         
-        if (data.success) {
-          console.log('Trial initialized:', data.message);
+        if (result.success) {
+          console.log('Trial initialized:', result.message);
         } else {
-          console.log('Trial initialization failed or already exists:', data.error || data.message);
+          console.log('Trial initialization failed or already exists:', result.error || result.message);
         }
       } catch (error) {
         console.error('Error initializing trial:', error);

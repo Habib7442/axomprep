@@ -6,7 +6,7 @@ import { vapi } from "@/lib/vapi.sdk";
 import Image from "next/image";
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
 import soundwaves from "@/constants/soundwaves.json";
-import { addToSessionHistory } from "@/lib/actions/companion.actions";
+import { addToSessionHistory, initializeUserTrial } from "@/lib/actions/companion.actions";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -59,13 +59,17 @@ const CompanionComponent = ({
     // Initialize trial for new users
     const initializeTrial = async () => {
       try {
-        const response = await fetch('/api/user/trial', { method: 'POST' });
-        const data = await response.json();
-        
-        if (data.success) {
-          console.log('Trial initialized:', data.message);
+        // Check if initializeUserTrial is available before calling it
+        if (typeof initializeUserTrial === 'function') {
+          const result = await initializeUserTrial();
+          
+          if (result.success) {
+            console.log('Trial initialized:', result.message);
+          } else {
+            console.log('Trial initialization failed or already exists:', result.error || result.message);
+          }
         } else {
-          console.log('Trial initialization failed or already exists:', data.error || data.message);
+          console.log('initializeUserTrial function not available');
         }
       } catch (error) {
         console.error('Error initializing trial:', error);
@@ -430,17 +434,17 @@ const CompanionComponent = ({
   };
 
   return (
-    <section className="flex flex-col h-[75vh] lg:h-[80vh]">
-      <section className="flex flex-col lg:flex-row gap-8 mb-8">
+    <section className="flex flex-col h-full w-full">
+      <section className="flex flex-col lg:flex-row gap-8 mb-6 flex-shrink-0 w-full">
         <div className="companion-section w-full lg:w-7/12 xl:w-8/12">
           <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
             <div
-              className="companion-avatar w-[120px] h-[120px] md:w-[150px] md:h-[150px] lg:w-[180px] lg:h-[180px] rounded-full overflow-hidden flex items-center justify-center"
+              className="companion-avatar w-48 h-48 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center overflow-hidden relative"
               style={{ backgroundColor: getSubjectColor(subject) }}
             >
               <div
                 className={cn(
-                  "absolute transition-opacity duration-1000 flex items-center justify-center",
+                  "absolute transition-opacity duration-1000 flex items-center justify-center w-full h-full",
                   callStatus === CallStatus.FINISHED ||
                     callStatus === CallStatus.INACTIVE
                     ? "opacity-100"
@@ -452,15 +456,15 @@ const CompanionComponent = ({
                 <Image
                   src={voice === "female" ? "/icons/female-ai-assistant.png" : "/icons/male-ai-assistant.png"}
                   alt={`${name} - ${voice} voice`}
-                  width={120}
-                  height={120}
-                  className="w-full h-full object-cover"
+                  width={192}
+                  height={192}
+                  className="w-full h-full object-cover object-center"
                 />
               </div>
 
               <div
                 className={cn(
-                  "absolute transition-opacity duration-1000",
+                  "absolute transition-opacity duration-1000 w-full h-full",
                   callStatus === CallStatus.ACTIVE ? "opacity-100" : "opacity-0"
                 )}
               >
@@ -468,14 +472,14 @@ const CompanionComponent = ({
                   lottieRef={lottieRef}
                   animationData={soundwaves}
                   autoplay={false}
-                  className="companion-lottie w-[120px] h-[120px] md:w-[150px] md:h-[150px] lg:w-[180px] lg:h-[180px]"
+                  className="companion-lottie w-full h-full"
                 />
               </div>
             </div>
             <div className="text-center lg:text-left">
               <h2 className="font-bold text-2xl md:text-3xl lg:text-4xl text-[#1F2937] mb-2">{name}</h2>
               <p className="text-lg md:text-xl text-[#4B5563] mb-4">{topic}</p>
-              <div className="flex flex-wrap justify-center lg:justify-start gap-2">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-6">
                 <div 
                   className="px-3 py-1 rounded-full text-sm font-semibold capitalize text-white"
                   style={{ backgroundColor: getSubjectColor(subject) }}
@@ -493,13 +497,13 @@ const CompanionComponent = ({
         <div className="user-section w-full lg:w-5/12 xl:w-4/12">
           <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-6 h-full flex flex-col">
             <div className="flex flex-col items-center mb-6">
-              <div className="relative mb-4">
+              <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center overflow-hidden mb-4">
                 <Image
                   src={userImage}
                   alt={userName}
-                  width={100}
-                  height={100}
-                  className="rounded-full border-4 border-[#FFF7F2] w-[100px] h-[100px] object-cover"
+                  width={192}
+                  height={192}
+                  className="w-full h-full object-cover object-center"
                 />
                 {callStatus === CallStatus.ACTIVE && !isMuted && isSpeaking && (
                   <div className="absolute -top-2 -right-2 bg-green-500 rounded-full p-2">
@@ -517,7 +521,7 @@ const CompanionComponent = ({
             
             <div className="flex flex-col gap-4 mt-auto">
               <button
-                className={`flex items-center justify-center gap-3 px-4 py-3 rounded-xl transition-colors text-base font-semibold ${
+                className={`flex items-center justify-center gap-3 px-4 py-3 rounded-xl transition-colors text-base font-semibold w-full ${
                   callStatus === CallStatus.ACTIVE 
                     ? isMuted 
                       ? "bg-gray-200 hover:bg-gray-300 text-gray-700" 
@@ -532,7 +536,7 @@ const CompanionComponent = ({
                   alt="mic"
                   width={24}
                   height={24}
-                />
+              />
                 <span>
                   {isMuted ? "Unmute Microphone" : "Mute Microphone"}
                 </span>
@@ -540,7 +544,7 @@ const CompanionComponent = ({
               
               <button
                 className={cn(
-                  "rounded-xl py-3 px-4 cursor-pointer transition-all text-white font-semibold text-base flex items-center justify-center gap-2",
+                  "rounded-xl py-3 px-4 cursor-pointer transition-all text-white font-semibold text-base flex items-center justify-center gap-2 w-full",
                   callStatus === CallStatus.ACTIVE 
                     ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg" 
                     : "bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] shadow-lg",
@@ -579,78 +583,34 @@ const CompanionComponent = ({
         </div>
       </section>
 
-      <section className="transcript bg-white rounded-2xl border border-gray-200 shadow-md p-6 flex-grow" ref={conversationRef}>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-[#1F2937]">Conversation</h3>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-            <span className="text-sm text-[#4B5563]">
-              {callStatus === CallStatus.ACTIVE ? "Session Active" : 
-               callStatus === CallStatus.CONNECTING ? "Connecting..." : 
-               callStatus === CallStatus.FINISHED ? "Session Ended" : "Ready to Start"}
-            </span>
-          </div>
-        </div>
-        
-        <div className="transcript-message no-scrollbar bg-gray-50 rounded-xl p-4 h-[calc(100%-2rem)]">
-          {messages.length > 0 ? (
-            <div className="space-y-4">
-              {messages.map((message, index) => (
-                <div 
-                  key={index} 
-                  className={`p-4 rounded-xl ${
-                    message.role === "assistant" 
-                      ? "bg-white border border-[#E2E8F0]" 
-                      : "bg-[#FFEEE6] border border-[#FDE6D8]"
+      <section className="bg-white rounded-2xl shadow-lg p-6 flex-grow w-full">
+        <h2 className="text-2xl font-bold mb-4">Conversation Transcript</h2>
+        <div className="bg-gray-50 rounded-xl p-4 h-[600px] overflow-y-auto">
+          <div className="space-y-4">
+            {messages.length > 0 ? (
+              messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`p-4 rounded-lg ${
+                    message.role === "assistant"
+                      ? "bg-blue-100 border border-blue-200"
+                      : "bg-orange-100 border border-orange-200"
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    {message.role === "assistant" ? (
-                      <div 
-                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: getSubjectColor(subject) }}
-                      >
-                        <span className="text-white text-xs font-bold">
-                          {name.charAt(0)}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-[#FF6B35]">
-                        <span className="text-white text-xs font-bold">
-                          {userName.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-[#1F2937]">
-                          {message.role === "assistant" ? name.split(" ")[0] : userName}
-                        </span>
-                        <span className="text-xs text-[#9CA3AF]">
-                          {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      <p className="text-[#4B5563]">{message.content}</p>
-                    </div>
+                  <div className="font-bold mb-2">
+                    {message.role === "assistant" ? name.split(" ")[0] : userName}
                   </div>
+                  <p className="text-[#4B5563]">{message.content}</p>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <div className="bg-[#FFF7F2] rounded-full p-4 mb-4">
-                <svg className="w-12 h-12 text-[#FF6B35]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                </svg>
+              ))
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                {callStatus === CallStatus.ACTIVE
+                  ? "Conversation in progress... Speak to the microphone to begin."
+                  : "Your conversation with your AI tutor will appear here."}
               </div>
-              <h4 className="text-xl font-bold text-[#1F2937] mb-2">Start Your Conversation</h4>
-              <p className="text-[#4B5563] max-w-md">
-                {callStatus === CallStatus.INACTIVE 
-                  ? "Click 'Start Session' to begin your conversation with your AI tutor." 
-                  : "Speak naturally to your AI tutor. Your conversation will appear here."}
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </section>
       

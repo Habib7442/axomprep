@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const Footer = () => {
   return (
@@ -7,18 +8,21 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-bold mb-4">AxomPrep</h3>
+            <div className="flex items-center gap-2 mb-4">
+              <Image src="/images/logo.png" alt="logo" width={36} height={34} />
+              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                AxomPrep
+              </span>
+            </div>
             <p className="text-gray-400">
-              Your AI-powered interview coach that helps you practice, get feedback, and track your progress.
+              Your AI-powered learning platform that helps you master subjects, practice interviews, and track your progress.
             </p>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-4">Products</h4>
+            <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/interview" className="hover:text-white transition-colors">Interview Practice</Link></li>
-              <li><Link href="/interview/resume" className="hover:text-white transition-colors">Resume Analysis</Link></li>
-              <li><Link href="/my-journey" className="hover:text-white transition-colors">My Journey</Link></li>
+              <li>Email: axomprep@outlook.com</li>
             </ul>
           </div>
           
@@ -27,7 +31,6 @@ const Footer = () => {
             <ul className="space-y-2 text-gray-400">
               <li><Link href="#" className="hover:text-white transition-colors">Blog</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Help Center</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Community</Link></li>
             </ul>
           </div>
           
@@ -35,8 +38,6 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-gray-400">
               <li><Link href="#" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
         </div>

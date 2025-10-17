@@ -69,15 +69,44 @@ const CompanionForm = () => {
         duration: Number(values.duration)
       };
       
-      const companion = await createCompanion(formData)
-      if(companion){
-        redirect(`/companions/${companion.id}`)
+      console.log("Attempting to create companion with data:", formData);
+      const result = await createCompanion(formData);
+      console.log("Companion creation result:", result);
+      
+      // Check if there was an error
+      if ('error' in result) {
+        if (result.error === "limit_reached") {
+          // Redirect to limit reached page
+          window.location.href = "/limit-reached";
+          return;
+        } else if (result.error === "permission_error") {
+          // Redirect to limit reached page for permission errors
+          window.location.href = "/limit-reached";
+          return;
+        } else {
+          // Show error message for other errors
+          console.error("Error creating companion:", result.error);
+          setIsSubmitting(false);
+          alert("Failed to create AI Tutor. Please try again.");
+          return;
+        }
+      }
+      
+      // If successful, redirect to the new companion page
+      if (result.success && result.companion) {
+        window.location.href = `/companions/${result.companion.id}`;
       } else {
-        console.log("Failed to create an AI Tutor")
-        redirect("/")
+        console.log("Failed to create an AI Tutor - no companion returned");
+        window.location.href = "/";
       }
     } catch (error) {
-      console.error("Error creating companion:", error);
+      console.error("Unexpected error creating companion:", error);
+      // Log more detailed error information
+      if (error instanceof Error) {
+        console.error("Error name:", error.name);
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
       // Reset submitting state on error so user can try again
       setIsSubmitting(false);
       // Optionally show an error message to the user

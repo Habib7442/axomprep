@@ -13,9 +13,9 @@ const CTA = () => {
         Create a customized AI Tutor that matches your learning style
         and preferences.
       </p>
-      <Image src="/images/cta.svg" alt="cta" width={362} height={232} />
+      <Image src="/images/cta.svg" alt="cta" width={362} height={232} className="w-full h-auto object-contain" />
       <button className="btn-primary">
-        <Image src="/icons/plus.svg" alt="plus" width={12} height={12} />
+        <Image src="/icons/plus.svg" alt="plus" width={12} height={12} className="object-contain" />
         <Link href="/companions/new">
           <p>Build a new AI Tutor</p>
         </Link>

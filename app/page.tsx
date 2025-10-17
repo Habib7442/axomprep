@@ -63,123 +63,100 @@ const HomePage = () => {
       </div>
 
       {/* Hero Section with gradient background */}
-      <div className="bg-gradient-to-br from-[#EEF2FF] via-[#F8F9FB] to-[#FEF3C7] py-12 md:py-20">
+      <div className="bg-gradient-to-br from-[#EEF2FF] via-[#F8F9FB] to-[#FEF3C7] py-16 md:py-24 lg:py-32">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col items-center text-center">
-            {/* Badge */}
+            {/* Larger Logo */}
             <div className="mb-6">
-              <div className="inline-flex items-center justify-center border-2 border-teal-500 rounded-full p-1">
+              <div className="inline-flex items-center justify-center border-2 border-teal-500 rounded-full p-2">
                 <Image
                   src="/images/logo.png"
                   alt="AxomPrep Logo"
-                  width={40}
-                  height={40}
+                  width={80}
+                  height={80}
                   className="rounded-full"
                 />
               </div>
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6 text-[#0F172A] tracking-tight max-w-5xl leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 md:mb-8 text-[#0F172A] tracking-tight max-w-5xl leading-tight">
               AxomPrep: Your Gateway to <br className="hidden md:block" />
               English Fluency and{" "}
               <span className="text-[#6366F1]">Career Success</span>
             </h1>
 
-            {/* Subheading */}
-            <p className="text-base md:text-xl lg:text-2xl text-[#4B5563] mb-6 md:mb-8 max-w-3xl leading-relaxed font-normal">
-              AxomPrep empowers Indian learners with AI-powered English learning
-              and interview practice. Master conversational English and ace job
-              interviews from home.
-            </p>
+            {/* Start Interview Card moved to Hero Section */}
+            <div className="max-w-4xl w-full mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8 lg:p-12 border border-[#E2E8F0] mt-8">
+              <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-6 md:mb-8">
+                <input
+                  type="text"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="Enter interview topic (e.g., React Developer, Marketing Manager)"
+                  className="flex-grow px-4 md:px-6 py-3 md:py-4 text-base md:text-lg border border-[#E2E8F0] rounded-lg focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 focus:outline-none transition-all bg-white text-[#0F172A] placeholder-[#94A3B8]"
+                />
+                <button
+                  onClick={handleStartInterview}
+                  className="bg-[#6366F1] hover:bg-[#4F46E5] text-white px-6 md:px-8 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all shadow-md hover:shadow-lg whitespace-nowrap"
+                >
+                  Start Interview
+                </button>
+              </div>
+
+              <div>
+                <p className="text-[#64748B] mb-3 md:mb-4 font-medium text-sm md:text-base">
+                  Popular Interview Topics:
+                </p>
+                <div className="flex flex-wrap gap-2 md:gap-3">
+                  {interviewTopics.map((topicItem, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setTopic(topicItem)}
+                      className="px-3 py-2 md:px-5 md:py-2.5 bg-[#F1F5F9] text-[#475569] rounded-lg hover:bg-[#E2E8F0] hover:text-[#0F172A] transition-colors font-medium text-xs md:text-sm"
+                    >
+                      {topicItem}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
-        {/* Start Your Interview Practice Section */}
+        {/* Create Your Own AI Tutor Section - Improved design */}
         <div className="mb-16 md:mb-32">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-[#0F172A]">
-              Start Your Interview Practice
-            </h2>
-            <p className="text-base md:text-xl text-[#475569] max-w-2xl mx-auto">
-              Choose a topic or enter your own to begin a realistic mock
-              interview
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8 lg:p-12 border border-[#E2E8F0]">
-            <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-6 md:mb-8">
-              <input
-                type="text"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="Enter interview topic (e.g., React Developer, Marketing Manager)"
-                className="flex-grow px-4 md:px-6 py-3 md:py-4 text-base md:text-lg border border-[#E2E8F0] rounded-lg focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20 focus:outline-none transition-all bg-white text-[#0F172A] placeholder-[#94A3B8]"
-              />
-              <button
-                onClick={handleStartInterview}
-                className="bg-[#6366F1] hover:bg-[#4F46E5] text-white px-6 md:px-8 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all shadow-md hover:shadow-lg whitespace-nowrap"
-              >
-                Start Interview
-              </button>
-            </div>
-
-            <div>
-              <p className="text-[#64748B] mb-3 md:mb-4 font-medium text-sm md:text-base">
-                Popular Interview Topics:
-              </p>
-              <div className="flex flex-wrap gap-2 md:gap-3">
-                {interviewTopics.map((topicItem, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setTopic(topicItem)}
-                    className="px-3 py-2 md:px-5 md:py-2.5 bg-[#F1F5F9] text-[#475569] rounded-lg hover:bg-[#E2E8F0] hover:text-[#0F172A] transition-colors font-medium text-xs md:text-sm"
-                  >
-                    {topicItem}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Create Your Own AI Tutor Section */}
-        <div className="mb-16 md:mb-32">
-          <div className="bg-gradient-to-br from-[#1E293B] to-[#334155] rounded-2xl md:rounded-3xl p-8 md:p-12 lg:p-16 text-center text-white shadow-2xl">
-            <div className="mb-4 md:mb-6">
-              <span className="inline-block bg-[#FCD34D] text-[#78350F] px-3 py-1.5 rounded-full text-xs md:text-sm font-bold">
+          <div className="bg-white/30 backdrop-blur-md rounded-2xl md:rounded-3xl p-8 md:p-12 lg:p-16 border border-white/20 shadow-lg">
+            <div className="text-center mb-6 md:mb-8">
+              <span className="inline-block bg-gradient-to-r from-[#FF6B35] to-[#FF914D] text-white px-4 py-2 rounded-full text-xs md:text-sm font-bold mb-4">
                 Start Learning Your Way
               </span>
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-[#1F2937]">
+                Build and Personalize Your AI Tutor
+              </h2>
+              <p className="text-base md:text-xl text-[#4B5563] max-w-2xl mx-auto mb-6 md:mb-8 leading-relaxed">
+                Create a customized AI tutor that matches your learning style and preferences.
+              </p>
             </div>
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
-              Build and Personalize Your AI Tutor
-            </h2>
-            <p className="text-base md:text-xl text-[#CBD5E1] max-w-2xl mx-auto mb-6 md:mb-8 leading-relaxed">
-              Create a customized AI tutor that matches your learning style and
-              preferences.
-            </p>
 
             {/* Icon Grid */}
             <div className="flex flex-wrap justify-center gap-4 md:gap-6 mb-8 md:mb-10 max-w-lg mx-auto">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/50 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
                 <span className="text-2xl md:text-3xl">🎓</span>
               </div>
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/50 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
                 <span className="text-2xl md:text-3xl">💻</span>
               </div>
-              <div className="w-14 h-14 md:w-20 md:h-20 bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] rounded-xl md:rounded-2xl flex items-center justify-center shadow-xl border-2 border-white/30 transform scale-105">
+              <div className="w-14 h-14 md:w-20 md:h-20 bg-gradient-to-br from-[#FF6B35] to-[#FF914D] rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg border border-white/30 transform scale-105">
                 <span className="text-2xl md:text-4xl">🤖</span>
               </div>
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/50 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
                 <span className="text-2xl md:text-3xl">👥</span>
               </div>
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/50 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30">
                 <span className="text-2xl md:text-3xl">💬</span>
-              </div>
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-                <span className="text-2xl md:text-3xl">📝</span>
               </div>
             </div>
 
@@ -195,10 +172,6 @@ const HomePage = () => {
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-[#0F172A]">
               Why Choose AxomPrep?
             </h2>
-            <p className="text-base md:text-xl text-[#475569] max-w-2xl mx-auto">
-              Experience the future of interview preparation with our AI-powered
-              platform
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">

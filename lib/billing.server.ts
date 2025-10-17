@@ -50,7 +50,7 @@ export async function getUserPlanFeaturesServer(): Promise<PlanFeatures> {
       .from('user_trials')
       .select('trial_end_date')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     // If user has an active trial, provide trial benefits
     if (!trialError && trialData) {
@@ -127,7 +127,7 @@ export async function canCreateCompanionServer(): Promise<boolean> {
       .from('user_trials')
       .select('trial_end_date')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     // If user has an active trial, check against trial limits
     if (!trialError && trialData) {
@@ -202,7 +202,7 @@ export async function canStartInterviewServer(): Promise<boolean> {
       .from('user_trials')
       .select('trial_end_date')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     // If user has an active trial, check against trial limits
     if (!trialError && trialData) {
@@ -317,7 +317,7 @@ export async function getUserPlanServer(): Promise<PlanType> {
       .from('user_trials')
       .select('trial_end_date')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     // If user has an active trial, return trial status
     if (!trialError && trialData) {

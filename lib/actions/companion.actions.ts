@@ -4,30 +4,29 @@ import { auth } from "@clerk/nextjs/server";
 import { createSupabaseClient } from "../supabase";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { canCreateCompanionServer } from "../billing.server";
 
 export const createCompanion = async (formData: CreateCompanion) => {
   const { userId: author } = await auth();
   const supabase = createSupabaseClient();
 
-  // Check if user can create a companion by calling our API
+  console.log("Creating companion for user:", author);
+  console.log("Form data:", formData);
+
+  // Check if user can create a companion by calling our server function directly
   try {
-    const response = await fetch(`/api/billing?action=can-create-companion`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const canCreate = await canCreateCompanionServer();
+    console.log("User can create companion:", canCreate);
     
-    const data = await response.json();
-    
-    if (!data.canCreate) {
-      // Redirect to limit reached page when user exceeds companion limit
-      redirect("/limit-reached");
+    if (!canCreate) {
+      // Return a specific error code instead of redirecting
+      console.log("User cannot create companion");
+      return { error: "limit_reached" };
     }
   } catch (error) {
     // If we can't check permissions, we should NOT allow creation to avoid bypassing limits
     console.error("Error checking companion creation permission:", error);
-    redirect("/limit-reached");
+    return { error: "permission_error" };
   }
 
   const { data, error } = await supabase
@@ -35,10 +34,13 @@ export const createCompanion = async (formData: CreateCompanion) => {
     .insert({ ...formData, author })
     .select();
 
-  if (error || !data)
-    throw new Error(error?.message || "Failed to create a companion");
+  if (error || !data) {
+    console.error("Error creating companion:", error);
+    return { error: error?.message || "Failed to create a companion" };
+  }
 
-  return data[0];
+  console.log("Companion created successfully:", data[0]);
+  return { success: true, companion: data[0] };
 };
 
 export const getAllCompanions = async ({
@@ -138,22 +140,131 @@ export const getUserCompanions = async (userId: string) => {
 
 export const newCompanionPermissions = async () => {
   try {
-    // Call our API to check if user can create a companion
-    const response = await fetch(`/api/billing?action=can-create-companion`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    const data = await response.json();
-    return data.canCreate ?? false; // Return false if canCreate is undefined
+    // Use server-side function directly to avoid authentication issues with fetch
+    const canCreate = await canCreateCompanionServer();
+    return canCreate;
   } catch (error) {
     console.error("Error checking companion creation permission:", error);
     // If we can't check permissions, we should NOT allow creation to avoid bypassing limits
     return false;
   }
 }
+
+// Trial actions
+export const initializeUserTrial = async () => {
+  try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return { 
+        success: false,
+        error: "User not authenticated"
+      };
+    }
+
+    const supabase = createSupabaseClient();
+
+    // Check if user already has a trial record
+    const { data: existingTrial, error: fetchError } = await supabase
+      .from('user_trials')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no record exists
+
+    // If user already has a trial, return success
+    if (existingTrial) {
+      return { 
+        success: true,
+        message: "Trial already exists for this user" 
+      };
+    }
+
+    // Create a new trial record for the user (trial end date will be set automatically by the trigger)
+    const { data, error } = await supabase
+      .from('user_trials')
+      .insert([
+        {
+          user_id: userId,
+          trial_start_date: new Date().toISOString()
+          // trial_end_date will be set automatically by the database trigger
+        }
+      ])
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error creating trial:", error);
+      return { 
+        success: false,
+        error: "Failed to create trial"
+      };
+    }
+
+    return { 
+      success: true,
+      message: "7-day free trial initialized successfully",
+      trial: data
+    };
+  } catch (error) {
+    console.error("Error in trial initialization:", error);
+    return { 
+      success: false,
+      error: "Internal server error"
+    };
+  }
+};
+
+export const checkUserTrialStatus = async () => {
+  try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return { 
+        hasTrial: false,
+        isActive: false,
+        error: "User not authenticated"
+      };
+    }
+
+    const supabase = createSupabaseClient();
+
+    // Get user's trial information
+    const { data: trialData, error } = await supabase
+      .from('user_trials')
+      .select('trial_start_date, trial_end_date')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error || !trialData) {
+      // If no trial record exists, user doesn't have a trial
+      return { 
+        hasTrial: false,
+        isActive: false,
+        message: "No trial found for this user"
+      };
+    }
+
+    // Check if trial is still active
+    const now = new Date();
+    const trialEndDate = new Date(trialData.trial_end_date);
+    const isActive = now < trialEndDate;
+
+    return { 
+      hasTrial: true,
+      isActive,
+      trialStartDate: trialData.trial_start_date,
+      trialEndDate: trialData.trial_end_date,
+      daysRemaining: Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    };
+  } catch (error) {
+    console.error("Error checking trial status:", error);
+    return { 
+      hasTrial: false,
+      isActive: false,
+      error: "Internal server error"
+    };
+  }
+};
 
 // Bookmarks
 export const addBookmark = async (companionId: string, path: string) => {

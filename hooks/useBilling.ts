@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { PlanType, PlanFeatures, FeatureType } from "@/lib/billing";
+import { checkUserTrialStatus } from "@/lib/actions/companion.actions";
 
 // Define the trial info type
 interface TrialInfo {
@@ -49,8 +50,7 @@ export const useBilling = () => {
         const featuresData = await featuresResponse.json();
         
         // Fetch trial info
-        const trialResponse = await fetch('/api/user/trial');
-        const trialData = await trialResponse.json();
+        const trialData = await checkUserTrialStatus();
         
         setPlan(planData.plan);
         setFeatures(featuresData.features);

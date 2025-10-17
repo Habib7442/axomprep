@@ -1,9 +1,9 @@
 import React from "react";
 import NewCompanionClient from "./NewCompanionClient";
 import Image from "next/image";
-import { newCompanionPermissions } from "@/lib/actions/companion.actions";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { canCreateCompanionServer } from "@/lib/billing.server";
 
 const NewCompanion = async () => {
   const user = await currentUser();
@@ -13,7 +13,8 @@ const NewCompanion = async () => {
     redirect("/sign-in");
   }
 
-  const canCreateCompanion = await newCompanionPermissions();
+  // Check if user can create a companion using server-side function directly
+  const canCreateCompanion = await canCreateCompanionServer();
   
   // If user cannot create a companion, redirect to limit reached page
   if (!canCreateCompanion) {

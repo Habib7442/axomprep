@@ -13,9 +13,12 @@ const getSearchParamAsString = (param: string | string[] | undefined): string =>
   return Array.isArray(param) ? param[0] : param;
 };
 
-const CompanionsLibrary = async ({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) => {
+const CompanionsLibrary = async ({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) => {
   // Get the current user ID
   const { userId } = await auth();
+  
+  // Await searchParams
+  const awaitedSearchParams = await searchParams;
   
   if (!userId) {
     return (
@@ -41,8 +44,8 @@ const CompanionsLibrary = async ({ searchParams }: { searchParams: { [key: strin
   }
 
   // Extract search parameters and ensure they are strings
-  const subject = getSearchParamAsString(searchParams.subject);
-  const topic = getSearchParamAsString(searchParams.topic);
+  const subject = getSearchParamAsString(awaitedSearchParams.subject);
+  const topic = getSearchParamAsString(awaitedSearchParams.topic);
 
   try {
     const companions = await getUserCompanions(userId);

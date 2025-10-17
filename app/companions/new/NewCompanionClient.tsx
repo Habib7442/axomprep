@@ -2,19 +2,19 @@
 
 import React, { useEffect } from "react";
 import CompanionForm from "@/components/CompanionForm";
+import { initializeUserTrial } from "@/lib/actions/companion.actions";
 
 const NewCompanionClient = () => {
   useEffect(() => {
     // Initialize trial for new users
     const initializeTrial = async () => {
       try {
-        const response = await fetch('/api/user/trial', { method: 'POST' });
-        const data = await response.json();
+        const result = await initializeUserTrial();
         
-        if (data.success) {
-          console.log('Trial initialized:', data.message);
+        if (result.success) {
+          console.log('Trial initialized:', result.message);
         } else {
-          console.log('Trial initialization failed or already exists:', data.error || data.message);
+          console.log('Trial initialization failed or already exists:', result.error || result.message);
         }
       } catch (error) {
         console.error('Error initializing trial:', error);

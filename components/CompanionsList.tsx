@@ -48,6 +48,7 @@ const CompanionsList = ({
                         alt={subject}
                         width={35}
                         height={35}
+                        className="object-contain"
                       />
                     </div>
                     <div className="flex flex-col gap-2">

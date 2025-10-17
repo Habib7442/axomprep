@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { PlanFeatures, PlanType } from "@/lib/billing";
 import Link from "next/link";
+import { checkUserTrialStatus } from "@/lib/actions/companion.actions";
 
 const UsageLimits = () => {
   const [plan, setPlan] = useState<PlanType>('free');
@@ -41,8 +42,7 @@ const UsageLimits = () => {
 
         // Check trial status
         try {
-          const trialResponse = await fetch('/api/user/trial');
-          const trialData = await trialResponse.json();
+          const trialData = await checkUserTrialStatus();
           setTrialInfo(trialData);
         } catch (trialError) {
           console.error("Error fetching trial info:", trialError);

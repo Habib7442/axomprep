@@ -32,11 +32,16 @@ export async function getUserSubscription() {
   try {
     const supabase = createSupabaseClient();
     
+    // Use absolute URL for server-side fetch calls
+    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+    const host = process.env.NEXT_PUBLIC_APP_URL || 'localhost:3000';
+    const baseUrl = `${protocol}://${host}`;
+    
     // Get user's plan from our API
-    const response = await fetch(`/api/billing?action=plan`);
+    const response = await fetch(`${baseUrl}/api/billing?action=plan`);
     const planData = await response.json();
     
-    const featuresResponse = await fetch(`/api/billing?action=features`);
+    const featuresResponse = await fetch(`${baseUrl}/api/billing?action=features`);
     const featuresData = await featuresResponse.json();
     
     const plan = planData.plan;

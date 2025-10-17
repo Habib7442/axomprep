@@ -32,7 +32,7 @@ const CompanionSession = async ({ params }: CompanionSessionPageProps) => {
                 alt={subject}
                 width={40}
                 height={40}
-                className="md:w-[45px] md:h-[45px]"
+                className="md:w-[45px] md:h-[45px] object-contain"
               />
             </div>
             <div className="flex flex-col gap-2">

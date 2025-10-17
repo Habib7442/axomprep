@@ -1,7 +1,8 @@
-"use client";
+ "use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { initializeUserTrial, checkUserTrialStatus } from "@/lib/actions/companion.actions";
 
 // Define the trial info type
 interface TrialInfo {
@@ -25,9 +26,8 @@ const TrialTestPage = () => {
   const fetchTrialInfo = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/user/trial');
-      const data = await response.json();
-      setTrialInfo(data);
+      const result = await checkUserTrialStatus();
+      setTrialInfo(result);
     } catch (error) {
       console.error("Error fetching trial info:", error);
     } finally {
@@ -38,9 +38,8 @@ const TrialTestPage = () => {
   const initializeTrial = async () => {
     try {
       setInitializing(true);
-      const response = await fetch('/api/user/trial', { method: 'POST' });
-      const data = await response.json();
-      setTrialInfo(data);
+      const result = await initializeUserTrial();
+      setTrialInfo(result);
       
       // Refresh the info after initialization
       setTimeout(fetchTrialInfo, 1000);
