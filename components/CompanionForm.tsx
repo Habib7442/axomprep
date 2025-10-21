@@ -69,9 +69,9 @@ const CompanionForm = () => {
         duration: Number(values.duration)
       };
       
-      console.log("Attempting to create companion with data:", formData);
+      // console.log("Attempting to create companion with data:", formData);
       const result = await createCompanion(formData);
-      console.log("Companion creation result:", result);
+      // console.log("Companion creation result:", result);
       
       // Check if there was an error
       if ('error' in result) {

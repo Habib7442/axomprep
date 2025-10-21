@@ -44,7 +44,7 @@ export default function MyJourneyPage() {
     const fetchInterviewReports = async () => {
       try {
         setLoading(true);
-        console.log("Fetching reports for user ID:", user.id);
+        // console.log("Fetching reports for user ID:", user.id);
 
         // Fetch interview reports for the current user only
         const { data: reportsData, error: reportsError } = await supabase
@@ -58,7 +58,7 @@ export default function MyJourneyPage() {
           throw new Error(reportsError.message || "Failed to fetch interview reports");
         }
 
-        console.log("Fetched reports:", reportsData);
+        // console.log("Fetched reports:", reportsData);
         setInterviewReports(reportsData || []);
       } catch (err) {
         // Only set error if it's not because there are no reports yet

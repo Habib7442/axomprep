@@ -10,8 +10,8 @@ export const createCompanion = async (formData: CreateCompanion) => {
   const { userId: author } = await auth();
   const supabase = createSupabaseClient();
 
-  console.log("Creating companion for user:", author);
-  console.log("Form data:", formData);
+  // console.log("Creating companion for user:", author);
+  // console.log("Form data:", formData);
 
   // Check if user can create a companion by calling our server function directly
   try {

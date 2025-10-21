@@ -11,7 +11,6 @@ const HomePageClient = () => {
 
   const { user } = useUser();
 
-  console.log(user);
 
   const handleStartInterview = () => {
     if (topic.trim()) {
