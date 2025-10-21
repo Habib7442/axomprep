@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 "use client";
 
 import React, { useState } from "react";
@@ -5,6 +6,25 @@ import Link from "next/link";
 import CTA from "@/components/CTA";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
+
+export const metadata: Metadata = {
+  title: "AxomPrep — AI-Powered English Learning Platform",
+  description: "Master English communication skills through AI-powered interview practice. Build confidence and fluency for academic and professional success with our conversational AI platform.",
+  keywords: [
+    "English learning", 
+    "AI interview practice", 
+    "conversational AI", 
+    "interview preparation", 
+    "language learning", 
+    "AI tutor"
+  ],
+  openGraph: {
+    title: "AxomPrep — AI-Powered English Learning Platform",
+    description: "Master English communication skills through AI-powered interview practice.",
+    url: "https://www.axomprep.in",
+    siteName: "AxomPrep",
+  },
+};
 
 const HomePage = () => {
   const [topic, setTopic] = useState("");
@@ -48,7 +68,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Announcement Banner */}
       <div className="bg-[#1E293B] text-white py-2 text-center text-xs md:text-sm">
         <span className="opacity-90">

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import CompanionCard from "@/components/CompanionCard";
 import SearchInput from "@/components/SearchInput";
 import SubjectFilter from "@/components/SubjectFilter";
@@ -6,6 +7,25 @@ import { getSubjectColor } from "@/lib/utils";
 import React from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
+
+export const metadata: Metadata = {
+  title: "AI Tutors — Personalized English Learning Companions",
+  description: "Create and customize your own AI tutors for personalized English learning. Practice conversation, get feedback, and improve your language skills with our AI-powered companions.",
+  keywords: [
+    "AI tutors", 
+    "personalized learning", 
+    "English practice", 
+    "AI companions", 
+    "language learning", 
+    "conversational AI"
+  ],
+  openGraph: {
+    title: "AI Tutors — Personalized English Learning Companions",
+    description: "Create and customize your own AI tutors for personalized English learning.",
+    url: "https://www.axomprep.in/companions",
+    siteName: "AxomPrep",
+  },
+};
 
 // Helper function to convert search params to string
 const getSearchParamAsString = (param: string | string[] | undefined): string => {

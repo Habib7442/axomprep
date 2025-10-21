@@ -11,9 +11,51 @@ const bricolage = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: "AxomPrep — Your AI Learning Companion",
+  title: {
+    default: "AxomPrep — AI-Powered English Learning Platform",
+    template: "%s | AxomPrep"
+  },
   description:
-    "Master Subjects, Practice Interviews, and Build Confidence with AxomPrep. AI-powered learning platform that helps you master any subject, practice real interview scenarios, improve your English speaking skills, and build confidence for academic and professional success.",
+    "Master English communication skills through AI-powered interview practice. Build confidence and fluency for academic and professional success with our conversational AI platform.",
+  keywords: [
+    "English learning", 
+    "AI interview practice", 
+    "conversational AI", 
+    "interview preparation", 
+    "language learning", 
+    "AI tutor", 
+    "English fluency"
+  ],
+  authors: [{ name: "AxomPrep Team" }],
+  creator: "AxomPrep",
+  publisher: "AxomPrep",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://www.axomprep.in",
+    title: "AxomPrep — AI-Powered English Learning Platform",
+    description: "Master English communication skills through AI-powered interview practice. Build confidence and fluency for academic and professional success.",
+    siteName: "AxomPrep",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AxomPrep — AI-Powered English Learning Platform",
+    description: "Master English communication skills through AI-powered interview practice.",
+  },
+  verification: {
+    google: "", // Add your Google Search Console verification code here
+  },
 };
 
 export default function RootLayout({

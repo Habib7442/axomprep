@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://www.axomprep.in/sitemap.xml
+
+# Prevent crawling of user-specific pages
+Disallow: /my-journey/
+Disallow: /companions/new
+Disallow: /interview/resume
+Disallow: /billing-test
+Disallow: /limit-reached
+Disallow: /trial-test
