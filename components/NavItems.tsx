@@ -10,6 +10,7 @@ const navItems = [
   { label: "Interview", href: "/interview" },
   { label: "My Journey", href: "/my-journey" },
   { label: "Testimonials", href: "/testimonials" },
+  { label: "About", href: "/about-axomprep" },
   { label: "Pricing", href: "/subscription" },
 ];
 

@@ -37,7 +37,7 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="#" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link href="/about-axomprep" className="hover:text-white transition-colors">About Us</Link></li>
             </ul>
           </div>
         </div>

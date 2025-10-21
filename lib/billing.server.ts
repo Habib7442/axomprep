@@ -285,8 +285,9 @@ export async function hasFeatureServer(feature: FeatureType): Promise<boolean> {
       case 'interviews_per_month':
         return await canStartInterviewServer();
       case 'resume_analysis':
-        // Allow resume analysis for all plans including free
-        return has({ plan: 'basic' }) || has({ plan: 'pro' }) || has({ plan: 'free' });
+        // Allow resume analysis for ALL users (both authenticated and with any plan)
+        // This ensures the feature is available even if Clerk plan detection fails
+        return true;
       case 'advanced_reporting':
         return has({ plan: 'pro' });
       case 'priority_support':
