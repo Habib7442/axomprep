@@ -41,36 +41,36 @@ export default function MyJourneyPage() {
       return;
     }
 
-    const fetchInterviewReports = async () => {
+    const fetchReports = async () => {
       try {
         setLoading(true);
         // console.log("Fetching reports for user ID:", user.id);
 
         // Fetch interview reports for the current user only
-        const { data: reportsData, error: reportsError } = await supabase
+        const { data: interviewData, error: interviewError } = await supabase
           .from('interview_reports')
           .select('*')
           .eq('user_id', user.id) // Filter by current user ID from Clerk
           .order('created_at', { ascending: false });
 
-        if (reportsError) {
-          console.error("Error fetching interview reports:", reportsError);
-          throw new Error(reportsError.message || "Failed to fetch interview reports");
+        if (interviewError) {
+          console.error("Error fetching interview reports:", interviewError);
+          throw new Error(interviewError.message || "Failed to fetch interview reports");
         }
 
         // console.log("Fetched reports:", reportsData);
-        setInterviewReports(reportsData || []);
+        setInterviewReports(interviewData || []);
       } catch (err) {
         // Only set error if it's not because there are no reports yet
         // (Supabase returns an empty array when there are no matching records, not an error)
-        setError("Unable to load interview reports. Please check your connection and try again.");
+        setError("Unable to load reports. Please check your connection and try again.");
         console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInterviewReports();
+    fetchReports();
   }, [user, isLoaded, supabase]);
 
   const formatDate = (dateString: string) => {
@@ -86,13 +86,13 @@ export default function MyJourneyPage() {
             <Link href="/" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
               ← Back to Home
             </Link>
-            <h1 className="text-2xl sm:text-3xl font-bold text-center">My Interview Journey</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-center">My Learning Journey</h1>
             <div></div>
           </div>
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-lg">Loading your interview reports...</p>
+              <p className="mt-4 text-lg">Loading your reports...</p>
             </div>
           </div>
         </div>
@@ -108,16 +108,16 @@ export default function MyJourneyPage() {
             <Link href="/" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
               ← Back to Home
             </Link>
-            <h1 className="text-2xl sm:text-3xl font-bold text-center">My Interview Journey</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-center">My Learning Journey</h1>
             <div></div>
           </div>
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-[#0F172A] mb-4">Unable to Load Interview Reports</h2>
-              <p className="text-[#64748B] mb-6">We encountered an issue while loading your interview reports. This could be due to a network problem or server issue. Please try again later.</p>
+              <h2 className="text-2xl font-bold text-[#0F172A] mb-4">Unable to Load Reports</h2>
+              <p className="text-[#64748B] mb-6">We encountered an issue while loading your reports. This could be due to a network problem or server issue. Please try again later.</p>
               <Link href="/interview">
                 <button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg">
-                  Start Interview Practice
+                  Start Practice
                 </button>
               </Link>
             </div>
@@ -134,7 +134,7 @@ export default function MyJourneyPage() {
           <Link href="/" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
             ← Back to Home
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold text-center">My Interview Journey</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-center">My Learning Journey</h1>
           <div className="flex gap-4">
             <Link href="/interview" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
               Practice
@@ -142,12 +142,24 @@ export default function MyJourneyPage() {
             <Link href="/companions" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
               Tutors
             </Link>
+            <Link href="/stories" className="text-blue-600 hover:text-blue-800 whitespace-nowrap">
+              Stories
+            </Link>
           </div>
         </div>
         <div className="max-w-4xl mx-auto">
           {/* Usage Limits Component */}
           <div className="mb-8">
             <UsageLimits />
+          </div>
+          
+          {/* Tab Navigation - Only showing Interview Reports now */}
+          <div className="flex border-b border-gray-200 mb-6">
+            <button
+              className={`py-2 px-4 font-medium border-b-2 border-blue-500 text-blue-600`}
+            >
+              Interview Reports ({interviewReports.length})
+            </button>
           </div>
           
           {interviewReports.length === 0 ? (

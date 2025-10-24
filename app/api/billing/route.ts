@@ -5,6 +5,7 @@ import {
   hasFeatureServer, 
   canCreateCompanionServer, 
   canStartInterviewServer,
+  canStartStoryServer,
   getUserUsageServer
 } from "@/lib/billing.server";
 import { FeatureType } from "@/lib/billing.server";
@@ -40,6 +41,7 @@ export async function GET(request: Request) {
         const validFeatures: FeatureType[] = [
           'companions_limit',
           'interviews_per_month',
+          'stories_per_month',
           'resume_analysis',
           'advanced_reporting',
           'priority_support'
@@ -53,12 +55,13 @@ export async function GET(request: Request) {
         return NextResponse.json({ hasFeature });
         
       case 'usage':
-        // Get usage data including companions and interviews
+        // Get usage data including companions, interviews, and stories
         const usage = await getUserUsageServer();
-        // Return only the companions and interviews counts for backward compatibility
+        // Return only the companions, interviews, and stories counts for backward compatibility
         return NextResponse.json({
           companions: usage.companions,
-          interviews: usage.interviews
+          interviews: usage.interviews,
+          stories: usage.stories
         });
         
       case 'companions-count':
@@ -68,6 +71,14 @@ export async function GET(request: Request) {
       case 'interviews-count':
         const usage2 = await getUserUsageServer();
         return NextResponse.json({ count: usage2.interviews });
+        
+      case 'stories-count':
+        const usage3 = await getUserUsageServer();
+        return NextResponse.json({ count: usage3.stories });
+        
+      case 'can-start-story':
+        const canStartStory = await canStartStoryServer();
+        return NextResponse.json({ canStartStory });
         
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });

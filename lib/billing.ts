@@ -9,6 +9,7 @@ export type PlanType = 'free' | 'basic' | 'pro';
 export type FeatureType = 
   | 'companions_limit'
   | 'interviews_per_month'
+  | 'stories_per_month'
   | 'resume_analysis'
   | 'advanced_reporting'
   | 'priority_support';
@@ -19,6 +20,7 @@ export type FeatureType =
 export interface PlanFeatures {
   companionsLimit: number;
   interviewsPerMonth: number;
+  storiesPerMonth: number;
   resumeAnalysis: boolean;
   advancedReporting: boolean;
   prioritySupport: boolean;
@@ -35,6 +37,7 @@ export async function getUserPlanFeatures(): Promise<PlanFeatures> {
   return {
     companionsLimit: 3,
     interviewsPerMonth: 10,
+    storiesPerMonth: 2,
     resumeAnalysis: true, // Allow resume analysis for free users
     advancedReporting: false,
     prioritySupport: false

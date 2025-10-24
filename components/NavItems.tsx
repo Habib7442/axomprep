@@ -8,6 +8,8 @@ const navItems = [
   { label: "Home", href: "/" },
   { label: "AI Tutors", href: "/companions" },
   { label: "Interview", href: "/interview" },
+  { label: "Common Interview", href: "/common-interview" },
+  { label: "Stories", href: "/stories" },
   { label: "My Journey", href: "/my-journey" },
   { label: "Testimonials", href: "/testimonials" },
   { label: "About", href: "/about-axomprep" },

@@ -8,7 +8,7 @@ import { checkUserTrialStatus } from "@/lib/actions/companion.actions";
 const UsageLimits = () => {
   const [plan, setPlan] = useState<PlanType>('free');
   const [features, setFeatures] = useState<PlanFeatures | null>(null);
-  const [usage, setUsage] = useState<{ companions: number; interviews: number }>({ companions: 0, interviews: 0 });
+  const [usage, setUsage] = useState<{ companions: number; interviews: number; stories: number }>({ companions: 0, interviews: 0, stories: 0 });
   const [loading, setLoading] = useState(true);
   const [trialInfo, setTrialInfo] = useState<{ hasTrial: boolean; isActive: boolean; daysRemaining?: number } | null>(null);
 
@@ -28,16 +28,20 @@ const UsageLimits = () => {
         const [companionsResponse, interviewsResponse] = await Promise.all([
           fetch('/api/billing?action=companions-count'),
           fetch('/api/billing?action=interviews-count')
+          // Removed stories-count fetch since we're not displaying story usage
         ]);
 
         const companionsData = await companionsResponse.json();
         const interviewsData = await interviewsResponse.json();
+        // Removed storiesData since we're not displaying story usage
 
         setPlan(planData.plan);
         setFeatures(featuresData.features);
         setUsage({
           companions: companionsData.count || 0,
-          interviews: interviewsData.count || 0
+          interviews: interviewsData.count || 0,
+          // Set stories to 0 since we're not displaying story usage
+          stories: 0
         });
 
         // Check trial status
@@ -153,6 +157,8 @@ const UsageLimits = () => {
             ></div>
           </div>
         </div>
+        
+        {/* Removed Stories Usage section since we're not displaying story usage */}
       </div>
 
       {plan !== 'pro' && !trialInfo?.isActive && (
