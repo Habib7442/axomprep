@@ -6,7 +6,7 @@ import React from "react";
 import NavItems from "./NavItems";
 import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, Sparkles } from "lucide-react";
 import { useBilling } from "@/hooks/useBilling";
 
 const Navbar = () => {
@@ -65,6 +65,64 @@ const Navbar = () => {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6">
+          {/* Features button for large devices */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors font-medium text-gray-700 hover:bg-gray-100">
+                <Sparkles className="h-4 w-4" />
+                <span>Features</span>
+              </button>
+            </SheetTrigger>
+            <SheetContent 
+              side="left" 
+              className="w-[300px] sm:w-[320px] p-0"
+            >
+              <SheetHeader className="border-b border-gray-200 p-4">
+                <SheetTitle className="sr-only">Features Menu</SheetTitle>
+                <div className="flex items-center gap-2">
+                  <Image src="/images/logo.png" alt="logo" width={32} height={30} />
+                  <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                    AxomPrep Features
+                  </span>
+                </div>
+              </SheetHeader>
+              <div className="flex flex-col h-full py-4">
+                <div className="flex-1 px-2">
+                  <div className="space-y-2">
+                    <SheetClose asChild>
+                      <Link href="/companions">
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-100">
+                          <span className="font-medium">AI Tutors</span>
+                        </div>
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link href="/interview">
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-100">
+                          <span className="font-medium">Interview Practice</span>
+                        </div>
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link href="/common-interview">
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-100">
+                          <span className="font-medium">Common Interview</span>
+                        </div>
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link href="/stories">
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-100">
+                          <span className="font-medium">Stories</span>
+                        </div>
+                      </Link>
+                    </SheetClose>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+          
           <NavItems />
           <SignedOut>
             <SignInButton>
@@ -128,7 +186,9 @@ const Navbar = () => {
               </SheetHeader>
               <div className="flex flex-col h-full py-4">
                 <div className="flex-1 px-2">
-                  <NavItems />
+                  <SheetClose asChild>
+                    <NavItems />
+                  </SheetClose>
                 </div>
                 <div className="border-t border-gray-200 p-4">
                   <div className="flex items-center justify-between">

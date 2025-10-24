@@ -47,7 +47,7 @@ const HomePageClient = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen">
       {/* Announcement Banner */}
       <div className="bg-[#1E293B] text-white py-2 text-center text-xs md:text-sm">
         <span className="opacity-90">
@@ -123,10 +123,84 @@ const HomePageClient = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 md:py-12 max-w-7xl">
-        {/* Create Your Own AI Tutor Section - Improved design */}
-        <div className="mb-16 md:mb-32">
-          <div className="bg-white/30 backdrop-blur-md rounded-2xl md:rounded-3xl p-8 md:p-12 lg:p-16 border border-white/20 shadow-lg">
+      {/* Features Card Section with Glassmorphism Effect */}
+      <div className="bg-blue-50 py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="bg-white/60 backdrop-blur-md rounded-2xl md:rounded-3xl p-6 md:p-8 border border-white/20 shadow-xl mb-16 md:mb-32">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900 bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+                Explore Our Features
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Discover the powerful tools that will help you master English communication
+              </p>
+            </div>
+          
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              <Link href="/companions" className="group">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 md:p-6 border border-white/30 hover:border-orange-300 transition-all duration-300 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#FF6B35] to-[#FF914D] flex items-center justify-center">
+                      <span className="text-white font-bold">🤖</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 group-hover:text-[#FF6B35] transition-colors">AI Tutors</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Create personalized AI tutors tailored to your learning style and preferences.
+                  </p>
+                </div>
+              </Link>
+            
+              <Link href="/interview" className="group">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 md:p-6 border border-white/30 hover:border-orange-300 transition-all duration-300 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#FF6B35] to-[#FF914D] flex items-center justify-center">
+                      <span className="text-white font-bold">🎤</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 group-hover:text-[#FF6B35] transition-colors">Interview Practice</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Practice real-world interview scenarios with our advanced voice AI technology.
+                  </p>
+                </div>
+              </Link>
+            
+              <Link href="/common-interview" className="group">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 md:p-6 border border-white/30 hover:border-orange-300 transition-all duration-300 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#FF6B35] to-[#FF914D] flex items-center justify-center">
+                      <span className="text-white font-bold">💼</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 group-hover:text-[#FF6B35] transition-colors">Common Interview</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Master frequently asked interview questions with guided practice sessions.
+                  </p>
+                </div>
+              </Link>
+            
+              <Link href="/stories" className="group">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 md:p-6 border border-white/30 hover:border-orange-300 transition-all duration-300 h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#FF6B35] to-[#FF914D] flex items-center justify-center">
+                      <span className="text-white font-bold">📖</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 group-hover:text-[#FF6B35] transition-colors">Stories</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Improve your listening skills with engaging English stories and exercises.
+                  </p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Create Your Own AI Tutor Section - Improved design */}
+      <div className="bg-green-50 py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="bg-white backdrop-blur-md rounded-2xl md:rounded-3xl p-8 md:p-12 lg:p-16 border border-white/20 shadow-lg">
             <div className="text-center mb-6 md:mb-8">
               <span className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-full text-xs md:text-sm font-bold mb-4">
                 Start Learning Your Way
@@ -163,10 +237,12 @@ const HomePageClient = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Features Section */}
-        <div className="mb-16 md:mb-32">
-          <div className="text-center mb-10 md:mb-16">
+      {/* Features Section */}
+      <div className="bg-purple-50 py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="mb-10 md:mb-16">
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-gray-900">
               Why Choose AxomPrep?
             </h2>
@@ -208,52 +284,56 @@ const HomePageClient = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Final CTA Section */}
-        <div className="text-center bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl md:rounded-3xl p-8 md:p-12 lg:p-16 shadow-2xl">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-white">
-            Ready to Master English Interviews?
-          </h2>
-          <p className="text-base md:text-xl mb-8 md:mb-10 text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Join thousands of learners who are already building confidence with AxomPrep
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center">
-            <Link href="/interview">
-              <button className="bg-white text-orange-500 hover:bg-gray-100 px-6 md:px-8 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-2">
-                Practice Interviews Now
-                <svg
-                  className="w-4 h-4 md:w-5 md:h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </button>
-            </Link>
-            <Link href="/companions">
-              <button className="border-2 border-white text-white hover:bg-white/10 px-6 md:px-8 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all inline-flex items-center gap-2">
-                Meet Our AI Tutors
-                <svg
-                  className="w-4 h-4 md:w-5 md:h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </Link>
+      {/* Final CTA Section */}
+      <div className="bg-orange-100 py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center bg-white rounded-2xl md:rounded-3xl p-8 md:p-12 lg:p-16 shadow-2xl">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-gray-900 bg-gradient-to-r from-[#FF6B35] to-[#FF914D] bg-clip-text text-transparent">
+              Ready to Master English Interviews?
+            </h2>
+            <p className="text-base md:text-xl mb-8 md:mb-10 text-gray-700 max-w-2xl mx-auto leading-relaxed">
+              Join thousands of learners who are already building confidence with AxomPrep
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center">
+              <Link href="/interview">
+                <button className="bg-gradient-to-r from-[#FF6B35] to-[#FF914D] hover:from-[#FF844B] hover:to-[#FFB088] text-white px-6 md:px-8 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all shadow-lg hover:shadow-xl inline-flex items-center gap-2">
+                  Practice Interviews Now
+                  <svg
+                    className="w-4 h-4 md:w-5 md:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </button>
+              </Link>
+              <Link href="/companions">
+                <button className="border-2 border-[#FF6B35] text-[#FF6B35] hover:bg-[#FFF7F2] px-6 md:px-8 py-3 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all inline-flex items-center gap-2">
+                  Meet Our AI Tutors
+                  <svg
+                    className="w-4 h-4 md:w-5 md:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
