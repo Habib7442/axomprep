@@ -242,7 +242,7 @@ const HomePageClient = () => {
       {/* Features Section */}
       <div className="bg-purple-50 py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-10 md:mb-16">
+          <div className="mb-10 md:mb-16 text-center">
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-gray-900">
               Why Choose AxomPrep?
             </h2>

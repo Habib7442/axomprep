@@ -111,6 +111,13 @@ const Navbar = () => {
                       </Link>
                     </SheetClose>
                     <SheetClose asChild>
+                      <Link href="/social-scenarios">
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-100">
+                          <span className="font-medium">Social Scenarios</span>
+                        </div>
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
                       <Link href="/stories">
                         <div className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-100">
                           <span className="font-medium">Stories</span>
