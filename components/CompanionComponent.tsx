@@ -481,7 +481,7 @@ const CompanionComponent = ({
               <p className="text-lg md:text-xl text-[#4B5563] mb-4">{topic}</p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-6">
                 <div 
-                  className="px-3 py-1 rounded-full text-sm font-semibold capitalize text-white"
+                  className="px-3 py-1 rounded-full text-sm font-semibold capitalize text-black"
                   style={{ backgroundColor: getSubjectColor(subject) }}
                 >
                   {subject}

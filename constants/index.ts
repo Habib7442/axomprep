@@ -1,10 +1,5 @@
 export const subjects = [
-  "maths",
-  "language",
-  "science",
-  "history",
-  "coding",
-  "economics",
+  // Subjects are no longer predefined as users can now type their own subjects
 ];
 
 export const subjectsColors = {

@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { subjects } from "@/constants";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { formUrlQuery, removeKeysFromUrlQuery } from "@jsmastery/utils";
@@ -18,6 +17,24 @@ const SubjectFilter = () => {
   const query = searchParams.get("subject") || "";
 
   const [subject, setSubject] = useState(query);
+  const [subjects, setSubjects] = useState<string[]>([]);
+
+  // Fetch distinct subjects from the database
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        const response = await fetch('/api/companions/subjects');
+        const data = await response.json();
+        setSubjects(data.subjects || []);
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+        // Fallback to some common subjects if API fails
+        setSubjects(["maths", "science", "english", "history", "geography"]);
+      }
+    };
+
+    fetchSubjects();
+  }, []);
 
   useEffect(() => {
     let newUrl = "";
@@ -43,9 +60,9 @@ const SubjectFilter = () => {
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">All subjects</SelectItem>
-        {subjects.map((subject) => (
-          <SelectItem key={subject} value={subject} className="capitalize">
-            {subject}
+        {subjects.map((subjectItem) => (
+          <SelectItem key={subjectItem} value={subjectItem} className="capitalize">
+            {subjectItem}
           </SelectItem>
         ))}
       </SelectContent>

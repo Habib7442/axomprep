@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import CTA from "@/components/CTA";
+import FeatureCard from "@/components/FeatureCard";
 import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 
@@ -136,62 +137,41 @@ const HomePageClient = () => {
               </p>
             </div>
           
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              <Link href="/companions" className="group">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 md:p-6 border border-white/30 hover:border-orange-300 transition-all duration-300 h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#FF6B35] to-[#FF914D] flex items-center justify-center">
-                      <span className="text-white font-bold">🤖</span>
-                    </div>
-                    <h3 className="font-bold text-gray-900 group-hover:text-[#FF6B35] transition-colors">AI Tutors</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm md:text-base">
-                    Create personalized AI tutors tailored to your learning style and preferences.
-                  </p>
-                </div>
-              </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+              <FeatureCard 
+                href="/companions"
+                icon="🤖"
+                title="AI Tutors"
+                description="Create personalized AI tutors tailored to your learning style and preferences."
+              />
             
-              <Link href="/interview" className="group">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 md:p-6 border border-white/30 hover:border-orange-300 transition-all duration-300 h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#FF6B35] to-[#FF914D] flex items-center justify-center">
-                      <span className="text-white font-bold">🎤</span>
-                    </div>
-                    <h3 className="font-bold text-gray-900 group-hover:text-[#FF6B35] transition-colors">Interview Practice</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm md:text-base">
-                    Practice real-world interview scenarios with our advanced voice AI technology.
-                  </p>
-                </div>
-              </Link>
+              <FeatureCard 
+                href="/interview"
+                icon="🎤"
+                title="Interview Practice"
+                description="Practice real-world interview scenarios with our advanced voice AI technology."
+              />
             
-              <Link href="/common-interview" className="group">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 md:p-6 border border-white/30 hover:border-orange-300 transition-all duration-300 h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#FF6B35] to-[#FF914D] flex items-center justify-center">
-                      <span className="text-white font-bold">💼</span>
-                    </div>
-                    <h3 className="font-bold text-gray-900 group-hover:text-[#FF6B35] transition-colors">Common Interview</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm md:text-base">
-                    Master frequently asked interview questions with guided practice sessions.
-                  </p>
-                </div>
-              </Link>
+              <FeatureCard 
+                href="/common-interview"
+                icon="💼"
+                title="Common Interview"
+                description="Master frequently asked interview questions with guided practice sessions."
+              />
             
-              <Link href="/stories" className="group">
-                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-5 md:p-6 border border-white/30 hover:border-orange-300 transition-all duration-300 h-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#FF6B35] to-[#FF914D] flex items-center justify-center">
-                      <span className="text-white font-bold">📖</span>
-                    </div>
-                    <h3 className="font-bold text-gray-900 group-hover:text-[#FF6B35] transition-colors">Stories</h3>
-                  </div>
-                  <p className="text-gray-600 text-sm md:text-base">
-                    Improve your listening skills with engaging English stories and exercises.
-                  </p>
-                </div>
-              </Link>
+              <FeatureCard 
+                href="/social-scenarios"
+                icon="👥"
+                title="Social Scenarios"
+                description="Practice real-life English conversations in everyday social situations."
+              />
+            
+              <FeatureCard 
+                href="/stories"
+                icon="📖"
+                title="Stories"
+                description="Improve your listening skills with engaging English stories and exercises."
+              />
             </div>
           </div>
         </div>

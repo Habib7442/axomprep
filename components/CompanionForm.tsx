@@ -21,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { subjects } from "@/constants";
 import { Textarea } from "./ui/textarea";
 import { createCompanion } from "@/lib/actions/companion.actions";
 import { redirect } from "next/navigation";
@@ -38,11 +37,11 @@ type FormValues = {
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "AI Tutor name is required" }),
-  subject: z.string().min(1, { message: "Subject is required" }),
+  subject: z.string().min(1, { message: "Subject is required" }).max(50, { message: "Subject must be less than 50 characters" }),
   topic: z.string().min(1, { message: "Topic is required" }),
   voice: z.string().min(1, { message: "Voice is required" }),
   style: z.string().min(1, { message: "Style is required" }),
-  duration: z.number().min(1, { message: "Duration is required" }),
+  duration: z.number().min(1, { message: "Duration is required" }).max(120, { message: "Duration must be less than 120 minutes" }),
 });
 
 const CompanionForm = () => {
@@ -52,8 +51,8 @@ const CompanionForm = () => {
       name: "",
       subject: "",
       topic: "",
-      voice: "",
-      style: "",
+      voice: "male",
+      style: "casual",
       duration: 15,
     },
   });
@@ -143,26 +142,11 @@ const CompanionForm = () => {
             <FormItem>
               <FormLabel>Subject</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger className="input capitalize">
-                    <SelectValue placeholder="Select the subject" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subjects.map((subject) => (
-                      <SelectItem
-                        value={subject}
-                        key={subject}
-                        className="capitalize"
-                      >
-                        {subject}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  placeholder="Enter the subject (e.g., Maths, Science, History)"
+                  {...field}
+                  className="input capitalize"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
